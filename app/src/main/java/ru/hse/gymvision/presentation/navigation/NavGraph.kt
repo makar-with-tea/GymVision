@@ -7,11 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ru.hse.gymvision.presentation.ui.screens.AccountScreen
 import ru.hse.gymvision.presentation.ui.screens.AuthorizationScreen
 import ru.hse.gymvision.presentation.ui.screens.CameraScreen
 import ru.hse.gymvision.presentation.ui.screens.GymChoiceScreen
 import ru.hse.gymvision.presentation.ui.screens.GymSchemeScreen
-import ru.hse.gymvision.presentation.ui.screens.ProfileScreen
 import ru.hse.gymvision.presentation.ui.screens.RegistrationScreen
 
 val LocalNavController = compositionLocalOf<NavHostController> { error("No NavController found!") }
@@ -40,7 +40,7 @@ fun NavGraph(
                 GymSchemeScreen()
             }
             composable("profile") {
-                ProfileScreen()
+                AccountScreen()
             }
             composable("camera") {
                 CameraScreen()

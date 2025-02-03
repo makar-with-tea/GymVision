@@ -5,4 +5,5 @@ import androidx.navigation.NavController
 
 @Composable
 fun GymChoiceScreen() {
+
 }
