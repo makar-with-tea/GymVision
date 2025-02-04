@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package video_streaming;
+
+service VideoStreaming {
+  rpc StartStream(StreamRequest) returns (StreamResponse);
+  rpc StopStream(StopRequest) returns (StopResponse);
+}
+
+message StreamRequest {
+  string camera_ip = 1;
+  string camera_username = 2;
+  string camera_password = 3;
+  string rtp_destination = 4;
+}
+
+message StreamResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StopRequest {
+  string camera_ip = 1;
+}
+
+message StopResponse {
+  bool success = 1;
+  string message = 2;
+}
+
