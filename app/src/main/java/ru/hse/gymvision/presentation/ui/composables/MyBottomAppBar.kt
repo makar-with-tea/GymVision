@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -20,7 +19,7 @@ import ru.hse.gymvision.R
 import ru.hse.gymvision.presentation.navigation.LocalNavController
 
 @Composable
-fun BottomBar() {
+fun MyBottomAppBar() {
     val navController = LocalNavController.current
     BottomAppBar {
         Row(

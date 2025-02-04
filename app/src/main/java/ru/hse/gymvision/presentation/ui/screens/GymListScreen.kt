@@ -13,7 +13,7 @@ import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
 
 @Composable
-fun AccountScreen() {
+fun GymListScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = { MyBottomAppBar() }
@@ -26,7 +26,8 @@ fun AccountScreen() {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            MyTitle(text = "Мой профиль")
+            MyTitle(text = "Доступные залы")
+            // Recycler view
         }
     }
 }

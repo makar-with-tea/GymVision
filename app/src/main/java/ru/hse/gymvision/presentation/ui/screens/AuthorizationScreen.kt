@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,9 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import ru.hse.gymvision.domain.usecase.user.LoginUseCase
 import ru.hse.gymvision.presentation.navigation.LocalNavController
-import ru.hse.gymvision.presentation.ui.composables.BottomBar
 import ru.hse.gymvision.presentation.ui.composables.MyPasswordField
 import ru.hse.gymvision.presentation.ui.composables.MyTextField
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
@@ -33,6 +30,7 @@ import ru.hse.gymvision.presentation.ui.composables.MyTitle
 fun AuthorizationScreen() {
     val login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val navController = LocalNavController.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +63,9 @@ fun AuthorizationScreen() {
             ) {
                 Text("Нет аккаунта?")
                 TextButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController.navigate("registration")
+                    },
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 0.dp)
                         .wrapContentSize(),
                     contentPadding = PaddingValues(0.dp)

@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import ru.hse.gymvision.presentation.ui.screens.AccountScreen
 import ru.hse.gymvision.presentation.ui.screens.AuthorizationScreen
 import ru.hse.gymvision.presentation.ui.screens.CameraScreen
-import ru.hse.gymvision.presentation.ui.screens.GymChoiceScreen
+import ru.hse.gymvision.presentation.ui.screens.GymListScreen
 import ru.hse.gymvision.presentation.ui.screens.GymSchemeScreen
 import ru.hse.gymvision.presentation.ui.screens.RegistrationScreen
 
@@ -34,7 +34,7 @@ fun NavGraph(
                 RegistrationScreen()
             }
             composable("gymList") {
-                GymChoiceScreen()
+                GymListScreen()
             }
             composable("gymScheme") {
                 GymSchemeScreen()

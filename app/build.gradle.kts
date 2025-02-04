@@ -63,6 +63,12 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
+
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.media3.exoplayer.hls)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

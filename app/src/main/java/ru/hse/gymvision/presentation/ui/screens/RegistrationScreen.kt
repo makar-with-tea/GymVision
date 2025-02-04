@@ -23,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import ru.hse.gymvision.presentation.navigation.LocalNavController
-import ru.hse.gymvision.presentation.ui.composables.BottomBar
 import ru.hse.gymvision.presentation.ui.composables.MyPasswordField
 import ru.hse.gymvision.presentation.ui.composables.MyTextField
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
@@ -35,6 +34,7 @@ fun RegistrationScreen() {
     val login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordRepeat by remember { mutableStateOf("") }
+    val navController = LocalNavController.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -70,7 +70,9 @@ fun RegistrationScreen() {
                 onIconClick = { /*TODO*/ },
                 passwordVisibility = false
             )
-            Button(onClick = { }) { // todo: viewModel.register
+            Button(onClick = {
+                navController.navigate("gymList") // todo: viewModel.register
+            }) {
                 Text("Зарегистрироваться")
             }
             Row(
@@ -79,11 +81,13 @@ fun RegistrationScreen() {
             ) {
                 Text("Уже есть аккаунт?")
                 TextButton(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        navController.navigate("authorization")
+                    },
                     modifier = Modifier.wrapContentWidth(),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("Войти   ", modifier = Modifier.padding(0.dp))
+                    Text("Войти", modifier = Modifier.padding(0.dp))
                 }
             }
         }
