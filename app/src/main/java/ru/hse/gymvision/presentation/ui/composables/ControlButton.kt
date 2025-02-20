@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -15,13 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import ru.hse.gymvision.R
 
 @Composable
-fun ArrowButton(iconId: Int,
-                contentDescription: String,
-                onClick: () -> Unit,
-                alignment: Alignment) {
+fun ControlButton(iconId: Int,
+                  contentDescription: String,
+                  alignment: Alignment,
+                  onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -31,7 +28,7 @@ fun ArrowButton(iconId: Int,
             Icon(
                 imageVector = ImageVector.vectorResource(id = iconId),
                 contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(50.dp),
             )
         }

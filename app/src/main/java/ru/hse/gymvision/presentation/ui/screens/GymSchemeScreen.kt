@@ -171,7 +171,7 @@ fun Clickables(clickableTrainers: List<ClickableTrainer>, clickableCameras: List
                     .clickable {
                         // проверить можно ли подключиться к камере
                         // вью модель все дела
-                        val isAccessible = false
+                        val isAccessible = true
                         if (isAccessible) {
                             rootController.push("camera") // что-то с айди придумать
                         } else {

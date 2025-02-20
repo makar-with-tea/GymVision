@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -20,7 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -28,33 +32,33 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.ui.PlayerView
 import kotlinx.coroutines.delay
+import ru.hse.gymvision.R
+import ru.hse.gymvision.domain.CameraMovement
+import ru.hse.gymvision.domain.CameraRotation
+import ru.hse.gymvision.domain.CameraZoom
+import ru.hse.gymvision.domain.usecase.camera.MoveCameraUseCase
+import ru.hse.gymvision.domain.usecase.camera.RotateCameraUseCase
+import ru.hse.gymvision.domain.usecase.camera.ZoomCameraUseCase
 
-const val HIDE_CONTROLS_DELAY = 4000L
 
 @Composable
 fun myPlayerView(
-    videoUri: Uri,
+    videoUrl: String,
     playWhenReady: Boolean,
     showControls: MutableState<Boolean>,
     onError: (PlaybackException) -> Unit
 ): ExoPlayer {
     val player = rememberExoPlayerWithLifeCycle(
-        videoUri.toString(),
+        videoUrl,
         playWhenReady,
         onError)
     val context = LocalContext.current
-    var lastClickTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-
-    LaunchedEffect(lastClickTime) {
-        delay(HIDE_CONTROLS_DELAY)
-        showControls.value = false
-    }
+    val density = LocalDensity.current
+    var videoWidth = remember { 0.dp }
+    var videoHeight = remember { 0.dp }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -62,18 +66,19 @@ fun myPlayerView(
         .pointerInput(Unit) {
             detectTapGestures(
                 onTap = {
-                    if (showControls.value) {
-                        showControls.value = false
-                    } else {
-                        showControls.value = true
-                        lastClickTime = System.currentTimeMillis()
-                    }
+                    showControls.value = !showControls.value
                 }
             )
-        }
+        },
+        contentAlignment = Alignment.Center
     ) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize()
+                .onGloballyPositioned {
+                    videoWidth = with(density) { it.size.width.toDp() }
+                    videoHeight = with(density) { it.size.height.toDp() }
+                }
+            ,
             factory = {
                 PlayerView(context).apply {
                     layoutParams = ViewGroup.LayoutParams(
@@ -87,11 +92,48 @@ fun myPlayerView(
         )
 
         if (showControls.value) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-
-                PauseButton(player, onTouch = {
-                    lastClickTime = System.currentTimeMillis()
-                })
+            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
+                PauseButton(player)
+            }
+            ControlButton(iconId = R.drawable.ic_arrow_left,
+                contentDescription = "Move camera to the left",
+                alignment = Alignment.CenterStart) {
+                MoveCameraUseCase.execute(CameraMovement.LEFT)
+            }
+            ControlButton(iconId = R.drawable.ic_arrow_right,
+                contentDescription = "Move camera to the right",
+                alignment = Alignment.CenterEnd) {
+                MoveCameraUseCase.execute(CameraMovement.RIGHT)
+            }
+            ControlButton(iconId = R.drawable.ic_arrow_up,
+                contentDescription = "Move camera up",
+                alignment = Alignment.TopCenter) {
+                MoveCameraUseCase.execute(CameraMovement.UP)
+            }
+            ControlButton(iconId = R.drawable.ic_arrow_down,
+                contentDescription = "Move camera down",
+                alignment = Alignment.BottomCenter) {
+                MoveCameraUseCase.execute(CameraMovement.DOWN)
+            }
+            ControlButton(iconId = R.drawable.ic_zoom_out,
+                contentDescription = "Zoom out",
+                alignment = Alignment.TopStart) {
+                ZoomCameraUseCase.execute(CameraZoom.OUT)
+            }
+            ControlButton(iconId = R.drawable.ic_zoom_in,
+                contentDescription = "Zoom in",
+                alignment = Alignment.TopEnd) {
+                ZoomCameraUseCase.execute(CameraZoom.IN)
+            }
+            ControlButton(iconId = R.drawable.ic_rotate_left,
+                contentDescription = "Rotate camera to the left",
+                alignment = Alignment.BottomStart) {
+                RotateCameraUseCase.execute(CameraRotation.LEFT)
+            }
+            ControlButton(iconId = R.drawable.ic_rotate_right,
+                contentDescription = "Rotate camera to the right",
+                alignment = Alignment.BottomEnd) {
+                RotateCameraUseCase.execute(CameraRotation.RIGHT)
             }
         }
 
@@ -114,10 +156,8 @@ fun rememberExoPlayerWithLifeCycle(
         ExoPlayer.Builder(context)
             .build()
             .apply {
-                val dataSourceFactory = DefaultHttpDataSource.Factory()
-                val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
-                val mediaSource: MediaSource = mediaSourceFactory.createMediaSource(MediaItem.fromUri(Uri.parse(videoUrl)))
-                setMediaSource(mediaSource)
+                val uri = Uri.parse(videoUrl)
+                setMediaItem(MediaItem.fromUri(uri))
                 prepare()
                 addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
