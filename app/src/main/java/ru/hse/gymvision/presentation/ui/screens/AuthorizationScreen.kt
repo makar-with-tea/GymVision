@@ -11,26 +11,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
-import ru.hse.gymvision.presentation.navigation.LocalNavController
+import ru.alexgladkov.odyssey.compose.extensions.push
+import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.presentation.ui.composables.MyPasswordField
 import ru.hse.gymvision.presentation.ui.composables.MyTextField
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
 
 @Composable
 fun AuthorizationScreen() {
-    val login by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    val navController = LocalNavController.current
+    var login by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    val rootController = LocalRootController.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -45,16 +45,21 @@ fun AuthorizationScreen() {
         ) {
             MyTitle("Авторизация")
             MyTextField(value = login, label = "Логин", isError = false) {
+                login = it
             }
             MyPasswordField(
                 value = password,
                 label = "Пароль",
                 isError = false,
                 onValueChange = { password = it },
-                onIconClick = {  },
+                onIconClick = {
+                              // todo: viewModel.passwordVisibility = !viewModel.passwordVisibility
+                },
                 passwordVisibility = false
             )
-            Button(onClick = { }) { // todo: viewModel.login(login, password)
+            Button(onClick = {
+                rootController.push("gymList")
+            }) { // todo: viewModel.login(login, password)
                 Text("Войти")
             }
             Row(
@@ -64,7 +69,7 @@ fun AuthorizationScreen() {
                 Text("Нет аккаунта?")
                 TextButton(
                     onClick = {
-                        navController.navigate("registration")
+                        rootController.push("registration")
                     },
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 0.dp)
                         .wrapContentSize(),
@@ -80,8 +85,5 @@ fun AuthorizationScreen() {
 @Preview(showBackground = true)
 @Composable
 fun AuthorizationScreenPreview() {
-    val mockNavController = rememberNavController()
-    CompositionLocalProvider(LocalNavController provides mockNavController) {
-        AuthorizationScreen()
-    }
+    AuthorizationScreen()
 }

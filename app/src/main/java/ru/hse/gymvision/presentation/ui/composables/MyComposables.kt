@@ -7,22 +7,30 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ru.alexgladkov.odyssey.compose.extensions.push
 import ru.hse.gymvision.R
+import ru.hse.gymvision.presentation.ui.BottomNavScreen
 
 @Composable
 fun MyTitle(
@@ -77,6 +85,20 @@ fun MyPasswordField(
         },
         visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     )
+}
+
+@Composable
+fun MyBottomNavButton(curScreen: BottomNavScreen, targetScreen: BottomNavScreen, painter: Painter, contentDescription: String, onIconClick: () -> Unit) {
+    IconButton(onClick = onIconClick,
+        modifier = Modifier.size(40.dp)) {
+        Icon(
+            painter = painter,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(32.dp),
+            tint = if (curScreen == targetScreen) MaterialTheme.colorScheme.primary else Color.Gray
+
+        )
+    }
 }
 
 @Composable

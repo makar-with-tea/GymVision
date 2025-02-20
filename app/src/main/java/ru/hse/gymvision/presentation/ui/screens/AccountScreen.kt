@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ru.hse.gymvision.presentation.ui.BottomNavScreen
 import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
 
@@ -16,7 +17,7 @@ import ru.hse.gymvision.presentation.ui.composables.MyTitle
 fun AccountScreen() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomAppBar() }
+        bottomBar = { MyBottomAppBar(BottomNavScreen.PROFILE) }
     ) { paddingValues ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
