@@ -3,14 +3,15 @@ package ru.hse.gymvision.domain.model
 import android.graphics.Bitmap
 
 data class ClickableCoord(
-    val x: Int,
-    val y: Int,
-    val width: Int,
-    val height: Int,
-    val id: Int
+    val xPercent: Float = 0f,
+    val yPercent: Float = 0f,
+    val widthPercent: Float = 0f,
+    val heightPercent: Float = 0f,
+    val id: Int = 0,
+    val description: String = ""
 )
 
 data class GymSchemeModel(
-    val image: Bitmap,
+    var image: Bitmap,
     val clickableCoords: List<ClickableCoord>
     )

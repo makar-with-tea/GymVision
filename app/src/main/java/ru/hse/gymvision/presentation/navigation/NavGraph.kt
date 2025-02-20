@@ -20,7 +20,7 @@ fun RootComposeBuilder.navigationGraph() {
         GymListScreen()
     }
     screen(name = "gymScheme") {
-        GymSchemeScreen(gymId = it as Int)
+        GymSchemeScreen()
     }
     screen(name = "profile") {
         AccountScreen()

@@ -1,5 +1,6 @@
 package ru.hse.gymvision.presentation
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import ru.hse.gymvision.R
+import ru.hse.gymvision.domain.exampledata.gymSchemeExample
 import ru.hse.gymvision.presentation.ui.MainView
 import ru.hse.gymvision.presentation.ui.theme.GymVisionTheme
 
@@ -32,21 +35,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    GymVisionTheme {
-        Greeting("Android")
+        // todo: убрать, когда появится бэкенд
+        gymSchemeExample.image = BitmapFactory.decodeResource(resources, R.drawable.im_gym_scheme)
     }
 }

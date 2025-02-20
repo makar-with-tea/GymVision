@@ -1,7 +1,7 @@
 package ru.hse.gymvision.presentation.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +21,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.alexgladkov.odyssey.compose.extensions.push
 import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.GymModel
+import ru.hse.gymvision.presentation.ui.BottomNavScreen
+import ru.hse.gymvision.presentation.ui.PreferencesHelper
 import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
 
@@ -35,7 +40,7 @@ fun GymListScreen() {
     val viewModel = GymListViewModel()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomAppBar() }
+        bottomBar = { MyBottomAppBar(BottomNavScreen.HOME) }
     ) { paddingValues ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -58,11 +63,13 @@ fun GymListScreen() {
 @Composable
 fun GymCard(gym: GymModel) {
     val rootController = LocalRootController.current
+    val context = LocalContext.current
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable(onClick = {
+                PreferencesHelper(context).saveCurGymId(gym.id)
                 rootController.push("gymScheme")
             })
     ) {
@@ -85,7 +92,11 @@ fun GymCard(gym: GymModel) {
                     .padding(8.dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = gym.name)
+                Text(text = gym.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+
                 Text(text = gym.address)
             }
         }
