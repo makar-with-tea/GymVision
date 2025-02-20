@@ -12,7 +12,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,20 +20,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
-import ru.hse.gymvision.presentation.navigation.LocalNavController
+import ru.alexgladkov.odyssey.compose.extensions.push
+import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.presentation.ui.composables.MyPasswordField
 import ru.hse.gymvision.presentation.ui.composables.MyTextField
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
+import ru.hse.gymvision.presentation.ui.theme.GymVisionTheme
 
 @Composable
 fun RegistrationScreen() {
-    val name by remember { mutableStateOf("") }
-    val surname by remember { mutableStateOf("") }
-    val login by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var surname by remember { mutableStateOf("") }
+    var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordRepeat by remember { mutableStateOf("") }
-    val navController = LocalNavController.current
+    val rootController = LocalRootController.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -49,10 +49,13 @@ fun RegistrationScreen() {
         ) {
             MyTitle("Регистрация")
             MyTextField(value = name, label = "Имя", isError = false) {
+                name = it
             }
             MyTextField(value = surname, label = "Фамилия", isError = false) {
+                surname = it
             }
             MyTextField(value = login, label = "Логин", isError = false) {
+                login = it
             }
             MyPasswordField(
                 value = password,
@@ -71,7 +74,7 @@ fun RegistrationScreen() {
                 passwordVisibility = false
             )
             Button(onClick = {
-                navController.navigate("gymList") // todo: viewModel.register
+                rootController.push("gymList") // todo: viewModel.register
             }) {
                 Text("Зарегистрироваться")
             }
@@ -82,7 +85,7 @@ fun RegistrationScreen() {
                 Text("Уже есть аккаунт?")
                 TextButton(
                     onClick = {
-                        navController.navigate("authorization")
+                        rootController.push("authorization")
                     },
                     modifier = Modifier.wrapContentWidth(),
                     contentPadding = PaddingValues(0.dp)
@@ -97,8 +100,7 @@ fun RegistrationScreen() {
 @Preview(showBackground = true)
 @Composable
 fun RegistrationScreenPreview() {
-    val mockNavController = rememberNavController()
-    CompositionLocalProvider(LocalNavController provides mockNavController) {
+    GymVisionTheme {
         RegistrationScreen()
     }
 }

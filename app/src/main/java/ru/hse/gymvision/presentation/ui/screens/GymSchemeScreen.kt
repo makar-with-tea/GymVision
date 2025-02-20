@@ -13,7 +13,7 @@ import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.presentation.ui.composables.MyTitle
 
 @Composable
-fun GymSchemeScreen() {
+fun GymSchemeScreen(gymId: Int) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = { MyBottomAppBar() }

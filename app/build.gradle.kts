@@ -70,6 +70,9 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.media3.exoplayer.hls)
 
+    implementation(libs.odyssey.core) // For core classes
+    implementation(libs.odyssey.compose) // For compose extensions
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
