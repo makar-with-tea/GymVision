@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import ru.alexgladkov.odyssey.compose.extensions.push
 import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
-import ru.hse.gymvision.domain.model.GymModel
+import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.presentation.ui.BottomNavScreen
 import ru.hse.gymvision.presentation.ui.PreferencesHelper
 import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
@@ -61,7 +61,7 @@ fun GymListScreen() {
 }
 
 @Composable
-fun GymCard(gym: GymModel) {
+fun GymCard(gym: GymInfoModel) {
     val rootController = LocalRootController.current
     val context = LocalContext.current
     OutlinedCard(

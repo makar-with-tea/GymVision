@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,14 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.alexgladkov.odyssey.compose.extensions.push
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import ru.hse.gymvision.R
 import ru.hse.gymvision.presentation.ui.BottomNavScreen
 
@@ -122,5 +123,68 @@ fun LoadingScreen() {
         modifier = Modifier.fillMaxSize()
     ) {
         CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun MyAlertDialog(
+    title: String,
+    text: String,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = title) },
+        text = { Text(text = text) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Composable
+fun MyPopup(
+    header: String,
+    text: String,
+    onDismissRequest: () -> Unit
+) {
+    Popup(
+        alignment = Alignment.TopCenter,
+        properties = PopupProperties(),
+        onDismissRequest = onDismissRequest
+    ) {
+        Box(
+            Modifier
+                .size(300.dp, 100.dp)
+                .padding(top = 5.dp)
+                .background(
+                    MaterialTheme.colorScheme.secondary,
+                    RoundedCornerShape(10.dp)
+                )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = header,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(vertical = 5.dp),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = text,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier.padding(vertical = 5.dp),
+                    fontSize = 16.sp
+                )
+            }
+        }
     }
 }
