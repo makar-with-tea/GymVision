@@ -20,7 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun PauseButton(player: ExoPlayer, onTouch: () -> Unit) {
+fun PauseButton(player: ExoPlayer) {
     var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
     LaunchedEffect(player.playbackState, player.playWhenReady) {
@@ -41,14 +41,13 @@ fun PauseButton(player: ExoPlayer, onTouch: () -> Unit) {
                 player.play()
             }
             isPlaying = !isPlaying
-            onTouch()
         }
     ) {
         Icon(
             modifier = Modifier.size(50.dp),
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = "пауза/воспроизведение",
-            tint = MaterialTheme.colorScheme.onPrimary
+            tint = MaterialTheme.colorScheme.primary
         )
     }
 }

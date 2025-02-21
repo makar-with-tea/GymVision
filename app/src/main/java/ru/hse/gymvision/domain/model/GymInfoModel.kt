@@ -2,7 +2,7 @@ package ru.hse.gymvision.domain.model
 
 import android.graphics.Bitmap
 
-data class GymModel(
+data class GymInfoModel(
     val id: Int = 0,
     val name: String = "",
     val address: String = "",

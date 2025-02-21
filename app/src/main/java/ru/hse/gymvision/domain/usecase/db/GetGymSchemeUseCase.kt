@@ -1,8 +1,6 @@
 package ru.hse.gymvision.domain.usecase.db
 
-import android.graphics.Bitmap
 import ru.hse.gymvision.domain.exampledata.gymSchemeExample
-import ru.hse.gymvision.domain.model.ClickableCoord
 import ru.hse.gymvision.domain.model.GymSchemeModel
 import java.lang.Thread.sleep
 
