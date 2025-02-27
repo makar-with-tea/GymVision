@@ -1,4 +1,4 @@
-package ru.hse.gymvision.presentation.ui.screens
+package ru.hse.gymvision.presentation.ui.gymscheme
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package ru.hse.gymvision.presentation.ui.screens
+package ru.hse.gymvision.presentation.ui.registration
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

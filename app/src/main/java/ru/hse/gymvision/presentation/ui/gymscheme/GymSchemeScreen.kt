@@ -1,7 +1,6 @@
-package ru.hse.gymvision.presentation.ui.screens
+package ru.hse.gymvision.presentation.ui.gymscheme
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,18 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,20 +32,15 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.alexgladkov.odyssey.compose.extensions.push
 import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.ClickableCamera
 import ru.hse.gymvision.domain.model.ClickableTrainer
+import ru.hse.gymvision.presentation.ui.BitmapHelper
 import ru.hse.gymvision.presentation.ui.BottomNavScreen
 import ru.hse.gymvision.presentation.ui.PreferencesHelper
 import ru.hse.gymvision.presentation.ui.composables.LoadingScreen
@@ -77,7 +66,8 @@ fun GymSchemeScreen() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomAppBar(BottomNavScreen.GYM_SCHEME) }
+        bottomBar = { MyBottomAppBar(BottomNavScreen.GYM_SCHEME) },
+
     ) { paddingValues ->
         if (isLoading) {
             LoadingScreen()
@@ -92,9 +82,10 @@ fun GymSchemeScreen() {
             ) {
                 MyTitle(text = "Схема зала")
                 val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
-                val painter: Painter = remember(gymScheme?.image) {
-                    gymScheme?.let {
-                        BitmapPainter(it.image.asImageBitmap())
+                val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme?.image)
+                val painter: Painter = remember(imageBitmap) {
+                    imageBitmap?.let {
+                        BitmapPainter(imageBitmap.asImageBitmap())
                     } ?: placeholderPainter
                 }
 

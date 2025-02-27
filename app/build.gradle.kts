@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.odyssey.core) // For core classes
     implementation(libs.odyssey.compose) // For compose extensions
 
+    implementation(project(":domain"))
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

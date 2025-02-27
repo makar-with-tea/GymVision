@@ -50,6 +50,7 @@ fun MyTextField(
     value: String,
     label: String,
     isError: Boolean,
+    enabled: Boolean = true,
     onValueChange: (String) -> Unit
 ) {
     TextField(
@@ -57,6 +58,7 @@ fun MyTextField(
         value = value,
         label = { Text(label) },
         isError = isError,
+        enabled = enabled,
         onValueChange = onValueChange
     )
 }

@@ -1,4 +1,4 @@
-package ru.hse.gymvision.presentation.ui.screens
+package ru.hse.gymvision.presentation.ui.gymlist
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -30,6 +30,7 @@ import ru.alexgladkov.odyssey.compose.extensions.push
 import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.GymInfoModel
+import ru.hse.gymvision.presentation.ui.BitmapHelper
 import ru.hse.gymvision.presentation.ui.BottomNavScreen
 import ru.hse.gymvision.presentation.ui.PreferencesHelper
 import ru.hse.gymvision.presentation.ui.composables.MyBottomAppBar
@@ -75,8 +76,9 @@ fun GymCard(gym: GymInfoModel) {
     ) {
         Row {
             val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
-            val painter: Painter = remember(gym.image) {
-                gym.image?.let {
+            val imageBitmap = BitmapHelper.byteArrayToBitmap(gym.image)
+            val painter: Painter = remember(imageBitmap) {
+                imageBitmap?.let {
                     BitmapPainter(it.asImageBitmap())
                 } ?: placeholderPainter
             }
