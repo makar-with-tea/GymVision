@@ -35,8 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ru.alexgladkov.odyssey.compose.extensions.push
-import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.ClickableCamera
 import ru.hse.gymvision.domain.model.ClickableTrainer
@@ -45,69 +43,70 @@ import ru.hse.gymvision.ui.BottomNavScreen
 import ru.hse.gymvision.ui.PreferencesHelper
 import ru.hse.gymvision.ui.composables.LoadingScreen
 import ru.hse.gymvision.ui.composables.MyAlertDialog
-import ru.hse.gymvision.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.ui.composables.MyPopup
 import ru.hse.gymvision.ui.composables.MyTitle
 
 val CAMERA_SIZE = 24.dp
 
 @Composable
-fun GymSchemeScreen() {
+fun GymSchemeScreen(
+    navigateToCamera: (Int) -> Unit,
+) {
     val viewModel: GymSchemeViewModel = viewModel()
     val isLoading by viewModel.isLoading.collectAsState()
     val gymScheme by viewModel.gymScheme.collectAsState()
     var imageWidth by remember { mutableStateOf(0.dp) }
     var imageHeight by remember { mutableStateOf(0.dp) }
     val context = LocalContext.current
-    val gymId = PreferencesHelper(context).getCurGymId()
     val density = LocalDensity.current
+    val gymId = PreferencesHelper(context).getCurGymId()
+
+    Log.d("GymSchemeScreen", "gymId = $gymId")
 
     viewModel.loadGymScheme(gymId)
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomAppBar(BottomNavScreen.GYM_SCHEME) },
 
-    ) { paddingValues ->
-        if (isLoading) {
-            LoadingScreen()
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
+    if (isLoading) {
+        LoadingScreen()
+    } else {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+        ) {
+            MyTitle(text = "Схема зала")
+            val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
+            val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme?.image)
+            val painter: Painter = remember(imageBitmap) {
+                imageBitmap?.let {
+                    BitmapPainter(imageBitmap.asImageBitmap())
+                } ?: placeholderPainter
+            }
+
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(paddingValues)
                     .fillMaxSize()
-                    .padding(16.dp)
             ) {
-                MyTitle(text = "Схема зала")
-                val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
-                val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme?.image)
-                val painter: Painter = remember(imageBitmap) {
-                    imageBitmap?.let {
-                        BitmapPainter(imageBitmap.asImageBitmap())
-                    } ?: placeholderPainter
-                }
-
-                Box(
-                    contentAlignment = Alignment.Center,
+                Image(
+                    painter = painter,
+                    contentDescription = "Gym scheme",
                     modifier = Modifier
-                        .fillMaxSize()
+                        .wrapContentSize(Alignment.Center)
+                        .onGloballyPositioned {
+                            val imageSize = it.size
+                            imageWidth = with(density) { imageSize.width.toDp() }
+                            imageHeight = with(density) { imageSize.height.toDp() }
+                        }
+                )
+                Clickables(
+                    gymScheme?.clickableTrainers ?: emptyList(),
+                    gymScheme?.clickableCameras ?: emptyList(),
+                    imageWidth, imageHeight
                 ) {
-                    Image(
-                        painter = painter,
-                        contentDescription = "Gym scheme",
-                        modifier = Modifier
-                            .wrapContentSize(Alignment.Center)
-                            .onGloballyPositioned {
-                                val imageSize = it.size
-                                imageWidth = with(density) { imageSize.width.toDp() }
-                                imageHeight = with(density) { imageSize.height.toDp() }
-                            }
-                    )
-                    Clickables(gymScheme?.clickableTrainers ?: emptyList(),
-                        gymScheme?.clickableCameras ?: emptyList(),
-                        imageWidth, imageHeight)
+                    navigateToCamera(it)
                 }
             }
         }
@@ -115,8 +114,8 @@ fun GymSchemeScreen() {
 }
 
 @Composable
-fun Clickables(clickableTrainers: List<ClickableTrainer>, clickableCameras: List<ClickableCamera>, imWidth: Dp, imHeight: Dp) {
-    val rootController = LocalRootController.current
+fun Clickables(clickableTrainers: List<ClickableTrainer>, clickableCameras: List<ClickableCamera>, imWidth: Dp, imHeight: Dp,
+               navigateToCamera: (Int) -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     var showPopup by remember { mutableStateOf(false) }
     var trainerName by remember { mutableStateOf("") }
@@ -164,7 +163,7 @@ fun Clickables(clickableTrainers: List<ClickableTrainer>, clickableCameras: List
                         // вью модель все дела
                         val isAccessible = true
                         if (isAccessible) {
-                            rootController.push("camera") // что-то с айди придумать
+                            navigateToCamera(clickableCamera.id) // что-то с айди придумать
                         } else {
                             showDialog = true
                         }

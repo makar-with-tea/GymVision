@@ -23,10 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
-import ru.alexgladkov.odyssey.compose.extensions.push
-import ru.alexgladkov.odyssey.compose.local.LocalRootController
-import ru.alexgladkov.odyssey.core.LaunchFlag
 import ru.hse.gymvision.ui.authorization.AuthorizationAction
 import ru.hse.gymvision.ui.authorization.AuthorizationEvent
 import ru.hse.gymvision.ui.authorization.AuthorizationState
@@ -39,20 +37,21 @@ import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 @Composable
 fun RegistrationScreen(
+    navigateToAuthorization: () -> Unit,
+    navigateToGymList: () -> Unit,
     viewModel: RegistrationViewModel = koinViewModel()
 ) {
-    val rootController = LocalRootController.current
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
     when (action.value) {
         is RegistrationAction.NavigateToAuthorization -> {
-            rootController.push("authorization", launchFlag = LaunchFlag.ClearPrevious)
+            navigateToAuthorization()
             viewModel.obtainEvent(RegistrationEvent.Clear)
         }
 
         is RegistrationAction.NavigateToGymList -> {
-            rootController.push("gymList", launchFlag = LaunchFlag.ClearPrevious)
+            navigateToGymList()
             viewModel.obtainEvent(RegistrationEvent.Clear)
         }
 
@@ -104,58 +103,60 @@ fun MainState(
     val password: MutableState<String> = remember { mutableStateOf(state.password) }
     val passwordRepeat: MutableState<String> = remember { mutableStateOf(state.passwordRepeat) }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-    ) { paddingValues ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .padding(16.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        MyTitle("Регистрация")
+        MyTextField(value = name.value, label = "Имя", isError = false) {
+            name.value = it
+        }
+        MyTextField(value = surname.value, label = "Фамилия", isError = false) {
+            surname.value = it
+        }
+        MyTextField(value = login.value, label = "Логин", isError = false) {
+            login.value = it
+        }
+        MyPasswordField(
+            value = password.value,
+            label = "Пароль",
+            isError = false,
+            onValueChange = { password.value = it },
+            onIconClick = { onShowPasswordClick() },
+            passwordVisibility = state.passwordVisibility
+        )
+        MyPasswordField(
+            value = passwordRepeat.value,
+            label = "Повторите пароль",
+            isError = false,
+            onValueChange = { passwordRepeat.value = it },
+            onIconClick = { onShowPasswordRepeatClick() },
+            passwordVisibility = state.passwordRepeatVisibility
+        )
+        Button(onClick = {
+            onRegistrationClick(
+                name.value,
+                surname.value,
+                login.value,
+                password.value
+            )
+        }) {
+            Text("Зарегистрироваться")
+        }
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            MyTitle("Регистрация")
-            MyTextField(value = name.value, label = "Имя", isError = false) {
-                name.value = it
-            }
-            MyTextField(value = surname.value, label = "Фамилия", isError = false) {
-                surname.value = it
-            }
-            MyTextField(value = login.value, label = "Логин", isError = false) {
-                login.value = it
-            }
-            MyPasswordField(
-                value = password.value,
-                label = "Пароль",
-                isError = false,
-                onValueChange = { password.value = it },
-                onIconClick = { onShowPasswordClick() },
-                passwordVisibility = state.passwordVisibility
-            )
-            MyPasswordField(
-                value = passwordRepeat.value,
-                label = "Повторите пароль",
-                isError = false,
-                onValueChange = { passwordRepeat.value = it },
-                onIconClick = { onShowPasswordRepeatClick() },
-                passwordVisibility = state.passwordRepeatVisibility
-            )
-            Button(onClick = { onRegistrationClick(name.value, surname.value, login.value, password.value) }) {
-                Text("Зарегистрироваться")
-            }
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Text("Уже есть аккаунт?")
+            TextButton(
+                onClick = { onLoginClick(login.value, password.value) },
+                modifier = Modifier.wrapContentWidth(),
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Text("Уже есть аккаунт?")
-                TextButton(
-                    onClick = { onLoginClick(login.value, password.value) },
-                    modifier = Modifier.wrapContentWidth(),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Text("Войти", modifier = Modifier.padding(0.dp))
-                }
+                Text("Войти", modifier = Modifier.padding(0.dp))
             }
         }
     }
@@ -165,6 +166,8 @@ fun MainState(
 @Composable
 fun RegistrationScreenPreview() {
     GymVisionTheme {
-        RegistrationScreen()
+        RegistrationScreen(
+            {}, {}
+        )
     }
 }

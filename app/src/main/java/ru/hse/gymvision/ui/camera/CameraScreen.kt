@@ -10,25 +10,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.NavHostController
 import ru.hse.gymvision.domain.exampledata.videoUrlExample
 import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.myPlayerView
 
 @Composable
-fun CameraScreen() {
+fun CameraScreen(
+    navigateToGymScheme: () -> Unit,
+) {
     val showControls = remember { mutableStateOf(false) }
     var player: ExoPlayer? = null
     val videoUrl = videoUrlExample
 
-    Scaffold { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
-            MyTitle(text = "Камера")
-            player = myPlayerView(
-                videoUrl,
-                true,
-                showControls) { error ->
-                Log.d("CameraScreen", "Error: $error")
-            }
+    Box(
+        modifier = Modifier
+            .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+    ) {
+        MyTitle(text = "Камера")
+        player = myPlayerView(
+            videoUrl,
+            true,
+            showControls
+        ) { error ->
+            Log.d("CameraScreen", "Error: $error")
         }
     }
 }
