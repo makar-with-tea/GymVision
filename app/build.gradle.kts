@@ -73,6 +73,15 @@ dependencies {
     implementation(libs.odyssey.core) // For core classes
     implementation(libs.odyssey.compose) // For compose extensions
 
+    // FLow
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Koin
+    implementation("io.insert-koin:koin-androidx-compose:4.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+
     implementation(project(":domain"))
 
     testImplementation(libs.junit)
