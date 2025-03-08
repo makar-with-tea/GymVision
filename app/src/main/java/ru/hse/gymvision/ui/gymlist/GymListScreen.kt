@@ -26,35 +26,31 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ru.alexgladkov.odyssey.compose.extensions.push
-import ru.alexgladkov.odyssey.compose.local.LocalRootController
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.ui.BitmapHelper
-import ru.hse.gymvision.ui.BottomNavScreen
 import ru.hse.gymvision.ui.PreferencesHelper
-import ru.hse.gymvision.ui.composables.MyBottomAppBar
 import ru.hse.gymvision.ui.composables.MyTitle
 
 @Composable
-fun GymListScreen() {
+fun GymListScreen(
+    navigateToGymScheme: () -> Unit,
+) {
     val viewModel = GymListViewModel()
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = { MyBottomAppBar(BottomNavScreen.HOME) }
-    ) { paddingValues ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            MyTitle(text = "Доступные залы")
-            LazyColumn {
-                itemsIndexed(viewModel.getGymList()) { index, gym ->
-                    GymCard(gym)
+    val context = LocalContext.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+    ) {
+        MyTitle(text = "Доступные залы")
+        LazyColumn {
+            itemsIndexed(viewModel.getGymList()) { _, gym ->
+                GymCard(gym) {
+                    PreferencesHelper(context).saveCurGymId(gym.id)
+                    navigateToGymScheme()
                 }
             }
         }
@@ -62,16 +58,14 @@ fun GymListScreen() {
 }
 
 @Composable
-fun GymCard(gym: GymInfoModel) {
-    val rootController = LocalRootController.current
+fun GymCard(gym: GymInfoModel, navigateToGymScheme: () -> Unit) {
     val context = LocalContext.current
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
             .clickable(onClick = {
-                PreferencesHelper(context).saveCurGymId(gym.id)
-                rootController.push("gymScheme")
+                navigateToGymScheme()
             })
     ) {
         Row {

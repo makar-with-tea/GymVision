@@ -21,10 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
-import ru.alexgladkov.odyssey.compose.extensions.push
-import ru.alexgladkov.odyssey.compose.local.LocalRootController
-import ru.alexgladkov.odyssey.core.LaunchFlag
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyPasswordField
 import ru.hse.gymvision.ui.composables.MyTextField
@@ -32,21 +30,22 @@ import ru.hse.gymvision.ui.composables.MyTitle
 
 @Composable
 fun AuthorizationScreen(
+    navigateToGymList: () -> Unit,
+    navigateToRegistration: () -> Unit,
     viewModel: AuthorizationViewModel = koinViewModel()
 ) {
-    val rootController = LocalRootController.current
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
     Log.d("AuthorizationScreen", "State: $state")
     when (action.value) {
         is AuthorizationAction.NavigateToGymList -> {
-            rootController.push("gymList", launchFlag = LaunchFlag.ClearPrevious)
+            navigateToGymList()
             viewModel.obtainEvent(AuthorizationEvent.Clear)
         }
 
         is AuthorizationAction.NavigateToRegistration -> {
-            rootController.push("registration")
+            navigateToRegistration()
             viewModel.obtainEvent(AuthorizationEvent.Clear)
         }
 
@@ -153,5 +152,7 @@ fun LoadingState() {
 @Preview(showBackground = true)
 @Composable
 fun AuthorizationScreenPreview() {
-    AuthorizationScreen()
+    AuthorizationScreen(
+            {}, {}
+    )
 }

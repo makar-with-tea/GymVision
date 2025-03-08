@@ -10,8 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import ru.hse.gymvision.domain.exampledata.gymSchemeExample
+import ru.hse.gymvision.ui.navigation.MainView
 import ru.hse.gymvision.ui.BitmapHelper
-import ru.hse.gymvision.ui.MainView
 import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainView(this)
+                    MainView()
                 }
             }
         }
