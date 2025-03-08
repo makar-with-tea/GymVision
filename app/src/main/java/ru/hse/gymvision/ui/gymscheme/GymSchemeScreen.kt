@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,12 +36,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.model.ClickableCamera
 import ru.hse.gymvision.domain.model.ClickableTrainer
+import ru.hse.gymvision.domain.model.GymSchemeModel
 import ru.hse.gymvision.ui.BitmapHelper
 import ru.hse.gymvision.ui.BottomNavScreen
 import ru.hse.gymvision.ui.PreferencesHelper
+import ru.hse.gymvision.ui.authorization.AuthorizationViewModel
+import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.LoadingScreen
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPopup
@@ -50,63 +55,174 @@ val CAMERA_SIZE = 24.dp
 
 @Composable
 fun GymSchemeScreen(
+    id: Int? = null,
     navigateToCamera: (Int) -> Unit,
+    viewModel: GymSchemeViewModel = koinViewModel()
 ) {
-    val viewModel: GymSchemeViewModel = viewModel()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val gymScheme by viewModel.gymScheme.collectAsState()
-    var imageWidth by remember { mutableStateOf(0.dp) }
-    var imageHeight by remember { mutableStateOf(0.dp) }
-    val context = LocalContext.current
-    val density = LocalDensity.current
-    val gymId = PreferencesHelper(context).getCurGymId()
-
-    Log.d("GymSchemeScreen", "gymId = $gymId")
-
-    viewModel.loadGymScheme(gymId)
-
-
-    if (isLoading) {
-        LoadingScreen()
+    val state = viewModel.state.collectAsState()
+    val action = viewModel.action.collectAsState()
+    val prefHelper = PreferencesHelper(LocalContext.current)
+    val gymId = if (id == null) {
+        prefHelper.getCurGymId()
     } else {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+        prefHelper.saveCurGymId(id)
+        id
+    }
+
+    when (action.value) {
+        is GymSchemeAction.NavigateToCamera -> {
+            navigateToCamera(0) // todo: передать айди камеры
+            viewModel.obtainEvent(GymSchemeEvent.Clear)
+        }
+        null -> {}
+    }
+
+    when (state.value) {
+        is GymSchemeState.Main -> {
+            MainState(
+                state.value as GymSchemeState.Main,
+                onCameraClicked = { cameraId ->
+                    viewModel.obtainEvent(GymSchemeEvent.CameraClicked(cameraId))
+                },
+                onTrainerClicked = { name, description, id ->
+                    viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(id, name, description, id))
+                },
+                onHidePopup = {
+                    viewModel.obtainEvent(GymSchemeEvent.HidePopup)
+                },
+                onHideDialog = {
+                    viewModel.obtainEvent(GymSchemeEvent.HideDialog)
+                }
+            )
+        }
+        is GymSchemeState.Loading -> {
+            LoadingState()
+        }
+        is GymSchemeState.Idle -> {
+            IdleState()
+            viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
+        }
+    }
+
+}
+
+@Composable
+fun MainState(
+    state: GymSchemeState.Main,
+    onCameraClicked: (Int) -> Unit,
+    onTrainerClicked: (String, String, Int) -> Unit,
+    onHidePopup: () -> Unit,
+    onHideDialog: () -> Unit
+) {
+    Log.d("GymSchemeScreenMainState", "MainState: $state")
+    val gymScheme: MutableState<GymSchemeModel?> = remember { mutableStateOf(state.gymScheme) }
+
+    var imWidth by remember { mutableStateOf(0.dp) }
+    var imHeight by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+    ) {
+        MyTitle(text = "Схема зала")
+        val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
+        val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.image)
+        val painter: Painter = remember(imageBitmap) {
+            imageBitmap?.let {
+                BitmapPainter(imageBitmap.asImageBitmap())
+            } ?: placeholderPainter
+        }
+
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
         ) {
-            MyTitle(text = "Схема зала")
-            val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
-            val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme?.image)
-            val painter: Painter = remember(imageBitmap) {
-                imageBitmap?.let {
-                    BitmapPainter(imageBitmap.asImageBitmap())
-                } ?: placeholderPainter
-            }
+            Image(
+                painter = painter,
+                contentDescription = "Gym scheme",
+                modifier = Modifier
+                    .wrapContentSize(Alignment.Center)
+                    .onGloballyPositioned {
+                        val imageSize = it.size
+                        imWidth = with(density) { imageSize.width.toDp() }
+                        imHeight = with(density) { imageSize.height.toDp() }
+                    }
+            )
+
+
+            val clickableTrainers = gymScheme.value?.clickableTrainers ?: emptyList()
+            val clickableCameras = gymScheme.value?.clickableCameras ?: emptyList()
 
             Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.size(imWidth, imHeight)
             ) {
-                Image(
-                    painter = painter,
-                    contentDescription = "Gym scheme",
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.Center)
-                        .onGloballyPositioned {
-                            val imageSize = it.size
-                            imageWidth = with(density) { imageSize.width.toDp() }
-                            imageHeight = with(density) { imageSize.height.toDp() }
-                        }
-                )
-                Clickables(
-                    gymScheme?.clickableTrainers ?: emptyList(),
-                    gymScheme?.clickableCameras ?: emptyList(),
-                    imageWidth, imageHeight
+                for (clickableTrainer in clickableTrainers) {
+                    val x = (clickableTrainer.xPercent * imWidth.value).dp
+                    val y = (clickableTrainer.yPercent * imHeight.value).dp
+                    val width = (clickableTrainer.widthPercent * imWidth.value).dp
+                    val height = (clickableTrainer.heightPercent * imHeight.value).dp
+                    val isSelected = state.selectedTrainerId == clickableTrainer.id
+
+                    Box(
+                        modifier = Modifier
+                            .offset(x, y)
+                            .size(width, height)
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+                                else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            )
+                            .clickable {
+                                Log.d("GymSchemeScreen", "trainer clicked: x = $x, y = $y")
+                                onTrainerClicked(
+                                    clickableTrainer.name,
+                                    clickableTrainer.description,
+                                    clickableTrainer.id
+                                )
+                            }
+                    )
+                }
+
+                for (clickableCamera in clickableCameras) {
+                    val x = (clickableCamera.xPercent * imWidth.value).dp
+                    val y = (clickableCamera.yPercent * imHeight.value).dp
+                    Log.d("GymSchemeScreen", "cam: x = $x, y = $y")
+                    Box(
+                        modifier = Modifier
+                            .offset(x, y)
+                            .size(CAMERA_SIZE)
+                            .background(Color.Transparent)
+                            .clickable {
+                                onCameraClicked(0) // что-то с айди придумать
+                            }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_camera),
+                            contentDescription = "Camera",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+
+            if (state.showPopup) {
+                MyPopup(
+                    state.trainerName,
+                    state.trainerDescription
                 ) {
-                    navigateToCamera(it)
+                    onHidePopup()
+                }
+            }
+
+            if (state.showDialog) {
+                MyAlertDialog(
+                    "Камера недоступна",
+                    "Камера временно недоступна. Попробуйте позже.",
+                ) {
+                    onHideDialog()
                 }
             }
         }
@@ -114,86 +230,11 @@ fun GymSchemeScreen(
 }
 
 @Composable
-fun Clickables(clickableTrainers: List<ClickableTrainer>, clickableCameras: List<ClickableCamera>, imWidth: Dp, imHeight: Dp,
-               navigateToCamera: (Int) -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
-    var showPopup by remember { mutableStateOf(false) }
-    var trainerName by remember { mutableStateOf("") }
-    var trainerDescription by remember { mutableStateOf("") }
-    var selectedTrainerId by remember { mutableIntStateOf(-1) }
+fun LoadingState() {
+    LoadingBlock()
+}
 
-    Box(
-        modifier = Modifier.size(imWidth, imHeight)
-    ) {
-        for (clickableTrainer in clickableTrainers) {
-            val x = (clickableTrainer.xPercent * imWidth.value).dp
-            val y = (clickableTrainer.yPercent * imHeight.value).dp
-            val width = (clickableTrainer.widthPercent * imWidth.value).dp
-            val height = (clickableTrainer.heightPercent * imHeight.value).dp
-            val isSelected = selectedTrainerId == clickableTrainer.id
-
-            Box(
-                modifier = Modifier
-                    .offset(x, y)
-                    .size(width, height)
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
-                    .clickable {
-                        trainerName = clickableTrainer.name
-                        trainerDescription = clickableTrainer.description
-                        selectedTrainerId = clickableTrainer.id
-                        showPopup = true
-                    }
-            )
-        }
-
-        for (clickableCamera in clickableCameras) {
-            val x = (clickableCamera.xPercent * imWidth.value).dp
-            val y = (clickableCamera.yPercent * imHeight.value).dp
-            Log.d("GymSchemeScreen", "cam: x = $x, y = $y")
-            Box(
-                modifier = Modifier
-                    .offset(x, y)
-                    .size(CAMERA_SIZE)
-                    .background(Color.Transparent)
-                    .clickable {
-                        // проверить можно ли подключиться к камере
-                        // вью модель все дела
-                        val isAccessible = true
-                        if (isAccessible) {
-                            navigateToCamera(clickableCamera.id) // что-то с айди придумать
-                        } else {
-                            showDialog = true
-                        }
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_camera),
-                    contentDescription = "Camera",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-    }
-
-    if (showPopup) {
-        MyPopup(
-            trainerName,
-            trainerDescription
-        ) {
-            showPopup = false
-            selectedTrainerId = -1
-        }
-    }
-
-    if (showDialog) {
-        MyAlertDialog(
-            "Камера недоступна",
-            "Камера временно недоступна. Попробуйте позже.",
-        ) {
-            showDialog = false
-        }
-    }
+@Composable
+fun IdleState() {
+    LoadingBlock()
 }

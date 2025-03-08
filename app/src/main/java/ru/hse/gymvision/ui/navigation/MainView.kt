@@ -102,7 +102,14 @@ fun MainView() {
                 }
 
                 composable(Route.Account.route) {
-                    AccountScreen()
+                    AccountScreen(
+                        navigateToAuthorization = {
+                            navController.navigate(Route.Authorization.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                    )
                 }
                 composable(Route.Camera.route) { backStackEntry ->
 //                    val camera: Route.Camera = backStackEntry.toRoute()
