@@ -136,6 +136,9 @@ fun MainView() {
                     AccountScreen(
                         navigateToAuthorization = {
                             navController.navigate(Route.Authorization.route) {
+                                popUpTo(Route.Authorization.route) {
+                                    inclusive = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
