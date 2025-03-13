@@ -137,6 +137,10 @@ fun MainState(
             }
         }
     }
+
+    if (state.loading) {
+        LoadingBlock()
+    }
 }
 
 @Composable

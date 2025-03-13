@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.user.GetPastLoginUseCase
-import ru.hse.gymvision.ui.authorization.AuthorizationEvent
-import ru.hse.gymvision.ui.authorization.AuthorizationState
+import ru.hse.gymvision.domain.usecase.user.LoginUseCase
+import java.lang.Thread.sleep
 
 class AuthorizationViewModel(
-    // тут всякие UseCase
-): ViewModel() {
+    private val getPastLoginUseCase: GetPastLoginUseCase,
+    private val loginUseCase: LoginUseCase
+
+    ): ViewModel() {
     private val _state: MutableStateFlow<AuthorizationState> = MutableStateFlow(AuthorizationState.Idle)
     val state : StateFlow<AuthorizationState>
         get() = _state
@@ -41,8 +43,25 @@ class AuthorizationViewModel(
     }
 
     private fun login(login: String, password: String) {
-        //LoginUseCase.execute(login, password)
-        _action.value = AuthorizationAction.NavigateToGymList
+        _state.value = AuthorizationState.Main(
+            login = login,
+            password = password,
+            loading = true
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = loginUseCase.execute(login, password)
+            if (!res) {
+                // todo: show error
+                return@launch
+            }
+            sleep(1000)
+            _state.value = AuthorizationState.Main(
+                login = login,
+                password = password,
+                loading = false
+            )
+            _action.value = AuthorizationAction.NavigateToGymList
+        }
     }
 
     private fun clear() {
@@ -67,7 +86,7 @@ class AuthorizationViewModel(
         _state.value = AuthorizationState.Loading
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val username = GetPastLoginUseCase().execute()
+                val username = getPastLoginUseCase.execute()
                 if (username != null) {
                     _action.value = AuthorizationAction.NavigateToGymList
                 } else {

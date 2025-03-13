@@ -15,7 +15,7 @@ import ru.hse.gymvision.ui.authorization.AuthorizationEvent
 import ru.hse.gymvision.ui.authorization.AuthorizationState
 
 class RegistrationViewModel(
-    // тут всякие UseCase
+    val registerUseCase: RegisterUseCase
 ): ViewModel() {
     private val _state: MutableStateFlow<RegistrationState> = MutableStateFlow(RegistrationState.Main(
         login = "",
@@ -64,7 +64,7 @@ class RegistrationViewModel(
     }
 
     private fun register(name: String, surname: String, login: String, password: String) {
-        //RegisterUseCase().execute(name, surname, login, password)
+//        registerUseCase.execute(name, surname, login, password)
         _action.value = RegistrationAction.NavigateToGymList
     }
 
