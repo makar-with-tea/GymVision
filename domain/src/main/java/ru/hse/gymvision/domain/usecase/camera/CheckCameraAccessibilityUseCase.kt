@@ -1,9 +1,12 @@
 package ru.hse.gymvision.domain.usecase.camera
 
+import ru.hse.gymvision.domain.repos.GlobalRepository
 import kotlin.random.Random
 
-class CheckCameraAccessibilityUseCase {
-    fun execute(cameraId: Int): Boolean {
-        return Random.nextBoolean()
+class CheckCameraAccessibilityUseCase(
+    private val repo: GlobalRepository
+) {
+    suspend fun execute(cameraId: Int): Boolean {
+        return repo.checkCameraAccessibility(cameraId)
     }
 }

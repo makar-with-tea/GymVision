@@ -10,7 +10,8 @@ sealed class GymSchemeState {
         val showDialog: Boolean = false,
         val trainerName: String = "",
         val trainerDescription: String = "",
-        val selectedTrainerId: Int = -1
+        val selectedTrainerId: Int = -1,
+        val isLoading: Boolean = false
     ) : GymSchemeState() {
         override fun toString(): String {
             return "Main(showPopup=$showPopup, showDialog=$showDialog, trainerName='$trainerName', trainerDescription='$trainerDescription', selectedTrainerId=$selectedTrainerId)"
@@ -20,7 +21,7 @@ sealed class GymSchemeState {
 }
 
 sealed class GymSchemeEvent {
-    data class LoadGymScheme(val gymId: Int) : GymSchemeEvent()
+    data class LoadGymScheme(val gymId: Int?) : GymSchemeEvent()
     data class TrainerClicked(
         val trainerId: Int,
         val trainerName: String,

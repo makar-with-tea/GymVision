@@ -1,7 +1,11 @@
 package ru.hse.gymvision.domain.usecase.user
 
-class DeleteUserUseCase {
-    fun execute(id: Int) {
-        // delete user
+import ru.hse.gymvision.domain.repos.GlobalRepository
+
+class DeleteUserUseCase(
+    private val repo: GlobalRepository
+) {
+    suspend fun execute(login: String) {
+        repo.deleteUser(login)
     }
 }

@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import ru.hse.gymvision.R
-import ru.hse.gymvision.ui.BottomNavScreen
 
 @Composable
 fun MyTitle(
@@ -90,20 +88,6 @@ fun MyPasswordField(
         },
         visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     )
-}
-
-@Composable
-fun MyBottomNavButton(curScreen: BottomNavScreen, targetScreen: BottomNavScreen, painter: Painter, contentDescription: String, onIconClick: () -> Unit) {
-    IconButton(onClick = onIconClick,
-        modifier = Modifier.size(40.dp)) {
-        Icon(
-            painter = painter,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(32.dp),
-            tint = if (curScreen == targetScreen) MaterialTheme.colorScheme.primary else Color.Gray
-
-        )
-    }
 }
 
 @Composable

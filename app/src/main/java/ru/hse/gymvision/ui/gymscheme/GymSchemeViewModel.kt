@@ -7,12 +7,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
-import ru.hse.gymvision.domain.usecase.db.GetGymSchemeUseCase
+import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
+import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
+import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
 
 class GymSchemeViewModel(
     private val getGymSchemeUseCase: GetGymSchemeUseCase,
-    private val checkCameraAccessibilityUseCase: CheckCameraAccessibilityUseCase
+    private val checkCameraAccessibilityUseCase: CheckCameraAccessibilityUseCase,
+    private val getGymIdUseCase: GetGymIdUseCase,
+    private val saveGymIdUseCase: SaveGymIdUseCase
 ) : ViewModel() {
     private val _state: MutableStateFlow<GymSchemeState> = MutableStateFlow(GymSchemeState.Idle)
     val state: StateFlow<GymSchemeState>
@@ -43,20 +48,33 @@ class GymSchemeViewModel(
         Log.d("GymSchemeViewModel", "state: ${state.value}")
     }
 
-    private fun loadGymScheme(gymId: Int) {
+    private fun loadGymScheme(gymId: Int?) {
         _state.value = GymSchemeState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            val gymScheme = getGymSchemeUseCase.execute(gymId)
-            _state.value = GymSchemeState.Main(gymScheme = gymScheme)
+            val id = if (gymId == null) {
+                getGymIdUseCase.execute()
+            } else {
+                saveGymIdUseCase.execute(gymId)
+                gymId
+            }
+            val gymScheme = getGymSchemeUseCase.execute(id)
+            withContext(Dispatchers.Main){
+                _state.value = GymSchemeState.Main(gymScheme = gymScheme)
+            }
         }
     }
     private fun onCameraClicked(cameraId: Int) {
-        val isAccessible = checkCameraAccessibilityUseCase.execute(cameraId)
-        if (!isAccessible) {
-            if (state.value is GymSchemeState.Main) {
-                _state.value = (state.value as GymSchemeState.Main).copy(showDialog = true)
+        _state.value = (state.value as GymSchemeState.Main).copy(isLoading = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            val isAccessible = checkCameraAccessibilityUseCase.execute(cameraId)
+            withContext(Dispatchers.Main) {
+                if (!isAccessible) {
+                    if (state.value is GymSchemeState.Main) {
+                        _state.value = (state.value as GymSchemeState.Main).copy(showDialog = true)
+                    }
+                } else _action.value = GymSchemeAction.NavigateToCamera
             }
-        } else _action.value = GymSchemeAction.NavigateToCamera
+        }
     }
     private fun onTrainerClicked(trainerName: String, trainerDescription: String, selectedTrainerId: Int){
         if (state.value is GymSchemeState.Main) {

@@ -1,7 +1,11 @@
 package ru.hse.gymvision.domain.usecase.user
 
-class GetPastLoginUseCase {
+import ru.hse.gymvision.domain.repos.SharedPrefRepository
+
+class GetPastLoginUseCase(
+    private val repo: SharedPrefRepository
+) {
     suspend fun execute(): String? {
-        return null
+        return repo.getUser()
     }
 }

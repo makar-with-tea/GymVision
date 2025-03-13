@@ -2,7 +2,11 @@ package ru.hse.gymvision.ui.account
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.user.ChangePasswordUseCase
 import ru.hse.gymvision.domain.usecase.user.DeleteUserUseCase
 import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
@@ -72,13 +76,23 @@ class AccountViewModel(
     }
 
     private fun getUserInfo(id: Int) {
-        val userInfo = getUserInfoUseCase.execute(id)
-        _state.value = AccountState.Main(
-            name = userInfo.name,
-            surname = userInfo.surname,
-            login = userInfo.login,
-            password = userInfo.password
-        )
+        _state.value = AccountState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            val userInfo = getUserInfoUseCase.execute(id)
+            if (userInfo == null) {
+                logout()
+                _action.value = AccountAction.NavigateToAuthorization
+                return@launch
+            }
+            withContext(Dispatchers.Main) {
+                _state.value = AccountState.Main(
+                    name = userInfo.name,
+                    surname = userInfo.surname,
+                    login = userInfo.login,
+                    password = userInfo.password
+                )
+            }
+        }
     }
 
     private fun saveName(name: String, surname: String) {
@@ -95,13 +109,23 @@ class AccountViewModel(
 
     private fun savePassword(newPassword: String) {
         if (_state.value !is AccountState.ChangePassword) return
-        changePasswordUseCase.execute((_state.value as AccountState.ChangePassword).login, newPassword)
-        _state.value = AccountState.Main(
-            password = newPassword,
-            name = (_state.value as AccountState.ChangePassword).name,
-            surname = (_state.value as AccountState.ChangePassword).surname,
-            login = (_state.value as AccountState.ChangePassword).login
+        _state.value = (_state.value as AccountState.ChangePassword).copy(
+            isLoading = true
         )
+        viewModelScope.launch(Dispatchers.IO) {
+            changePasswordUseCase.execute(
+                (_state.value as AccountState.ChangePassword).login,
+                newPassword
+            )
+            withContext(Dispatchers.Main) {
+                _state.value = AccountState.Main(
+                    password = newPassword,
+                    name = (_state.value as AccountState.ChangePassword).name,
+                    surname = (_state.value as AccountState.ChangePassword).surname,
+                    login = (_state.value as AccountState.ChangePassword).login
+                )
+            }
+        }
     }
 
     private fun showOldPassword() {
@@ -152,7 +176,7 @@ class AccountViewModel(
     }
 
     private fun logout() {
-        logoutUseCase.execute()
+//        logoutUseCase.execute()
         _action.value = AccountAction.NavigateToAuthorization
     }
 

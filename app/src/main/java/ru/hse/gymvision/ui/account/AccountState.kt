@@ -23,7 +23,8 @@ sealed class AccountState {
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = ""
+        val password: String = "",
+        val isLoading: Boolean = false
     ) : AccountState()
 
     data object Loading : AccountState()

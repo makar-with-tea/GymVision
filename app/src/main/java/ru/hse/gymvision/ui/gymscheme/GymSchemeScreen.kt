@@ -14,12 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -30,23 +28,14 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
-import ru.hse.gymvision.domain.model.ClickableCamera
-import ru.hse.gymvision.domain.model.ClickableTrainer
 import ru.hse.gymvision.domain.model.GymSchemeModel
 import ru.hse.gymvision.ui.BitmapHelper
-import ru.hse.gymvision.ui.BottomNavScreen
-import ru.hse.gymvision.ui.PreferencesHelper
-import ru.hse.gymvision.ui.authorization.AuthorizationViewModel
 import ru.hse.gymvision.ui.composables.LoadingBlock
-import ru.hse.gymvision.ui.composables.LoadingScreen
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPopup
 import ru.hse.gymvision.ui.composables.MyTitle
@@ -61,13 +50,6 @@ fun GymSchemeScreen(
 ) {
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
-    val prefHelper = PreferencesHelper(LocalContext.current)
-    val gymId = if (id == null) {
-        prefHelper.getCurGymId()
-    } else {
-        prefHelper.saveCurGymId(id)
-        id
-    }
 
     when (action.value) {
         is GymSchemeAction.NavigateToCamera -> {
@@ -100,7 +82,7 @@ fun GymSchemeScreen(
         }
         is GymSchemeState.Idle -> {
             IdleState()
-            viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
+            viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
         }
     }
 
@@ -225,6 +207,9 @@ fun MainState(
                     onHideDialog()
                 }
             }
+        }
+        if (state.isLoading) {
+            LoadingBlock()
         }
     }
 }

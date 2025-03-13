@@ -2,10 +2,12 @@ package ru.hse.gymvision.ui.gymlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.model.GymInfoModel
-import ru.hse.gymvision.domain.usecase.db.GetGymListUseCase
-import ru.hse.gymvision.ui.PreferencesHelper
+import ru.hse.gymvision.domain.usecase.gym.GetGymListUseCase
 
 class GymListViewModel(
     private val getGymListUseCase: GetGymListUseCase
@@ -31,8 +33,12 @@ class GymListViewModel(
 
     private fun getGymList() {
         _state.value = GymListState.Loading
-        val gyms = getGymListUseCase.execute()
-        _state.value = GymListState.Main(gyms)
+        viewModelScope.launch(Dispatchers.IO) {
+            val gyms = getGymListUseCase.execute()
+            withContext(Dispatchers.Main) {
+                _state.value = GymListState.Main(gyms)
+            }
+        }
     }
 
     private fun selectGym(gym: GymInfoModel) {
