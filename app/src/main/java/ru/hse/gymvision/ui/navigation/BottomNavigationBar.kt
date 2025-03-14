@@ -18,9 +18,12 @@ import ru.hse.gymvision.R
 
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+fun BottomNavigationBar(
+    navigateToGymList: () -> Unit,
+    navigateToGymScheme: () -> Unit,
+    navigateToAccount: () -> Unit,
+    currentRoute: String?
+) {
 
 
     NavigationBar {
@@ -34,14 +37,8 @@ fun BottomNavigationBar(navController: NavHostController) {
                 )
             },
             onClick = {
-                navController.navigate(Route.GymList.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                    Log.d("BottomNavigationBar", "Navigate to GymList: $currentRoute")
-                }
+                navigateToGymList()
+                Log.d("Navigation", "BottomNav to GymList from $currentRoute")
             }
         )
 
@@ -55,13 +52,8 @@ fun BottomNavigationBar(navController: NavHostController) {
                 )
             },
             onClick = {
-                navController.navigate(Route.GymScheme.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navigateToGymScheme()
+                Log.d("Navigation", "BottomNav to GymScheme from $currentRoute")
             }
         )
 
@@ -75,13 +67,8 @@ fun BottomNavigationBar(navController: NavHostController) {
                 )
             },
             onClick = {
-                navController.navigate(Route.Account.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
+                navigateToAccount()
+                Log.d("Navigation", "BottomNav to Account from $currentRoute")
             }
         )
     }

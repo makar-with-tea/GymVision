@@ -38,11 +38,36 @@ fun MainView() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    val navigateToGymList = {
+        navController.navigate(Route.GymList.route) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToGymScheme = {
+        navController.navigate(Route.GymScheme.route) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToAccount = {
+        navController.navigate(Route.Account.route) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Scaffold(
         bottomBar = {
             Log.d("SetUpNavHost", "Current route: $currentRoute")
             if (currentRoute != Route.Authorization.route && currentRoute != Route.Registration.route) {
-                BottomNavigationBar(navController = navController)
+                BottomNavigationBar(
+                    navigateToGymList = navigateToGymList,
+                    navigateToGymScheme = navigateToGymScheme,
+                    navigateToAccount = navigateToAccount,
+                    currentRoute = currentRoute
+                )
             }
         }
     ) { paddingValues ->
@@ -55,12 +80,14 @@ fun MainView() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to Registration from Authorization")
                         },
                         navigateToGymList = {
                             navController.navigate(Route.GymList.route) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to GymList from Authorization")
                         },
                     )
                 }
@@ -71,12 +98,14 @@ fun MainView() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to GymList from Registration")
                         },
                         navigateToAuthorization = {
                             navController.navigate(Route.Authorization.route) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to Authorization from Registration")
                         }
                     )
                 }
@@ -87,6 +116,7 @@ fun MainView() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to GymScheme from GymList")
                         },
                     )
                 }
@@ -97,6 +127,7 @@ fun MainView() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to Camera from GymScheme")
                         },
                     )
                 }
@@ -105,9 +136,13 @@ fun MainView() {
                     AccountScreen(
                         navigateToAuthorization = {
                             navController.navigate(Route.Authorization.route) {
+                                popUpTo(Route.Authorization.route) {
+                                    inclusive = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to Authorization from Account")
                         },
                     )
                 }
@@ -120,6 +155,7 @@ fun MainView() {
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                            Log.d("Navigation", "Navigate to GymScheme from Camera")
                         },
                     )
                 }
