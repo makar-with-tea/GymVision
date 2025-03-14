@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    kotlin("plugin.serialization") version "2.0.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
+
 }
 
 android {
@@ -70,8 +73,19 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.media3.exoplayer.hls)
 
-    implementation(libs.odyssey.core) // For core classes
-    implementation(libs.odyssey.compose) // For compose extensions
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+
+    // FLow
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Koin
+    implementation("io.insert-koin:koin-androidx-compose:4.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+
+    implementation(project(":domain"))
+    implementation(project(":data"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
