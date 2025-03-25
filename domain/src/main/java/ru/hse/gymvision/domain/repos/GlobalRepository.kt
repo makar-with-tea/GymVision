@@ -13,5 +13,4 @@ interface GlobalRepository {
     suspend fun updateUser(name: String? = null, surname: String? = null, login: String, password: String? = null)
     suspend fun logout()
     suspend fun deleteUser(login: String)
-    suspend fun checkCameraAccessibility(id: Int): Boolean
 }

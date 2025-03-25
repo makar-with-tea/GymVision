@@ -7,7 +7,6 @@ import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.domain.model.GymSchemeModel
 import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.repos.GlobalRepository
-import kotlin.random.Random
 
 class GlobalRepositoryImpl: GlobalRepository {
     override suspend fun getGymList(): List<GymInfoModel> {
@@ -45,9 +44,5 @@ class GlobalRepositoryImpl: GlobalRepository {
 
     override suspend fun deleteUser(login: String) {
         // well.
-    }
-
-    override suspend fun checkCameraAccessibility(id: Int): Boolean {
-        return Random.nextBoolean()
     }
 }
