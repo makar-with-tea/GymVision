@@ -5,7 +5,10 @@ sealed class AuthorizationState {
         val login: String = "",
         val password: String = "",
         val passwordVisibility: Boolean = false,
-        val isError: Boolean = false,
+        val loginError: Boolean = false,
+        val loginErrorText: String? = null,
+        val passwordError: Boolean = false,
+        val passwordErrorText: String? = null,
         val loading: Boolean = false
     ) : AuthorizationState()
 

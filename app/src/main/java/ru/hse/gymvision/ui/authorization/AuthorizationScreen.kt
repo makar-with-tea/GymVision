@@ -100,18 +100,19 @@ fun MainState(
                 .padding(16.dp)
         ) {
             MyTitle("Авторизация")
-            MyTextField(value = login.value, label = "Логин", isError = false) {
+            MyTextField(value = login.value, label = "Логин", isError = state.loginError, errorText = state.loginErrorText) {
                 login.value = it
             }
             MyPasswordField(
                 value = password.value,
                 label = "Пароль",
-                isError = false,
+                isError = state.passwordError,
                 onValueChange = { password.value = it },
                 onIconClick = {
                     onShowPasswordClick()
                 },
-                passwordVisibility = state.passwordVisibility
+                passwordVisibility = state.passwordVisibility,
+                errorText = state.passwordErrorText
             )
             Button(onClick = {
                 onLoginClick(login.value, password.value)

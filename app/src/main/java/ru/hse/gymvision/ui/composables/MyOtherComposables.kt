@@ -49,6 +49,7 @@ fun MyTextField(
     label: String,
     isError: Boolean,
     enabled: Boolean = true,
+    errorText: String? = null,
     onValueChange: (String) -> Unit
 ) {
     TextField(
@@ -57,7 +58,8 @@ fun MyTextField(
         label = { Text(label) },
         isError = isError,
         enabled = enabled,
-        onValueChange = onValueChange
+        onValueChange = onValueChange,
+        supportingText = { errorText?.let { Text(it) } }
     )
 }
 
@@ -68,13 +70,15 @@ fun MyPasswordField(
     isError: Boolean,
     onValueChange: (String) -> Unit,
     onIconClick: () -> Unit,
-    passwordVisibility: Boolean
+    passwordVisibility: Boolean,
+    errorText: String? = null
 ) {
     TextField(
         modifier = Modifier.padding(8.dp),
         value = value,
         label = { Text(label) },
         isError = isError,
+        supportingText = { errorText?.let { Text(it) } },
         onValueChange = onValueChange,
         trailingIcon = {
             IconButton(onClick = onIconClick) {
@@ -98,17 +102,6 @@ fun LoadingBlock() {
             .background(Color.Black.copy(alpha = 0.5f))
             .clickable { },
         contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-fun LoadingScreen() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
     ) {
         CircularProgressIndicator()
     }

@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.runBlocking
+import ru.hse.gymvision.data.SharedPrefRepositoryImpl
 import ru.hse.gymvision.domain.exampledata.gymSchemeExample
+import ru.hse.gymvision.domain.repos.SharedPrefRepository
 import ru.hse.gymvision.ui.navigation.MainView
 import ru.hse.gymvision.ui.BitmapHelper
 import ru.hse.gymvision.ui.theme.GymVisionTheme
@@ -32,5 +35,6 @@ class MainActivity : ComponentActivity() {
         gymSchemeExample.image = BitmapHelper.bitmapToByteArray(
             BitmapFactory.decodeResource(resources, R.drawable.im_gym_scheme)
         )!!
+
     }
 }

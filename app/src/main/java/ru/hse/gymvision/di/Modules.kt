@@ -1,7 +1,6 @@
 package ru.hse.gymvision.di
 
 import org.koin.android.ext.koin.androidContext
-import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import ru.hse.gymvision.data.GlobalRepositoryImpl
@@ -52,11 +51,11 @@ val dataModule = module {
 
 val domainModule = module {
     factory<ChangePasswordUseCase> { ChangePasswordUseCase(get()) }
-    factory<DeleteUserUseCase> { DeleteUserUseCase(get()) }
+    factory<DeleteUserUseCase> { DeleteUserUseCase(get(), get()) }
     factory<GetPastLoginUseCase> { GetPastLoginUseCase(get()) }
-    factory<GetUserInfoUseCase> { GetUserInfoUseCase(get()) }
-    factory<LoginUseCase> { LoginUseCase(get()) }
-    factory<RegisterUseCase> { RegisterUseCase(get()) }
+    factory<GetUserInfoUseCase> { GetUserInfoUseCase(get(), get()) }
+    factory<LoginUseCase> { LoginUseCase(get(), get()) }
+    factory<RegisterUseCase> { RegisterUseCase(get(), get()) }
     factory<UpdateUserUseCase> { UpdateUserUseCase(get()) }
     factory<LogoutUseCase> { LogoutUseCase(get()) }
 

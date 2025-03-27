@@ -1,11 +1,14 @@
 package ru.hse.gymvision.domain.usecase.user
 
 import ru.hse.gymvision.domain.repos.GlobalRepository
+import ru.hse.gymvision.domain.repos.SharedPrefRepository
 
 class DeleteUserUseCase(
-    private val repo: GlobalRepository
+    private val globalRepo: GlobalRepository,
+    private val sharedPrefRepo: SharedPrefRepository
 ) {
     suspend fun execute(login: String) {
-        repo.deleteUser(login)
+        sharedPrefRepo.clearInfo()
+        globalRepo.deleteUser(login)
     }
 }

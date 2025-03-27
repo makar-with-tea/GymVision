@@ -10,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,7 +29,7 @@ fun AccountScreen(
 ) {
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
-    // todo: тут половина недоделана(( как минимум обновление имени
+    // todo: тут половина недоделана((
 
     when (action.value) {
         is AccountAction.NavigateToAuthorization -> {
@@ -44,7 +45,9 @@ fun AccountScreen(
             MainState(state.value as AccountState.Main,
                 onEditName = { viewModel.obtainEvent(AccountEvent.EditNameButtonClicked) },
                 onChangePassword = { viewModel.obtainEvent(AccountEvent.EditPasswordButtonClicked) },
-                onDeleteAccount = { viewModel.obtainEvent(AccountEvent.DeleteAccountButtonClicked) },
+                onDeleteAccount = { viewModel.obtainEvent(AccountEvent.DeleteAccountButtonClicked(
+                    (state.value as AccountState.Main).login
+                )) },
                 onLogout = { viewModel.obtainEvent(AccountEvent.LogoutButtonClicked) }
                 )
         }
@@ -65,15 +68,19 @@ fun AccountScreen(
         is AccountState.ChangePassword -> {
             ChangePasswordState(
                 state.value as AccountState.ChangePassword,
-                onSavePassword = { newPassword ->
-                    viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword))
-                }
+                onSavePassword = { newPassword, oldPassword, realPassword ->
+                    viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword,
+                        oldPassword, realPassword
+                        ))
+                },
+                onShowOldPassword = { viewModel.obtainEvent(AccountEvent.ShowOldPasswordButtonClicked) },
+                onShowNewPassword = { viewModel.obtainEvent(AccountEvent.ShowNewPasswordButtonClicked) }
             )
         }
 
         is AccountState.Idle -> {
             IdleState()
-            viewModel.obtainEvent(AccountEvent.GetUserInfo(0)) // TODO: get user id
+            viewModel.obtainEvent(AccountEvent.GetUserInfo)
         }
     }
 }
@@ -173,8 +180,13 @@ fun EditNameState(state: AccountState.EditName,
 @Composable
 fun ChangePasswordState(
     state: AccountState.ChangePassword,
-    onSavePassword: (String) -> Unit
+    onSavePassword: (String, String, String) -> Unit,
+    onShowOldPassword: () -> Unit,
+    onShowNewPassword: () -> Unit
 ) {
+    val oldPassword: MutableState<String> = remember { mutableStateOf(state.oldPassword) }
+    val newPassword: MutableState<String> = remember { mutableStateOf(state.newPassword) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -183,26 +195,27 @@ fun ChangePasswordState(
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
         MyTitle(text = "Смена пароля")
-        val oldPassword = remember { mutableStateOf("") }
-        val newPassword = remember { mutableStateOf("") }
+
 
         MyPasswordField(
             value = "",
             label = "Старый пароль",
             isError = false,
             onValueChange = { oldPassword.value = it },
-            onIconClick = { },
-            passwordVisibility = false // todo: viewmodel
+            onIconClick = { onShowOldPassword() },
+            passwordVisibility = state.oldPasswordVisibility
         )
         MyPasswordField(
             value = "",
             label = "Новый пароль",
             isError = false,
             onValueChange = { newPassword.value = it },
-            onIconClick = { },
-            passwordVisibility = false // todo: viewmodel
+            onIconClick = { onShowNewPassword() },
+            passwordVisibility = state.newPasswordRepeatVisibility
         )
-        Button(onClick = { onSavePassword(newPassword.value) }) {
+        Button(onClick = { onSavePassword(newPassword.value,
+            oldPassword.value, state.password
+            ) }) {
             Text("Сохранить")
         }
     }

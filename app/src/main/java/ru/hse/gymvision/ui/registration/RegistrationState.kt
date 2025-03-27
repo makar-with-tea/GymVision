@@ -9,12 +9,21 @@ sealed class RegistrationState {
         val passwordVisibility: Boolean = false,
         val passwordRepeat: String = "",
         val passwordRepeatVisibility: Boolean = false,
-        val isError: Boolean = false,
+        val nameIsError: Boolean = false,
+        val surnameIsError: Boolean = false,
+        val loginIsError: Boolean = false,
+        val passwordIsError: Boolean = false,
+        val passwordRepeatIsError: Boolean = false,
+        val nameErrorText : String? = null,
+        val surnameErrorText : String? = null,
+        val loginErrorText : String? = null,
+        val passwordErrorText : String? = null,
+        val passwordRepeatErrorText : String? = null,
         val loading: Boolean = false
     ) : RegistrationState()
 
-//    data object Idle : RegistrationState()
-//    data object Loading : RegistrationState()
+    data object Idle : RegistrationState()
+    data object Loading : RegistrationState()
 }
 
 sealed class RegistrationEvent {
@@ -22,7 +31,8 @@ sealed class RegistrationEvent {
         val name: String,
         val surname: String,
         val login: String,
-        val password: String
+        val password: String,
+        val passwordRepeat: String
     ): RegistrationEvent()
     data class LoginButtonClicked(
         val login: String,
