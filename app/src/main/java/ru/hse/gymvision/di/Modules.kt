@@ -4,8 +4,10 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import ru.hse.gymvision.data.GlobalRepositoryImpl
+import ru.hse.gymvision.data.LocalRepositoryImpl
 import ru.hse.gymvision.data.SharedPrefRepositoryImpl
 import ru.hse.gymvision.domain.repos.GlobalRepository
+import ru.hse.gymvision.domain.repos.LocalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 import ru.hse.gymvision.domain.usecase.camera.AddCameraUseCase
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
@@ -44,6 +46,7 @@ val appModule = module {
 val dataModule = module {
     single<SharedPrefRepository> { SharedPrefRepositoryImpl(context = androidContext()) }
     single<GlobalRepository> { GlobalRepositoryImpl() }
+    single<LocalRepository> { LocalRepositoryImpl() }
 }
 
 val domainModule = module {

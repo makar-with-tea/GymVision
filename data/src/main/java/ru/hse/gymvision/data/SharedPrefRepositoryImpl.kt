@@ -12,7 +12,7 @@ class SharedPrefRepositoryImpl(
 
     private val preferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     override suspend fun saveGymId(gymId: Int) {
-        preferences.edit { putInt("gym_id", gymId) }
+    preferences.edit { putInt("gym_id", gymId) }
     }
 
     override suspend fun getGymId(): Int {
