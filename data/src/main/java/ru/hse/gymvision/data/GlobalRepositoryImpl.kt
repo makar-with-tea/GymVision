@@ -59,4 +59,8 @@ class GlobalRepositoryImpl: GlobalRepository {
             password = ""
         )
     }
+
+    override suspend fun checkLoginAvailable(login: String): Boolean {
+        return userExample.login != login
+    }
 }

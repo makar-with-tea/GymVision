@@ -7,12 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.hse.gymvision.domain.usecase.user.CheckLoginAvailableUseCase
 import ru.hse.gymvision.domain.usecase.user.RegisterUseCase
 
 const val LATIN = "abcdefghijklmnopqrstuvwxyz"
 
 class RegistrationViewModel(
-    private val registerUseCase: RegisterUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val checkLoginAvailableUseCase: CheckLoginAvailableUseCase
 ): ViewModel() {
     private val _state: MutableStateFlow<RegistrationState> = MutableStateFlow(
         RegistrationState.Main(
@@ -145,9 +147,19 @@ class RegistrationViewModel(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val res = registerUseCase.execute(name, surname, login, password)
+            val isAvailable = checkLoginAvailableUseCase.execute(login)
+            if (!isAvailable) {
+                withContext(Dispatchers.Main) {
+                    _state.value = (_state.value as RegistrationState.Main).copy(
+                        loginErrorText = "Данный логин уже занят",
+                        loginIsError = true
+                    )
+                }
+                return@launch
+            }
+            val success = registerUseCase.execute(name, surname, login, password)
             withContext(Dispatchers.Main) {
-                if (!res) {
+                if (!success) {
                     _state.value = RegistrationState.Main(
                         name = name,
                         surname = surname,

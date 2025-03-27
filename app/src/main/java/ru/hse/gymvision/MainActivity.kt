@@ -36,5 +36,11 @@ class MainActivity : ComponentActivity() {
             BitmapFactory.decodeResource(resources, R.drawable.im_gym_scheme)
         )!!
 
+        // todo: убрать, когда появится бэкенд
+        runBlocking {
+            val sharedPrefRepository: SharedPrefRepository = SharedPrefRepositoryImpl(this@MainActivity)
+            sharedPrefRepository.clearInfo()
+        }
+
     }
 }

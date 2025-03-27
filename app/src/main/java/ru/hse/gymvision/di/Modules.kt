@@ -22,6 +22,7 @@ import ru.hse.gymvision.domain.usecase.gym.GetGymListUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
 import ru.hse.gymvision.domain.usecase.user.ChangePasswordUseCase
+import ru.hse.gymvision.domain.usecase.user.CheckLoginAvailableUseCase
 import ru.hse.gymvision.domain.usecase.user.DeleteUserUseCase
 import ru.hse.gymvision.domain.usecase.user.GetPastLoginUseCase
 import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
@@ -37,7 +38,7 @@ import ru.hse.gymvision.ui.registration.RegistrationViewModel
 
 val appModule = module {
     viewModel<AuthorizationViewModel> { AuthorizationViewModel(get(), get()) }
-    viewModel<RegistrationViewModel> { RegistrationViewModel(get()) }
+    viewModel<RegistrationViewModel> { RegistrationViewModel(get(), get()) }
     viewModel<GymSchemeViewModel> { GymSchemeViewModel(get(), get(), get(), get()) }
     viewModel<GymListViewModel> { GymListViewModel(get()) }
     viewModel<AccountViewModel> { AccountViewModel(get(), get(), get(), get(), get()) }
@@ -58,6 +59,7 @@ val domainModule = module {
     factory<RegisterUseCase> { RegisterUseCase(get(), get()) }
     factory<UpdateUserUseCase> { UpdateUserUseCase(get()) }
     factory<LogoutUseCase> { LogoutUseCase(get()) }
+    factory<CheckLoginAvailableUseCase> { CheckLoginAvailableUseCase(get()) }
 
     factory<GetGymListUseCase> { GetGymListUseCase(get()) }
     factory<GetGymSchemeUseCase> { GetGymSchemeUseCase(get()) }
