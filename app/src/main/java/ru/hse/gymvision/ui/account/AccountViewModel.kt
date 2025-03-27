@@ -30,7 +30,7 @@ class AccountViewModel(
     fun obtainEvent(event: AccountEvent) {
         when (event) {
             is AccountEvent.GetUserInfo -> {
-                getUserInfo(event.id)
+                getUserInfo()
             }
             is AccountEvent.SaveNameButtonClicked -> {
                 saveName(
@@ -41,7 +41,7 @@ class AccountViewModel(
 
             is AccountEvent.SavePasswordButtonClicked -> {
                 savePassword(
-                    event.newPassword
+                    event.newPassword, event.oldPassword, event.realPassword
                 )
             }
 
@@ -62,7 +62,7 @@ class AccountViewModel(
             }
 
             is AccountEvent.DeleteAccountButtonClicked -> {
-                deleteAccount()
+                deleteAccount(event.login)
             }
 
             is AccountEvent.LogoutButtonClicked -> {
@@ -75,13 +75,14 @@ class AccountViewModel(
         }
     }
 
-    private fun getUserInfo(id: Int) {
+    private fun getUserInfo() {
         _state.value = AccountState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            val userInfo = getUserInfoUseCase.execute(id)
+            val userInfo = getUserInfoUseCase.execute()
+            Log.d("AccountViewModel", "getUserInfo: userInfo = $userInfo")
             if (userInfo == null) {
                 logout()
-                _action.value = AccountAction.NavigateToAuthorization
+                Log.d("AccountViewModel", "getUserInfo: logout")
                 return@launch
             }
             withContext(Dispatchers.Main) {
@@ -107,8 +108,9 @@ class AccountViewModel(
         Log.d("AccountViewModel", "saveName: state = ${_state.value}")
     }
 
-    private fun savePassword(newPassword: String) {
+    private fun savePassword(newPassword: String, oldPassword: String, realPassword: String) {
         if (_state.value !is AccountState.ChangePassword) return
+        if (oldPassword != realPassword) return // todo: show error
         _state.value = (_state.value as AccountState.ChangePassword).copy(
             isLoading = true
         )
@@ -170,18 +172,31 @@ class AccountViewModel(
         )
     }
 
-    private fun deleteAccount() {
-//        deleteUserUseCase.execute()
-        _action.value = AccountAction.NavigateToAuthorization
+    private fun deleteAccount(login: String) {
+        if (_state.value !is AccountState.Main) return
+        _state.value = AccountState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            deleteUserUseCase.execute(login)
+            withContext(Dispatchers.Main) {
+                _action.value = AccountAction.NavigateToAuthorization
+            }
+        }
     }
 
     private fun logout() {
-//        logoutUseCase.execute()
-        _action.value = AccountAction.NavigateToAuthorization
+        if (_state.value !is AccountState.Main) return
+        _state.value = AccountState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
+            logoutUseCase.execute()
+            withContext(Dispatchers.Main) {
+                _action.value = AccountAction.NavigateToAuthorization
+            }
+        }
     }
 
     private fun clear() {
         _state.value = AccountState.Idle
         _action.value = null
+        Log.d("AccountViewModel", "cleared")
     }
 }

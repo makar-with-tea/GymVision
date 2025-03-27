@@ -58,41 +58,46 @@ fun RegistrationScreen(
         null -> {}
     }
 
-    MainState(
-        state.value as RegistrationState.Main,
-        onRegistrationClick = { name, surname, login, password ->
-            viewModel.obtainEvent(
-                RegistrationEvent.RegistrationButtonClicked(
-                    name,
-                    surname,
-                    login,
-                    password
+    when (state.value) {
+        RegistrationState.Idle -> IdleState()
+        RegistrationState.Loading -> LoadingState()
+        is RegistrationState.Main -> MainState(
+            state.value as RegistrationState.Main,
+            onRegistrationClick = { name, surname, login, password, passwordRepeat ->
+                viewModel.obtainEvent(
+                    RegistrationEvent.RegistrationButtonClicked(
+                        name,
+                        surname,
+                        login,
+                        password,
+                        passwordRepeat
+                    )
                 )
-            )
-        },
-        onShowPasswordClick = {
-            viewModel.obtainEvent(RegistrationEvent.ShowPasswordButtonClicked)
-        },
-        onShowPasswordRepeatClick = {
-            viewModel.obtainEvent(RegistrationEvent.ShowPasswordRepeatButtonClicked)
-        },
-        onLoginClick = { login, password ->
-            viewModel.obtainEvent(RegistrationEvent.Clear)
-            viewModel.obtainEvent(
-                RegistrationEvent.LoginButtonClicked(
-                    login,
-                    password
+            },
+            onShowPasswordClick = {
+                viewModel.obtainEvent(RegistrationEvent.ShowPasswordButtonClicked)
+            },
+            onShowPasswordRepeatClick = {
+                viewModel.obtainEvent(RegistrationEvent.ShowPasswordRepeatButtonClicked)
+            },
+            onLoginClick = { login, password ->
+                viewModel.obtainEvent(RegistrationEvent.Clear)
+                viewModel.obtainEvent(
+                    RegistrationEvent.LoginButtonClicked(
+                        login,
+                        password
+                    )
                 )
-            )
-        }
-    )
+            }
+        )
+    }
 
 }
 
 @Composable
 fun MainState(
     state: RegistrationState.Main,
-    onRegistrationClick: (String, String, String, String) -> Unit,
+    onRegistrationClick: (String, String, String, String, String) -> Unit,
     onLoginClick: (String, String) -> Unit,
     onShowPasswordClick: () -> Unit,
     onShowPasswordRepeatClick: () -> Unit
@@ -111,19 +116,20 @@ fun MainState(
             .padding(16.dp)
     ) {
         MyTitle("Регистрация")
-        MyTextField(value = name.value, label = "Имя", isError = false) {
+        MyTextField(value = name.value, label = "Имя", isError = state.nameIsError, errorText = state.nameErrorText) {
             name.value = it
         }
-        MyTextField(value = surname.value, label = "Фамилия", isError = false) {
+        MyTextField(value = surname.value, label = "Фамилия", isError = state.surnameIsError, errorText = state.surnameErrorText) {
             surname.value = it
         }
-        MyTextField(value = login.value, label = "Логин", isError = false) {
+        MyTextField(value = login.value, label = "Логин", isError = state.loginIsError, errorText = state.loginErrorText) {
             login.value = it
         }
         MyPasswordField(
             value = password.value,
             label = "Пароль",
-            isError = false,
+            isError = state.passwordIsError,
+            errorText = state.passwordErrorText,
             onValueChange = { password.value = it },
             onIconClick = { onShowPasswordClick() },
             passwordVisibility = state.passwordVisibility
@@ -131,17 +137,19 @@ fun MainState(
         MyPasswordField(
             value = passwordRepeat.value,
             label = "Повторите пароль",
-            isError = false,
+            isError = state.passwordRepeatIsError,
             onValueChange = { passwordRepeat.value = it },
             onIconClick = { onShowPasswordRepeatClick() },
-            passwordVisibility = state.passwordRepeatVisibility
+            passwordVisibility = state.passwordRepeatVisibility,
+            errorText = state.passwordRepeatErrorText
         )
         Button(onClick = {
             onRegistrationClick(
                 name.value,
                 surname.value,
                 login.value,
-                password.value
+                password.value,
+                passwordRepeat.value
             )
         }) {
             Text("Зарегистрироваться")
@@ -160,6 +168,16 @@ fun MainState(
             }
         }
     }
+}
+
+@Composable
+fun IdleState() {
+    LoadingBlock()
+}
+
+@Composable
+fun LoadingState() {
+    LoadingBlock()
 }
 
 @Preview(showBackground = true)

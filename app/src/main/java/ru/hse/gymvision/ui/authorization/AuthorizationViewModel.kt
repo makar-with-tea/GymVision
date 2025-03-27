@@ -17,11 +17,12 @@ class AuthorizationViewModel(
     private val loginUseCase: LoginUseCase
 
     ): ViewModel() {
-    private val _state: MutableStateFlow<AuthorizationState> = MutableStateFlow(AuthorizationState.Idle)
-    val state : StateFlow<AuthorizationState>
+    private val _state: MutableStateFlow<AuthorizationState> =
+        MutableStateFlow(AuthorizationState.Idle)
+    val state: StateFlow<AuthorizationState>
         get() = _state
     private val _action = MutableStateFlow<AuthorizationAction?>(null)
-    val action : StateFlow<AuthorizationAction?>
+    val action: StateFlow<AuthorizationAction?>
         get() = _action
 
     fun obtainEvent(event: AuthorizationEvent) {
@@ -33,10 +34,12 @@ class AuthorizationViewModel(
             is AuthorizationEvent.RegistrationButtonClicked -> {
                 register(event.login, event.password)
             }
+
             is AuthorizationEvent.ShowPasswordButtonClicked -> {
                 Log.d("AuthorizationViewModel", "ShowPasswordButtonClicked")
                 changeVisibilityState()
             }
+
             is AuthorizationEvent.Clear -> clear()
             is AuthorizationEvent.CheckPastLogin -> checkPastLogin()
         }
@@ -48,19 +51,48 @@ class AuthorizationViewModel(
             password = password,
             loading = true
         )
+        var isError = false
+
+        if (login.isEmpty()) {
+            _state.value = (_state.value as AuthorizationState.Main).copy(
+                loginError = true,
+                loginErrorText = "Поле не может быть пустым",
+                loading = false
+            )
+            isError = true
+        }
+
+        if (password.isEmpty()) {
+            _state.value = (_state.value as AuthorizationState.Main).copy(
+                passwordError = true,
+                passwordErrorText = "Поле не может быть пустым",
+                loading = false
+            )
+            isError = true
+        }
+
+        if (isError) {
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             val res = loginUseCase.execute(login, password)
             if (!res) {
-                // todo: show error
+                _state.value = (_state.value as AuthorizationState.Main).copy(
+                    loginError = true,
+                    passwordError = true,
+                    loginErrorText = "Неверный логин или пароль",
+                )
+                withContext(Dispatchers.Main) {
+                    _state.value = (_state.value as AuthorizationState.Main).copy(
+                        loading = false
+                    )
+                }
                 return@launch
             }
-            sleep(1000)
-            _state.value = AuthorizationState.Main(
-                login = login,
-                password = password,
-                loading = false
-            )
-            _action.value = AuthorizationAction.NavigateToGymList
+            withContext(Dispatchers.Main) {
+                _action.value = AuthorizationAction.NavigateToGymList
+            }
         }
     }
 
@@ -72,26 +104,30 @@ class AuthorizationViewModel(
     private fun register(login: String, password: String) {
         _state.value = AuthorizationState.Main(
             login = login,
-            password = password)
+            password = password
+        )
         _action.value = AuthorizationAction.NavigateToRegistration
     }
 
     private fun changeVisibilityState() {
         if (_state.value is AuthorizationState.Main) {
             _state.value = (_state.value as AuthorizationState.Main).copy(
-                passwordVisibility = !(_state.value as AuthorizationState.Main).passwordVisibility)
+                passwordVisibility = !(_state.value as AuthorizationState.Main).passwordVisibility
+            )
         }
     }
+
     private fun checkPastLogin() {
         _state.value = AuthorizationState.Loading
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val username = getPastLoginUseCase.execute()
+        viewModelScope.launch(Dispatchers.IO) {
+            val username = getPastLoginUseCase.execute()
+            withContext(Dispatchers.Main) {
                 if (username != null) {
                     _action.value = AuthorizationAction.NavigateToGymList
+                    Log.d("AuthorizationViewModel", "past login = $username")
                 } else {
                     _state.value = AuthorizationState.Main()
-                    Log.d("AuthorizationViewModel", "CheckPastLogin")
+                    Log.d("AuthorizationViewModel", "no past login")
                 }
             }
         }

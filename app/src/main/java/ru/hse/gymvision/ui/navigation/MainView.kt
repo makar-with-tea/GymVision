@@ -77,6 +77,10 @@ fun MainView() {
                     AuthorizationScreen(
                         navigateToRegistration = {
                             navController.navigate(Route.Registration.route) {
+                                popUpTo(Route.Authorization.route) {
+                                    inclusive = true
+                                    saveState = false
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -95,6 +99,10 @@ fun MainView() {
                     RegistrationScreen(
                         navigateToGymList = {
                             navController.navigate(Route.GymList.route) {
+                                popUpTo(Route.Registration.route) {
+                                    inclusive = true
+                                    saveState = false
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }

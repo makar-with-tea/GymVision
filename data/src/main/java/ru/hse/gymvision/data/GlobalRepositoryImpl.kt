@@ -18,15 +18,24 @@ class GlobalRepositoryImpl: GlobalRepository {
         return gymSchemeExample
     }
 
-    override suspend fun getUserInfo(): UserModel? {
-        return userExample
+    override suspend fun getUserInfo(login: String): UserModel? {
+        if (userExample.login == login) {
+            return userExample
+        }
+        return null
     }
 
     override suspend fun login(login: String, password: String): Boolean {
-        return true
+        return userExample.login == login && userExample.password == password
     }
 
     override suspend fun register(name: String, surname: String, login: String, password: String): Boolean {
+        userExample = userExample.copy(
+            name = name,
+            surname = surname,
+            login = login,
+            password = password
+        )
         return true
     }
 
@@ -44,7 +53,12 @@ class GlobalRepositoryImpl: GlobalRepository {
     }
 
     override suspend fun deleteUser(login: String) {
-        // well.
+        userExample = UserModel(
+            name = "",
+            surname = "",
+            login = "",
+            password = ""
+        )
     }
 
     override suspend fun checkCameraAccessibility(id: Int): Boolean {
