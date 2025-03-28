@@ -10,12 +10,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.user.GetPastLoginUseCase
 import ru.hse.gymvision.domain.usecase.user.LoginUseCase
-import java.lang.Thread.sleep
 
 class AuthorizationViewModel(
     private val getPastLoginUseCase: GetPastLoginUseCase,
     private val loginUseCase: LoginUseCase
-
     ): ViewModel() {
     private val _state: MutableStateFlow<AuthorizationState> =
         MutableStateFlow(AuthorizationState.Idle)

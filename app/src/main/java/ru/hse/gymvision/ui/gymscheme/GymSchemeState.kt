@@ -23,7 +23,6 @@ sealed class GymSchemeState {
 sealed class GymSchemeEvent {
     data class LoadGymScheme(val gymId: Int?) : GymSchemeEvent()
     data class TrainerClicked(
-        val trainerId: Int,
         val trainerName: String,
         val trainerDescription: String,
         val selectedTrainerId: Int
@@ -36,5 +35,5 @@ sealed class GymSchemeEvent {
 }
 
 sealed class GymSchemeAction {
-    data object NavigateToCamera : GymSchemeAction()
+    data class NavigateToCamera(val cameraId: Int): GymSchemeAction()
 }

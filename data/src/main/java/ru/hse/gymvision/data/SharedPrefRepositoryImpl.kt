@@ -34,4 +34,11 @@ class SharedPrefRepositoryImpl(
         preferences.edit { clear() }
     }
 
+    override suspend fun saveCameraIds(cameraIds: List<Int>) {
+        preferences.edit { putString("camera_ids", cameraIds.joinToString(",")) }
+    }
+
+    override suspend fun getCameraIds(): List<Int> {
+        return preferences.getString("camera_ids", null)?.split(",")?.map { it.toInt() } ?: emptyList()
+    }
 }

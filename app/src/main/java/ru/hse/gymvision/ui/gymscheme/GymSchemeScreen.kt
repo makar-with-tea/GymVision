@@ -45,7 +45,7 @@ val CAMERA_SIZE = 24.dp
 @Composable
 fun GymSchemeScreen(
     id: Int? = null,
-    navigateToCamera: (Int) -> Unit,
+    navigateToCamera: (String, Int) -> Unit,
     viewModel: GymSchemeViewModel = koinViewModel()
 ) {
     val state = viewModel.state.collectAsState()
@@ -53,7 +53,8 @@ fun GymSchemeScreen(
 
     when (action.value) {
         is GymSchemeAction.NavigateToCamera -> {
-            navigateToCamera(0) // todo: передать айди камеры
+            navigateToCamera((state.value as GymSchemeState.Main).gymScheme?.serverUrl ?: "",
+                (action.value as GymSchemeAction.NavigateToCamera).cameraId)
             viewModel.obtainEvent(GymSchemeEvent.Clear)
         }
         null -> {}
@@ -66,8 +67,8 @@ fun GymSchemeScreen(
                 onCameraClicked = { cameraId ->
                     viewModel.obtainEvent(GymSchemeEvent.CameraClicked(cameraId))
                 },
-                onTrainerClicked = { name, description, id ->
-                    viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(id, name, description, id))
+                onTrainerClicked = { name, description, trainerId ->
+                    viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(name, description, trainerId))
                 },
                 onHidePopup = {
                     viewModel.obtainEvent(GymSchemeEvent.HidePopup)
@@ -178,7 +179,7 @@ fun MainState(
                             .size(CAMERA_SIZE)
                             .background(Color.Transparent)
                             .clickable {
-                                onCameraClicked(0) // что-то с айди придумать
+                                onCameraClicked(clickableCamera.id)
                             }
                     ) {
                         Icon(

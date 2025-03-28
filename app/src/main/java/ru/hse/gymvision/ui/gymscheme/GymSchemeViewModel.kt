@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
-import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
+import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
 
 class GymSchemeViewModel(
@@ -72,7 +72,7 @@ class GymSchemeViewModel(
                     if (state.value is GymSchemeState.Main) {
                         _state.value = (state.value as GymSchemeState.Main).copy(showDialog = true)
                     }
-                } else _action.value = GymSchemeAction.NavigateToCamera
+                } else _action.value = GymSchemeAction.NavigateToCamera(cameraId)
             }
         }
     }

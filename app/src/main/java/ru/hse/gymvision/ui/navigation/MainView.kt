@@ -17,6 +17,8 @@ import ru.hse.gymvision.ui.camera.CameraScreen
 import ru.hse.gymvision.ui.gymlist.GymListScreen
 import ru.hse.gymvision.ui.gymscheme.GymSchemeScreen
 import ru.hse.gymvision.ui.registration.RegistrationScreen
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 sealed class Route(val route: String) {
     data object Authorization: Route("authorization")
@@ -29,7 +31,12 @@ sealed class Route(val route: String) {
 
     data object Account: Route("account")
 
-    data object Camera: Route("camera")
+    data object Camera: Route("camera/{serverUrl}/{newCameraId}") {
+        fun createRoute(serverUrl: String, newCameraId: Int): String {
+            val encodedUrl = URLEncoder.encode(serverUrl, StandardCharsets.UTF_8.toString())
+            return "camera/$encodedUrl/$newCameraId"
+        }
+    }
 }
 
 @Composable
@@ -130,8 +137,8 @@ fun MainView() {
                 }
                 composable(Route.GymScheme.route) {
                     GymSchemeScreen(
-                        navigateToCamera = {
-                            navController.navigate(Route.Camera.route) {
+                        navigateToCamera = { serverUrl: String, newCameraId: Int ->
+                            navController.navigate(Route.Camera.createRoute(serverUrl, newCameraId)) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -154,10 +161,17 @@ fun MainView() {
                         },
                     )
                 }
-                composable(Route.Camera.route) { backStackEntry ->
-//                    val camera: Route.Camera = backStackEntry.toRoute()
-                    // todo: разобраться, что делать с несколькими камерами
+                composable(
+                    route = Route.Camera.route) { backStackEntry ->
+                    val serverUrl = backStackEntry.arguments?.getString("serverUrl")
+                    val newCameraId = backStackEntry.arguments?.getInt("newCameraId")
+                    if (serverUrl == null) {
+                        Log.e("CameraScreen", "Server URL is null")
+                        return@composable
+                    }
                     CameraScreen(
+                        serverUrl = serverUrl,
+                        newCameraId = newCameraId,
                         navigateToGymScheme = {
                             navController.navigate(Route.GymScheme.route) {
                                 launchSingleTop = true
@@ -167,6 +181,9 @@ fun MainView() {
                         },
                     )
                 }
+
+
+
             }
         }
     }
