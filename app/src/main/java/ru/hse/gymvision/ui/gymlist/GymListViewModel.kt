@@ -23,7 +23,7 @@ class GymListViewModel(
                 getGymList()
             }
             is GymListEvent.SelectGym -> {
-                selectGym(event.gym)
+                selectGym(event.gymId)
             }
             is GymListEvent.Clear -> {
                 clear()
@@ -41,8 +41,8 @@ class GymListViewModel(
         }
     }
 
-    private fun selectGym(gym: GymInfoModel) {
-        _action.value = GymListAction.NavigateToGym(gym.id)
+    private fun selectGym(gymId: Int) {
+        _action.value = GymListAction.NavigateToGym(gymId)
     }
 
     private fun clear() {

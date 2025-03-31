@@ -1,8 +1,5 @@
 package ru.hse.gymvision.ui.composables
 
-import android.util.Log
-import android.view.ViewGroup
-import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -19,160 +16,226 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.net.toUri
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
+import org.videolan.libvlc.LibVLC
+import org.videolan.libvlc.Media
+import org.videolan.libvlc.MediaPlayer
+import org.videolan.libvlc.util.VLCVideoLayout
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
+import androidx.core.net.toUri
 
 @Composable
-fun myPlayerView(
+fun mainPlayerView(
     videoUrl: String,
     playWhenReady: Boolean,
-    showControls: MutableState<Boolean>? = null,
-    makeMainCamera: (() -> Unit)? = null,
-    onError: (PlaybackException) -> Unit,
+    showControls: MutableState<Boolean>,
+    onError: (Exception) -> Unit,
     onRotateCamera: (CameraRotation) -> Unit,
     onMoveCamera: (CameraMovement) -> Unit,
-    onZoomCamera: (CameraZoom) -> Unit
-): ExoPlayer {
-    val player = rememberExoPlayerWithLifeCycle(
-        videoUrl,
-        playWhenReady,
-        onError)
+    onZoomCamera: (CameraZoom) -> Unit,
+    onPlay: () -> Unit
+): MediaPlayer {
     val context = LocalContext.current
+    val libVLC = remember { LibVLC(context) }
+    val mediaPlayer = remember { MediaPlayer(libVLC) }
+    val videoUri = videoUrl.toUri()
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)
-        .pointerInput(Unit) {
-            detectTapGestures(
-                onTap = {
-                    if (showControls != null)
+    DisposableEffect(videoUrl) {
+        val media = Media(libVLC, videoUri)
+        mediaPlayer.media = media
+        mediaPlayer.setEventListener { event ->
+            if (event.type == MediaPlayer.Event.EndReached) {
+                // Handle completion
+            } else if (event.type == MediaPlayer.Event.EncounteredError) {
+                onError(Exception("VLC error"))
+            }
+        }
+        if (playWhenReady) {
+            mediaPlayer.play()
+        }
+        onDispose {
+            mediaPlayer.release()
+            media.release()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .padding(0.dp)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
                         showControls.value = !showControls.value
-                    else
-                        makeMainCamera?.invoke()
-                }
-            )
-        },
+                    }
+                )
+            },
         contentAlignment = Alignment.Center
     ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
-                PlayerView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    this.player = player
-                    useController = false
+                VLCVideoLayout(context).apply {
+                    mediaPlayer.attachViews(this, null, false, false)
                 }
             }
         )
 
-        if (showControls != null && showControls.value) {
-            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                PauseButton(player)
+        if (showControls.value) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                 PauseButton(mediaPlayer, onPlay)
             }
-            ControlButton(iconId = R.drawable.ic_arrow_left,
-                contentDescription = "Move camera to the left",
-                alignment = Alignment.CenterStart) {
+            ControlButton(
+                iconId = R.drawable.ic_arrow_left,
+                contentDescription = "Move camera left",
+                alignment = Alignment.CenterStart
+            ) {
                 onMoveCamera(CameraMovement.LEFT)
             }
-            ControlButton(iconId = R.drawable.ic_arrow_right,
-                contentDescription = "Move camera to the right",
-                alignment = Alignment.CenterEnd) {
+            ControlButton(
+                iconId = R.drawable.ic_arrow_right,
+                contentDescription = "Move camera right",
+                alignment = Alignment.CenterEnd
+            ) {
                 onMoveCamera(CameraMovement.RIGHT)
             }
-            ControlButton(iconId = R.drawable.ic_arrow_up,
+            ControlButton(
+                iconId = R.drawable.ic_arrow_up,
                 contentDescription = "Move camera up",
-                alignment = Alignment.TopCenter) {
+                alignment = Alignment.TopCenter
+            ) {
                 onMoveCamera(CameraMovement.UP)
             }
-            ControlButton(iconId = R.drawable.ic_arrow_down,
+            ControlButton(
+                iconId = R.drawable.ic_arrow_down,
                 contentDescription = "Move camera down",
-                alignment = Alignment.BottomCenter) {
+                alignment = Alignment.BottomCenter
+            ) {
                 onMoveCamera(CameraMovement.DOWN)
             }
-            ControlButton(iconId = R.drawable.ic_zoom_out,
+            ControlButton(
+                iconId = R.drawable.ic_zoom_out,
                 contentDescription = "Zoom out",
-                alignment = Alignment.TopStart) {
+                alignment = Alignment.TopStart
+            ) {
                 onZoomCamera(CameraZoom.OUT)
             }
-            ControlButton(iconId = R.drawable.ic_zoom_in,
+            ControlButton(
+                iconId = R.drawable.ic_zoom_in,
                 contentDescription = "Zoom in",
-                alignment = Alignment.TopEnd) {
+                alignment = Alignment.TopEnd
+            ) {
                 onZoomCamera(CameraZoom.IN)
             }
-            ControlButton(iconId = R.drawable.ic_rotate_left,
-                contentDescription = "Rotate camera to the left",
-                alignment = Alignment.BottomStart) {
+            ControlButton(
+                iconId = R.drawable.ic_rotate_left,
+                contentDescription = "Rotate camera left",
+                alignment = Alignment.BottomStart
+            ) {
                 onRotateCamera(CameraRotation.LEFT)
             }
-            ControlButton(iconId = R.drawable.ic_rotate_right,
-                contentDescription = "Rotate camera to the right",
-                alignment = Alignment.BottomEnd) {
+            ControlButton(
+                iconId = R.drawable.ic_rotate_right,
+                contentDescription = "Rotate camera right",
+                alignment = Alignment.BottomEnd
+            ) {
                 onRotateCamera(CameraRotation.RIGHT)
             }
         }
     }
-    return player
+    return mediaPlayer
 }
 
-
-@OptIn(UnstableApi::class)
 @Composable
-fun rememberExoPlayerWithLifeCycle(
+fun secondaryPlayerView(
     videoUrl: String,
     playWhenReady: Boolean,
-    onError: (PlaybackException) -> Unit
-): ExoPlayer {
+    showControls: MutableState<Boolean>,
+    onError: (Exception) -> Unit,
+    onMakeMainCamera: () -> Unit,
+    onDeleteCamera: () -> Unit,
+    onPlay: () -> Unit
+): MediaPlayer {
     val context = LocalContext.current
-    val exoPlayer = remember(videoUrl) {
-        ExoPlayer.Builder(context)
-            .build()
-            .apply {
-                val uri = videoUrl.toUri()
-                setMediaItem(MediaItem.fromUri(uri))
-                prepare()
-                addListener(object : Player.Listener {
-                    override fun onPlayerError(error: PlaybackException) {
-                        onError(error)
-                    }
-                })
-                this.playWhenReady = playWhenReady
-                Log.d("MyPlayerView", "ExoPlayer created")
+    val libVLC = remember { LibVLC(context) }
+    val mediaPlayer = remember { MediaPlayer(libVLC) }
+    val videoUri = videoUrl.toUri()
+
+    DisposableEffect(videoUrl) {
+        val media = Media(libVLC, videoUri)
+        mediaPlayer.media = media
+        mediaPlayer.setEventListener { event ->
+            if (event.type == MediaPlayer.Event.EndReached) {
+                // Handle completion
+            } else if (event.type == MediaPlayer.Event.EncounteredError) {
+                onError(Exception("VLC error"))
             }
-    }
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val lifecycleObserver = getExoPlayerLifecycleObserver(exoPlayer)
-        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        }
+        if (playWhenReady) {
+            mediaPlayer.play()
+        }
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+            mediaPlayer.release()
+            media.release()
         }
     }
-    return exoPlayer
-}
 
-fun getExoPlayerLifecycleObserver(
-    exoPlayer: ExoPlayer,
-): LifecycleEventObserver =
-    LifecycleEventObserver { _, event ->
-        when (event) {
-            Lifecycle.Event.ON_DESTROY -> {
-                exoPlayer.release()
+    Box(
+        modifier = Modifier
+            .padding(
+                start = 0.dp,
+                end = 0.dp,
+                bottom = 50.dp,
+                top = 0.dp
+            )
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        showControls.value = !showControls.value
+                    }
+                )
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                VLCVideoLayout(context).apply {
+                    mediaPlayer.attachViews(this, null, false, false)
+                }
             }
-            else -> {}
+        )
+
+        if (showControls.value) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                PauseButton(mediaPlayer, onPlay)
+            }
+            ControlButton(
+                iconId = R.drawable.ic_crop_free,
+                contentDescription = "Сделать главной камерой",
+                alignment = Alignment.CenterStart
+            ) {
+                onMakeMainCamera()
+            }
+            ControlButton(
+                iconId = R.drawable.ic_delete,
+                contentDescription = "Удалить камеру",
+                alignment = Alignment.CenterEnd
+            ) {
+                onDeleteCamera()
+            }
         }
     }
-
+    return mediaPlayer
+}

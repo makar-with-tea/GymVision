@@ -85,6 +85,9 @@ fun GymSchemeScreen(
             IdleState()
             viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
         }
+        is GymSchemeState.Error -> {
+            ErrorState((state.value as GymSchemeState.Error).errorText)
+        }
     }
 
 }
@@ -223,4 +226,20 @@ fun LoadingState() {
 @Composable
 fun IdleState() {
     LoadingBlock()
+}
+
+@Composable
+fun ErrorState(errorText: String?) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        MyAlertDialog(
+            "Ошибка",
+            errorText ?: "Неизвестная ошибка"
+        ) {}
+    }
 }

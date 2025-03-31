@@ -27,11 +27,15 @@ sealed class Route(val route: String) {
 
     data object GymList: Route("gym_list")
 
-    data object GymScheme: Route("gym_scheme")
+    data object GymScheme: Route("gym_scheme/{gym_id}") {
+        fun createRoute(gymId: Int): String {
+            return "gym_scheme/$gymId"
+        }
+    }
 
     data object Account: Route("account")
 
-    data object Camera: Route("camera/{serverUrl}/{newCameraId}") {
+    data object Camera: Route("camera/{server_url}/{new_camera_id}") {
         fun createRoute(serverUrl: String, newCameraId: Int): String {
             val encodedUrl = URLEncoder.encode(serverUrl, StandardCharsets.UTF_8.toString())
             return "camera/$encodedUrl/$newCameraId"
@@ -126,8 +130,8 @@ fun MainView() {
                 }
                 composable(Route.GymList.route) {
                     GymListScreen(
-                        navigateToGymScheme = {
-                            navController.navigate(Route.GymScheme.route) {
+                        navigateToGymScheme = { gymId: Int ->
+                            navController.navigate(Route.GymScheme.createRoute(gymId)) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -135,8 +139,11 @@ fun MainView() {
                         },
                     )
                 }
-                composable(Route.GymScheme.route) {
+
+                composable(Route.GymScheme.route) { backStackEntry ->
+                    val gymId = backStackEntry.arguments?.getString("gym_id")?.toIntOrNull()
                     GymSchemeScreen(
+                        id = gymId,
                         navigateToCamera = { serverUrl: String, newCameraId: Int ->
                             navController.navigate(Route.Camera.createRoute(serverUrl, newCameraId)) {
                                 launchSingleTop = true
@@ -161,10 +168,9 @@ fun MainView() {
                         },
                     )
                 }
-                composable(
-                    route = Route.Camera.route) { backStackEntry ->
-                    val serverUrl = backStackEntry.arguments?.getString("serverUrl")
-                    val newCameraId = backStackEntry.arguments?.getInt("newCameraId")
+                composable(Route.Camera.route) { backStackEntry ->
+                    val serverUrl = backStackEntry.arguments?.getString("server_url")
+                    val newCameraId = backStackEntry.arguments?.getString("new_camera_id")?.toIntOrNull()
                     if (serverUrl == null) {
                         Log.e("CameraScreen", "Server URL is null")
                         return@composable
@@ -181,9 +187,6 @@ fun MainView() {
                         },
                     )
                 }
-
-
-
             }
         }
     }

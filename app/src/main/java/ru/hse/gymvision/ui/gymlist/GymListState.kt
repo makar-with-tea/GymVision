@@ -13,7 +13,7 @@ sealed class GymListState {
 
 sealed class GymListEvent {
     data object GetGymList : GymListEvent()
-    data class SelectGym(val gym: GymInfoModel) : GymListEvent()
+    data class SelectGym(val gymId: Int) : GymListEvent()
     data object Clear : GymListEvent()
 }
 

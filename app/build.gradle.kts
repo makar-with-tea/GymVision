@@ -66,10 +66,6 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.exoplayer.dash)
-    implementation(libs.androidx.media3.ui)
-
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.media3.exoplayer.hls)
 
@@ -83,6 +79,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:4.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
+    implementation("org.videolan.android:libvlc-all:3.6.1")
 
     implementation(project(":domain"))
     implementation(project(":data"))

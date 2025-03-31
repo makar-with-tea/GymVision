@@ -17,6 +17,7 @@ sealed class GymSchemeState {
             return "Main(showPopup=$showPopup, showDialog=$showDialog, trainerName='$trainerName', trainerDescription='$trainerDescription', selectedTrainerId=$selectedTrainerId)"
         }
     }
+    data class Error(val errorText: String) : GymSchemeState()
     data object Loading : GymSchemeState()
 }
 

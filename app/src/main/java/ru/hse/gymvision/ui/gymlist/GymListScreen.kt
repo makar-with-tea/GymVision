@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.gymlist
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +35,7 @@ import ru.hse.gymvision.ui.composables.MyTitle
 
 @Composable
 fun GymListScreen(
-    navigateToGymScheme: () -> Unit,
+    navigateToGymScheme: (Int) -> Unit,
     viewModel: GymListViewModel = koinViewModel()
 ) {
     val state = viewModel.state.collectAsState()
@@ -42,7 +43,7 @@ fun GymListScreen(
 
     when (action.value) {
         is GymListAction.NavigateToGym -> {
-            navigateToGymScheme()
+            navigateToGymScheme((action.value as GymListAction.NavigateToGym).gymId)
             viewModel.obtainEvent(GymListEvent.Clear)
         }
 
@@ -53,8 +54,9 @@ fun GymListScreen(
         is GymListState.Main -> {
             MainState(
                 state = state.value as GymListState.Main,
-                onGymClicked = { gym ->
-                    viewModel.obtainEvent(GymListEvent.SelectGym(gym))
+                onGymClicked = { gymId ->
+                    Log.d("GymListScreen", "Gym clicked: $gymId")
+                    viewModel.obtainEvent(GymListEvent.SelectGym(gymId))
                 }
             )
         }
@@ -85,7 +87,7 @@ fun LoadingState() {
 @Composable
 fun MainState(
     state: GymListState.Main,
-    onGymClicked: (GymInfoModel) -> Unit
+    onGymClicked: (Int) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -103,7 +105,7 @@ fun MainState(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .clickable(onClick = {
-                            onGymClicked(gym)
+                            onGymClicked(gym.id)
                         })
                 ) {
                     Row {

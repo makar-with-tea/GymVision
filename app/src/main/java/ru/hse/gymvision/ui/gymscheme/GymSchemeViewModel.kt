@@ -57,6 +57,12 @@ class GymSchemeViewModel(
                 saveGymIdUseCase.execute(gymId)
                 gymId
             }
+            if (id < 0) {
+                withContext(Dispatchers.Main) {
+                    _state.value = GymSchemeState.Error("Зал не найден, попробуйте выбрать зал заново!")
+                }
+                return@launch
+            }
             val gymScheme = getGymSchemeUseCase.execute(id)
             withContext(Dispatchers.Main){
                 _state.value = GymSchemeState.Main(gymScheme = gymScheme)

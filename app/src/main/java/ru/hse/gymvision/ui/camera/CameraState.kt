@@ -37,6 +37,8 @@ sealed class CameraEvent {
     data object PlayThirdCameraButtonClicked : CameraEvent()
     data object DeleteSecondCameraButtonClicked : CameraEvent()
     data object DeleteThirdCameraButtonClicked : CameraEvent()
+    data object MakeSecondCameraMainButtonClicked : CameraEvent()
+    data object MakeThirdCameraMainButtonClicked : CameraEvent()
     data class LoadCameraIds(val newCameraId: Int?) : CameraEvent()
     data object Clear: CameraEvent()
 }

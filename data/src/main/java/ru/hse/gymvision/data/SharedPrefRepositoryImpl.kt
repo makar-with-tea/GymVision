@@ -12,11 +12,17 @@ class SharedPrefRepositoryImpl(
 
     private val preferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     override suspend fun saveGymId(gymId: Int) {
-    preferences.edit { putInt("gym_id", gymId) }
+        Log.d("SharedPrefRepository", "saveGymId: $gymId")
+        preferences.edit {
+            remove("camera_ids") // при выборе нового зала удаляем старые камеры
+            putInt("gym_id", gymId)
+        }
     }
 
     override suspend fun getGymId(): Int {
-        return preferences.getInt("gym_id", -1)
+        return preferences.getInt("gym_id", -1).also {
+            Log.d("SharedPrefRepository", "getGymId: $it")
+        }
     }
 
     override suspend fun saveUser(username: String) {
@@ -25,8 +31,9 @@ class SharedPrefRepositoryImpl(
     }
 
     override suspend fun getUser(): String? {
-        Log.d("SharedPrefRepository", "getUser: ${preferences.getString("login", null)}")
-        return preferences.getString("login", null)
+        return preferences.getString("login", null).also {
+            Log.d("SharedPrefRepository", "getUser: $it")
+        }
     }
 
     override suspend fun clearInfo() {
@@ -35,10 +42,13 @@ class SharedPrefRepositoryImpl(
     }
 
     override suspend fun saveCameraIds(cameraIds: List<Int>) {
+        Log.d("SharedPrefRepository", "saveCameraIds: $cameraIds")
         preferences.edit { putString("camera_ids", cameraIds.joinToString(",")) }
     }
 
     override suspend fun getCameraIds(): List<Int> {
-        return preferences.getString("camera_ids", null)?.split(",")?.map { it.toInt() } ?: emptyList()
+        return preferences.getString("camera_ids", null)?.split(",")?.map { it.toInt() } ?: emptyList<Int>().also {
+            Log.d("SharedPrefRepository", "getCameraIds: $it")
+        }
     }
 }
