@@ -1,5 +1,8 @@
 package ru.hse.gymvision.data
 
+import ru.hse.gymvision.domain.CameraMovement
+import ru.hse.gymvision.domain.CameraRotation
+import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.domain.exampledata.gymListExample
 import ru.hse.gymvision.domain.exampledata.gymSchemeExample
 import ru.hse.gymvision.domain.exampledata.userExample
@@ -7,6 +10,7 @@ import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.domain.model.GymSchemeModel
 import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.repos.GlobalRepository
+import kotlin.random.Random
 
 class GlobalRepositoryImpl: GlobalRepository {
     override suspend fun getGymList(): List<GymInfoModel> {
@@ -47,10 +51,6 @@ class GlobalRepositoryImpl: GlobalRepository {
         )
     }
 
-    override suspend fun logout() {
-        // а надо ли оно мне
-    }
-
     override suspend fun deleteUser(login: String) {
         userExample = UserModel(
             name = "",
@@ -62,5 +62,22 @@ class GlobalRepositoryImpl: GlobalRepository {
 
     override suspend fun checkLoginAvailable(login: String): Boolean {
         return userExample.login != login
+    }
+
+    override suspend fun checkCameraAccessibility(gymId: Int, cameraId: Int): Boolean {
+        return Random.nextBoolean()
+    }
+
+    override suspend fun getCameraLink(gymId: Int, cameraId: Int): String {
+        return "https://media.geeksforgeeks.org/wp-content/uploads/20201217163353/Screenrecorder-2020-12-17-16-32-03-350.mp4"
+    }
+
+    override suspend fun moveCamera(gymId: Int, cameraId: Int, direction: CameraMovement) {
+    }
+
+    override suspend fun rotateCamera(gymId: Int, cameraId: Int, direction: CameraRotation) {
+    }
+
+    override suspend fun zoomCamera(gymId: Int, cameraId: Int, direction: CameraZoom) {
     }
 }

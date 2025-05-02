@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.camera
 
+import org.videolan.libvlc.media.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
@@ -7,11 +8,14 @@ import ru.hse.gymvision.domain.CameraZoom
 sealed class CameraState {
     data class OneCamera(
         val camera1Id: Int = 0,
+        val camera1Link: String = "",
         val isPlaying1: Boolean = true,
     ): CameraState()
     data class TwoCameras(
         val camera1Id: Int = 0,
         val camera2Id: Int = 0,
+        val camera1Link: String = "",
+        val camera2Link: String = "",
         val isPlaying1: Boolean = true,
         val isPlaying2: Boolean = true,
     ): CameraState()
@@ -19,6 +23,9 @@ sealed class CameraState {
         val camera1Id: Int = 0,
         val camera2Id: Int = 0,
         val camera3Id: Int = 0,
+        val camera1Link: String = "",
+        val camera2Link: String = "",
+        val camera3Link: String = "",
         val isPlaying1: Boolean = true,
         val isPlaying2: Boolean = true,
         val isPlaying3: Boolean = true,
@@ -39,8 +46,9 @@ sealed class CameraEvent {
     data object DeleteThirdCameraButtonClicked : CameraEvent()
     data object MakeSecondCameraMainButtonClicked : CameraEvent()
     data object MakeThirdCameraMainButtonClicked : CameraEvent()
-    data class LoadCameraIds(val newCameraId: Int?) : CameraEvent()
+    data class InitCameras(val newCameraId: Int?, val gymId: Int) : CameraEvent()
     data object Clear: CameraEvent()
+    data class SavePlayers(val player1: MediaPlayer, val player2: MediaPlayer, val player3: MediaPlayer) : CameraEvent()
 }
 
 sealed class CameraAction {

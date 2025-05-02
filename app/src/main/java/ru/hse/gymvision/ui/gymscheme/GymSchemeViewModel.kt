@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
+import ru.hse.gymvision.domain.usecase.camera.GetNewCameraLinkUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
@@ -17,7 +18,7 @@ class GymSchemeViewModel(
     private val getGymSchemeUseCase: GetGymSchemeUseCase,
     private val checkCameraAccessibilityUseCase: CheckCameraAccessibilityUseCase,
     private val getGymIdUseCase: GetGymIdUseCase,
-    private val saveGymIdUseCase: SaveGymIdUseCase
+    private val saveGymIdUseCase: SaveGymIdUseCase,
 ) : ViewModel() {
     private val _state: MutableStateFlow<GymSchemeState> = MutableStateFlow(GymSchemeState.Idle)
     val state: StateFlow<GymSchemeState>
@@ -35,7 +36,10 @@ class GymSchemeViewModel(
                 onTrainerClicked(event.trainerName, event.trainerDescription, event.selectedTrainerId)
             }
             is GymSchemeEvent.CameraClicked -> {
-                onCameraClicked(event.cameraId)
+                onCameraClicked(
+                    event.gymId,
+                    event.cameraId
+                )
             }
             is GymSchemeEvent.HidePopup -> {
                 hidePopup()
@@ -69,16 +73,31 @@ class GymSchemeViewModel(
             }
         }
     }
-    private fun onCameraClicked(cameraId: Int) {
+
+    private fun onCameraClicked(gymId: Int?, cameraId: Int) {
         _state.value = (state.value as GymSchemeState.Main).copy(isLoading = true)
         viewModelScope.launch(Dispatchers.IO) {
-            val isAccessible = checkCameraAccessibilityUseCase.execute(cameraId)
+            val id = if (gymId == null) {
+                getGymIdUseCase.execute()
+            } else {
+                saveGymIdUseCase.execute(gymId)
+                gymId
+            }
+            if (id < 0) {
+                withContext(Dispatchers.Main) {
+                    _state.value = GymSchemeState.Error("Зал не найден, попробуйте выбрать зал заново!")
+                }
+                return@launch
+            }
+            val isAccessible = checkCameraAccessibilityUseCase.execute(id, cameraId)
             withContext(Dispatchers.Main) {
                 if (!isAccessible) {
                     if (state.value is GymSchemeState.Main) {
                         _state.value = (state.value as GymSchemeState.Main).copy(showDialog = true)
                     }
-                } else _action.value = GymSchemeAction.NavigateToCamera(cameraId)
+                } else {
+                    _action.value = GymSchemeAction.NavigateToCamera(id, cameraId)
+                }
             }
         }
     }

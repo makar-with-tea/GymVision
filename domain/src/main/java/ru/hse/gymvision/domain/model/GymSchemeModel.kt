@@ -1,10 +1,10 @@
 package ru.hse.gymvision.domain.model
 
 data class GymSchemeModel(
+    val id: Int,
     var image: ByteArray,
     val clickableTrainers: List<ClickableTrainer>,
     val clickableCameras: List<ClickableCamera>,
-    val serverUrl: String
     ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

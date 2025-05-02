@@ -45,16 +45,19 @@ val CAMERA_SIZE = 24.dp
 @Composable
 fun GymSchemeScreen(
     id: Int? = null,
-    navigateToCamera: (String, Int) -> Unit,
-    viewModel: GymSchemeViewModel = koinViewModel()
+    navigateToCamera: (Int, Int) -> Unit,
+    viewModel: GymSchemeViewModel = koinViewModel(),
+    navigateToGymList: () -> Unit
 ) {
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
     when (action.value) {
         is GymSchemeAction.NavigateToCamera -> {
-            navigateToCamera((state.value as GymSchemeState.Main).gymScheme?.serverUrl ?: "",
-                (action.value as GymSchemeAction.NavigateToCamera).cameraId)
+            navigateToCamera(
+                (action.value as GymSchemeAction.NavigateToCamera).gymId,
+                (action.value as GymSchemeAction.NavigateToCamera).cameraId
+            )
             viewModel.obtainEvent(GymSchemeEvent.Clear)
         }
         null -> {}
@@ -65,7 +68,7 @@ fun GymSchemeScreen(
             MainState(
                 state.value as GymSchemeState.Main,
                 onCameraClicked = { cameraId ->
-                    viewModel.obtainEvent(GymSchemeEvent.CameraClicked(cameraId))
+                    viewModel.obtainEvent(GymSchemeEvent.CameraClicked(id, cameraId))
                 },
                 onTrainerClicked = { name, description, trainerId ->
                     viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(name, description, trainerId))
@@ -86,7 +89,10 @@ fun GymSchemeScreen(
             viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
         }
         is GymSchemeState.Error -> {
-            ErrorState((state.value as GymSchemeState.Error).errorText)
+            ErrorState((state.value as GymSchemeState.Error).errorText) {
+                viewModel.obtainEvent(GymSchemeEvent.Clear)
+                navigateToGymList()
+            }
         }
     }
 
@@ -229,7 +235,7 @@ fun IdleState() {
 }
 
 @Composable
-fun ErrorState(errorText: String?) {
+fun ErrorState(errorText: String?, onDismiss: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -239,7 +245,8 @@ fun ErrorState(errorText: String?) {
     ) {
         MyAlertDialog(
             "Ошибка",
-            errorText ?: "Неизвестная ошибка"
-        ) {}
+            errorText ?: "Неизвестная ошибка",
+            onDismiss
+        )
     }
 }

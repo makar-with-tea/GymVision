@@ -4,20 +4,16 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import ru.hse.gymvision.data.GlobalRepositoryImpl
-import ru.hse.gymvision.data.LocalRepositoryImpl
 import ru.hse.gymvision.data.SharedPrefRepositoryImpl
 import ru.hse.gymvision.domain.repos.GlobalRepository
-import ru.hse.gymvision.domain.repos.LocalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
-import ru.hse.gymvision.domain.usecase.camera.AddCameraUseCase
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
-import ru.hse.gymvision.domain.usecase.camera.DeleteCameraUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraIdsUseCase
+import ru.hse.gymvision.domain.usecase.camera.GetCameraLinksUseCase
+import ru.hse.gymvision.domain.usecase.camera.GetNewCameraLinkUseCase
 import ru.hse.gymvision.domain.usecase.camera.MoveCameraUseCase
-import ru.hse.gymvision.domain.usecase.camera.PlayVideoUseCase
 import ru.hse.gymvision.domain.usecase.camera.RotateCameraUseCase
-import ru.hse.gymvision.domain.usecase.camera.SaveCameraIdsUseCase
-import ru.hse.gymvision.domain.usecase.camera.SetMainCameraUseCase
+import ru.hse.gymvision.domain.usecase.camera.SaveCamerasUseCase
 import ru.hse.gymvision.domain.usecase.camera.ZoomCameraUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymListUseCase
@@ -45,13 +41,12 @@ val appModule = module {
     viewModel<GymSchemeViewModel> { GymSchemeViewModel(get(), get(), get(), get()) }
     viewModel<GymListViewModel> { GymListViewModel(get()) }
     viewModel<AccountViewModel> { AccountViewModel(get(), get(), get(), get(), get()) }
-    viewModel<CameraViewModel> { CameraViewModel(get(), get(), get(), get(), get()) }
+    viewModel<CameraViewModel> { CameraViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val dataModule = module {
     single<SharedPrefRepository> { SharedPrefRepositoryImpl(context = androidContext()) }
     single<GlobalRepository> { GlobalRepositoryImpl() }
-    single<LocalRepository> { LocalRepositoryImpl() }
 }
 
 val domainModule = module {
@@ -70,14 +65,12 @@ val domainModule = module {
     factory<GetGymIdUseCase> { GetGymIdUseCase(get()) }
     factory<SaveGymIdUseCase> { SaveGymIdUseCase(get()) }
 
-    factory<AddCameraUseCase> { AddCameraUseCase() }
     factory<CheckCameraAccessibilityUseCase> { CheckCameraAccessibilityUseCase(get()) }
-    factory<DeleteCameraUseCase> { DeleteCameraUseCase() }
     factory<MoveCameraUseCase> { MoveCameraUseCase(get()) }
-    factory<PlayVideoUseCase> { PlayVideoUseCase() }
     factory<RotateCameraUseCase> { RotateCameraUseCase(get()) }
-    factory<SetMainCameraUseCase> { SetMainCameraUseCase() }
     factory<ZoomCameraUseCase> { ZoomCameraUseCase(get()) }
-    factory<SaveCameraIdsUseCase> { SaveCameraIdsUseCase(get()) }
+    factory<SaveCamerasUseCase> { SaveCamerasUseCase(get()) }
     factory<GetCameraIdsUseCase> { GetCameraIdsUseCase(get()) }
+    factory<GetNewCameraLinkUseCase> { GetNewCameraLinkUseCase(get()) }
+    factory<GetCameraLinksUseCase> { GetCameraLinksUseCase(get()) }
 }

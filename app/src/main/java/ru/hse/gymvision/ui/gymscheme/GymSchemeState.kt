@@ -29,12 +29,12 @@ sealed class GymSchemeEvent {
         val selectedTrainerId: Int
     ) : GymSchemeEvent()
 
-    data class CameraClicked(val cameraId: Int) : GymSchemeEvent()
+    data class CameraClicked(val gymId: Int?, val cameraId: Int) : GymSchemeEvent()
     data object HidePopup : GymSchemeEvent()
     data object HideDialog : GymSchemeEvent()
     data object Clear : GymSchemeEvent()
 }
 
 sealed class GymSchemeAction {
-    data class NavigateToCamera(val cameraId: Int): GymSchemeAction()
+    data class NavigateToCamera(val gymId: Int, val cameraId: Int): GymSchemeAction()
 }

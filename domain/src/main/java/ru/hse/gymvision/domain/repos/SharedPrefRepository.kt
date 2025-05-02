@@ -6,6 +6,7 @@ interface SharedPrefRepository {
     suspend fun saveUser(username: String)
     suspend fun getUser(): String?
     suspend fun clearInfo()
-    suspend fun saveCameraIds(cameraIds: List<Int>)
+    suspend fun saveCameras(cameraIds: List<Int>, cameraLinks: List<String>)
     suspend fun getCameraIds(): List<Int>
+    suspend fun getCameraLinks(): List<String>
 }

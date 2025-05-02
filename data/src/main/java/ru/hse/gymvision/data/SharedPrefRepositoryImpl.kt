@@ -15,6 +15,7 @@ class SharedPrefRepositoryImpl(
         Log.d("SharedPrefRepository", "saveGymId: $gymId")
         preferences.edit {
             remove("camera_ids") // при выборе нового зала удаляем старые камеры
+            remove("camera_links")
             putInt("gym_id", gymId)
         }
     }
@@ -41,14 +42,21 @@ class SharedPrefRepositoryImpl(
         preferences.edit { clear() }
     }
 
-    override suspend fun saveCameraIds(cameraIds: List<Int>) {
-        Log.d("SharedPrefRepository", "saveCameraIds: $cameraIds")
+    override suspend fun saveCameras(cameraIds: List<Int>, cameraLinks: List<String>) {
+        Log.d("SharedPrefRepository", "saveCameras: $cameraIds")
         preferences.edit { putString("camera_ids", cameraIds.joinToString(",")) }
+        preferences.edit { putString("camera_links", cameraLinks.joinToString(",")) }
     }
 
     override suspend fun getCameraIds(): List<Int> {
         return preferences.getString("camera_ids", null)?.split(",")?.map { it.toInt() } ?: emptyList<Int>().also {
             Log.d("SharedPrefRepository", "getCameraIds: $it")
+        }
+    }
+
+    override suspend fun getCameraLinks(): List<String> {
+        return preferences.getString("camera_links", null)?.split(",") ?: emptyList<String>().also {
+            Log.d("SharedPrefRepository", "getCameraLinks: $it")
         }
     }
 }
