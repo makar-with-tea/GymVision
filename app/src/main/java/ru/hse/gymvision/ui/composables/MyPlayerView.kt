@@ -93,17 +93,17 @@ fun mainPlayerView(
             }
             ControlButton(
                 iconId = R.drawable.ic_arrow_left,
-                contentDescription = "Move camera left",
+                contentDescription = "Rotate camera left",
                 alignment = Alignment.CenterStart
             ) {
-                onMoveCamera(CameraMovement.LEFT)
+                onRotateCamera(CameraRotation.LEFT)
             }
             ControlButton(
                 iconId = R.drawable.ic_arrow_right,
-                contentDescription = "Move camera right",
+                contentDescription = "Rotate camera right",
                 alignment = Alignment.CenterEnd
             ) {
-                onMoveCamera(CameraMovement.RIGHT)
+                onRotateCamera(CameraRotation.RIGHT)
             }
             ControlButton(
                 iconId = R.drawable.ic_arrow_up,
@@ -133,20 +133,7 @@ fun mainPlayerView(
             ) {
                 onZoomCamera(CameraZoom.IN)
             }
-            ControlButton(
-                iconId = R.drawable.ic_rotate_left,
-                contentDescription = "Rotate camera left",
-                alignment = Alignment.BottomStart
-            ) {
-                onRotateCamera(CameraRotation.LEFT)
-            }
-            ControlButton(
-                iconId = R.drawable.ic_rotate_right,
-                contentDescription = "Rotate camera right",
-                alignment = Alignment.BottomEnd
-            ) {
-                onRotateCamera(CameraRotation.RIGHT)
-            }
+
         }
     }
     return mediaPlayer

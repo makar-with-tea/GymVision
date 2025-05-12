@@ -74,22 +74,34 @@ class AuthorizationViewModel(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val res = loginUseCase.execute(login, password)
-            if (!res) {
-                _state.value = (_state.value as AuthorizationState.Main).copy(
-                    loginError = true,
-                    passwordError = true,
-                    loginErrorText = "Неверный логин или пароль",
-                )
+            try {
+                val res = loginUseCase.execute(login, password)
+                if (!res) {
+                    _state.value = (_state.value as AuthorizationState.Main).copy(
+                        loginError = true,
+                        passwordError = true,
+                        loginErrorText = "Неверный логин или пароль",
+                    )
+                    withContext(Dispatchers.Main) {
+                        _state.value = (_state.value as AuthorizationState.Main).copy(
+                            loading = false
+                        )
+                    }
+                    return@launch
+                }
+                withContext(Dispatchers.Main) {
+                    _action.value = AuthorizationAction.NavigateToGymList
+                }
+            } catch (e: Exception) {
+                Log.e("AuthorizationViewModel", "Login error: ${e.message}")
                 withContext(Dispatchers.Main) {
                     _state.value = (_state.value as AuthorizationState.Main).copy(
+                        loginError = true,
+                        passwordError = true,
+                        passwordErrorText = "Ошибка сети",
                         loading = false
                     )
                 }
-                return@launch
-            }
-            withContext(Dispatchers.Main) {
-                _action.value = AuthorizationAction.NavigateToGymList
             }
         }
     }

@@ -4,9 +4,9 @@ import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.domain.repos.GlobalRepository
 
 class ZoomCameraUseCase(
-    private val repo: GlobalRepository
+    private val globalRepository: GlobalRepository
 ) {
     suspend fun execute(gymId: Int, cameraId: Int, direction: CameraZoom) {
-        repo.zoomCamera(gymId, cameraId, direction)
+        globalRepository.zoomCamera(gymId, cameraId, direction)
     }
 }

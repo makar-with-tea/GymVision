@@ -4,11 +4,11 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 
 class DeleteUserUseCase(
-    private val globalRepo: GlobalRepository,
-    private val sharedPrefRepo: SharedPrefRepository
+    private val globalRepository: GlobalRepository,
+    private val sharedPrefRepository: SharedPrefRepository
 ) {
     suspend fun execute(login: String) {
-        sharedPrefRepo.clearInfo()
-        globalRepo.deleteUser(login)
+        sharedPrefRepository.clearInfo()
+        globalRepository.deleteUser(login)
     }
 }

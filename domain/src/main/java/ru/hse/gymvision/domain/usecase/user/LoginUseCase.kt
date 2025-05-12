@@ -4,13 +4,13 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 
 class LoginUseCase(
-    private val globalRepo: GlobalRepository,
-    private val sharedPrefRepo: SharedPrefRepository
+    private val globalRepository: GlobalRepository,
+    private val sharedPrefRepository: SharedPrefRepository
 ) {
     suspend fun execute(login: String, password: String): Boolean {
-        val res = globalRepo.login(login, password)
+        val res = globalRepository.login(login, password)
         if (res) {
-            sharedPrefRepo.saveUser(login)
+            sharedPrefRepository.saveUser(login)
         }
         println("LoginUseCase: login = $login, password = $password, res = $res")
         return res

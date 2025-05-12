@@ -3,9 +3,9 @@ package ru.hse.gymvision.domain.usecase.gym
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 
 class GetGymIdUseCase(
-    private val repo: SharedPrefRepository
+    private val sharedPrefRepository: SharedPrefRepository
 ) {
     suspend fun execute(): Int {
-        return repo.getGymId()
+        return sharedPrefRepository.getGymId()
     }
 }

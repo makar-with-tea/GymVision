@@ -28,7 +28,6 @@ sealed class AuthorizationEvent {
     data object ShowPasswordButtonClicked: AuthorizationEvent()
     data object Clear: AuthorizationEvent()
     data object CheckPastLogin: AuthorizationEvent()
-
 }
 
 sealed class AuthorizationAction {

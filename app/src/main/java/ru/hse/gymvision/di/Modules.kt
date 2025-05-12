@@ -1,10 +1,15 @@
 package ru.hse.gymvision.di
 
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import ru.hse.gymvision.data.GlobalRepositoryImpl
 import ru.hse.gymvision.data.SharedPrefRepositoryImpl
+import ru.hse.gymvision.data.TokenAuthenticator
+import ru.hse.gymvision.data.api.GlobalApiService
 import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
@@ -46,7 +51,26 @@ val appModule = module {
 
 val dataModule = module {
     single<SharedPrefRepository> { SharedPrefRepositoryImpl(context = androidContext()) }
-    single<GlobalRepository> { GlobalRepositoryImpl() }
+
+    single<OkHttpClient> {
+        OkHttpClient.Builder()
+            .authenticator(TokenAuthenticator(get(), get()))
+            .build()
+    }
+
+    single<Retrofit> {
+        Retrofit.Builder()
+            .baseUrl("https://localhost:8000") // todo: global server url
+            .client(get<OkHttpClient>())
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    single<GlobalApiService> {
+        get<Retrofit>().create(GlobalApiService::class.java)
+    }
+
+    single<GlobalRepository> { GlobalRepositoryImpl(apiService = get()) }
 }
 
 val domainModule = module {

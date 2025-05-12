@@ -9,8 +9,8 @@ import androidx.core.content.edit
 class SharedPrefRepositoryImpl(
     context: Context
 ): SharedPrefRepository {
-
     private val preferences: SharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
     override suspend fun saveGymId(gymId: Int) {
         Log.d("SharedPrefRepository", "saveGymId: $gymId")
         preferences.edit {
@@ -58,5 +58,29 @@ class SharedPrefRepositoryImpl(
         return preferences.getString("camera_links", null)?.split(",") ?: emptyList<String>().also {
             Log.d("SharedPrefRepository", "getCameraLinks: $it")
         }
+    }
+
+    override fun saveToken(token: String) {
+        preferences.edit { putString("auth_token", token) }
+    }
+
+    override fun getToken(): String? {
+        return preferences.getString("auth_token", null)
+    }
+
+    override fun clearToken() {
+        preferences.edit { remove("auth_token") }
+    }
+
+    override fun saveRefreshToken(token: String) {
+        preferences.edit { putString("refresh_token", token) }
+    }
+
+    override fun getRefreshToken(): String? {
+        return preferences.getString("refresh_token", null)
+    }
+
+    override fun clearRefreshToken() {
+        preferences.edit { remove("refresh_token") }
     }
 }

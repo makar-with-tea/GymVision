@@ -13,8 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
@@ -25,6 +27,7 @@ import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
+import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 @Composable
 fun CameraScreen(
@@ -169,12 +172,14 @@ fun OneCameraState(
             onClick = {
                 onAddCamera()
             },
-            modifier = Modifier.padding(16.dp).align(Alignment.BottomEnd)
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = "Добавить камеру",
-                tint = androidx.compose.ui.graphics.Color.White
+                tint = Color.White
             )
         }
 
@@ -238,12 +243,14 @@ fun TwoCamerasState(
             onClick = {
                 onAddCamera()
             },
-            modifier = Modifier.padding(16.dp).align(Alignment.BottomEnd)
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = "Добавить камеру",
-                tint = androidx.compose.ui.graphics.Color.White
+                tint = Color.White
             )
         }
 
@@ -333,12 +340,14 @@ fun ThreeCamerasState(
             onClick = {
                 onAddCamera()
             },
-            modifier = Modifier.padding(16.dp).align(Alignment.BottomEnd)
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.BottomEnd)
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = "Добавить камеру",
-                tint = androidx.compose.ui.graphics.Color.White
+                tint = Color.White
             )
         }
     }
@@ -352,4 +361,24 @@ fun LoadingState() {
 @Composable
 fun IdleState() {
     LoadingBlock()
+}
+
+@Preview(
+    showBackground = true
+)
+@Composable
+fun MainViewPreview() {
+    GymVisionTheme {
+        OneCameraState(
+            state = CameraState.OneCamera(
+                camera1Link = "https://media.geeksforgeeks.org/wp-content/uploads/20201217163353/Screenrecorder-2020-12-17-16-32-03-350.mp4",
+                isPlaying1 = false
+            ),
+            onRotateCamera = { },
+            onMoveCamera = { },
+            onZoomCamera = { },
+            onAddCamera = { },
+            onPlay = { }
+        )
+    }
 }

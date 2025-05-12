@@ -5,14 +5,14 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 
 class GetUserInfoUseCase(
-    private val globalRepo: GlobalRepository,
-    private val sharedPrefRepo: SharedPrefRepository
+    private val globalRepository: GlobalRepository,
+    private val sharedPrefRepository: SharedPrefRepository
 ) {
     suspend fun execute(): UserModel? {
-        val login = sharedPrefRepo.getUser()
+        val login = sharedPrefRepository.getUser()
         println("GetUserInfoUseCase: login = $login")
         return login?.let {
-            globalRepo.getUserInfo(it)
+            globalRepository.getUserInfo(it)
         }
     }
 }

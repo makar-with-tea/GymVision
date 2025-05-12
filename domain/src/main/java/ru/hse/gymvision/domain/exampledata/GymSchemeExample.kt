@@ -16,5 +16,6 @@ val gymSchemeExample = GymSchemeModel(
         ClickableCamera(1, 0.63f, 0.44f),
         ClickableCamera(2, 0.3f, 0.8f)
     ),
-    id = 0
+    id = 0,
+    name = "Имя зала"
 )

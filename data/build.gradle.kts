@@ -39,8 +39,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
 
-//    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-//    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
