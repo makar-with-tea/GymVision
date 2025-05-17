@@ -1,3 +1,56 @@
 <resources>
     <string name="app_name">GymVision</string>
+
+    <string name="loading_error">Ошибка загрузки</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="reload_button_text">Перезагрузить</string>
+
+    <string name="available_gyms_title">Доступные залы</string>
+    <string name="gym_avatar_description">Аватар зала</string>
+
+    <string name="my_profile_title">Мой профиль</string>
+    <string name="name">Имя</string>
+    <string name="surname">Фамилия</string>
+    <string name="login">Логин</string>
+    <string name="edit">Редактировать</string>
+    <string name="change_password">Сменить пароль</string>
+    <string name="logout">Выйти</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="delete_account_title">Удаление аккаунта</string>
+    <string name="delete_account_confirmation">Вы уверены, что хотите удалить аккаунт?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="edit_name">Редактирование имени</string>
+    <string name="save">Сохранить</string>
+    <string name="old_password">Старый пароль</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="change_password_title">Смена пароля</string>
+
+    <string name="authorization_title">Авторизация</string>
+    <string name="login_label">Логин</string>
+    <string name="password_label">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="no_account">Нет аккаунта?</string>
+    <string name="register_button">Зарегистрироваться</string>
+
+    <string name="camera_title">Камера</string>
+    <string name="camera_plural_title">Камеры</string>
+    <string name="add_camera_button_description">Добавить камеру</string>
+
+    <string name="gym_scheme_title">Схема зала</string>
+    <string name="gym_scheme_image_description">Схема зала</string>
+    <string name="camera_icon_description">Камера</string>
+    <string name="camera_unavailable_title">Камера недоступна</string>
+    <string name="camera_unavailable_message">Камера временно недоступна. Попробуйте позже.</string>
+
+    <string name="home_icon_description">Главная</string>
+    <string name="gym_icon_description">Зал</string>
+    <string name="account_icon_description">Аккаунт</string>
+
+    <string name="registration_title">Регистрация</string>
+    <string name="name_label">Имя</string>
+    <string name="surname_label">Фамилия</string>
+    <string name="repeat_password_label">Повторите пароль</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+
 </resources>

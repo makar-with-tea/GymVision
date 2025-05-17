@@ -7,15 +7,17 @@ sealed class AccountState {
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = ""
+        val password: String = "",
+        val isLoading: Boolean = false,
     ) : AccountState()
 
     data class EditName(
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = ""
-    ) : AccountState()
+        val password: String = "",
+        val isLoading: Boolean = false,
+        ) : AccountState()
 
     data class ChangePassword(
         val oldPassword: String = "",
@@ -30,6 +32,10 @@ sealed class AccountState {
     ) : AccountState()
 
     data object Loading : AccountState()
+
+    data class Error(
+        val message: String
+    ) : AccountState()
 }
 
 sealed class AccountEvent {

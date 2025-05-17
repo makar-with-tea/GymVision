@@ -1,6 +1,5 @@
 package ru.hse.gymvision.ui.registration
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,26 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
-import ru.hse.gymvision.ui.authorization.AuthorizationAction
-import ru.hse.gymvision.ui.authorization.AuthorizationEvent
-import ru.hse.gymvision.ui.authorization.AuthorizationState
-import ru.hse.gymvision.ui.authorization.AuthorizationViewModel
+import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyPasswordField
 import ru.hse.gymvision.ui.composables.MyTextField
@@ -115,19 +108,19 @@ fun MainState(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        MyTitle("Регистрация")
-        MyTextField(value = name.value, label = "Имя", isError = state.nameIsError, errorText = state.nameErrorText) {
+        MyTitle(stringResource(R.string.registration_title))
+        MyTextField(value = name.value, label = stringResource(R.string.name_label), isError = state.nameIsError, errorText = state.nameErrorText) {
             name.value = it
         }
-        MyTextField(value = surname.value, label = "Фамилия", isError = state.surnameIsError, errorText = state.surnameErrorText) {
+        MyTextField(value = surname.value, label = stringResource(R.string.surname_label), isError = state.surnameIsError, errorText = state.surnameErrorText) {
             surname.value = it
         }
-        MyTextField(value = login.value, label = "Логин", isError = state.loginIsError, errorText = state.loginErrorText) {
+        MyTextField(value = login.value, label = stringResource(R.string.login_label), isError = state.loginIsError, errorText = state.loginErrorText) {
             login.value = it
         }
         MyPasswordField(
             value = password.value,
-            label = "Пароль",
+            label = stringResource(R.string.password_label),
             isError = state.passwordIsError,
             errorText = state.passwordErrorText,
             onValueChange = { password.value = it },
@@ -136,7 +129,7 @@ fun MainState(
         )
         MyPasswordField(
             value = passwordRepeat.value,
-            label = "Повторите пароль",
+            label = stringResource(R.string.repeat_password_label),
             isError = state.passwordRepeatIsError,
             onValueChange = { passwordRepeat.value = it },
             onIconClick = { onShowPasswordRepeatClick() },
@@ -152,19 +145,19 @@ fun MainState(
                 passwordRepeat.value
             )
         }) {
-            Text("Зарегистрироваться")
+            Text(stringResource(R.string.register_button))
         }
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Уже есть аккаунт?")
+            Text(stringResource(R.string.already_have_account))
             TextButton(
                 onClick = { onLoginClick(login.value, password.value) },
                 modifier = Modifier.wrapContentWidth(),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Text("Войти", modifier = Modifier.padding(0.dp))
+                Text(stringResource(R.string.login_button), modifier = Modifier.padding(0.dp))
             }
         }
     }

@@ -1,15 +1,13 @@
 package ru.hse.gymvision.di
 
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import ru.hse.gymvision.data.GlobalRepositoryImpl
 import ru.hse.gymvision.data.SharedPrefRepositoryImpl
-import ru.hse.gymvision.data.TokenAuthenticator
-import ru.hse.gymvision.data.api.GlobalApiService
 import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
@@ -40,6 +38,7 @@ import ru.hse.gymvision.ui.gymlist.GymListViewModel
 import ru.hse.gymvision.ui.gymscheme.GymSchemeViewModel
 import ru.hse.gymvision.ui.registration.RegistrationViewModel
 
+
 val appModule = module {
     viewModel<AuthorizationViewModel> { AuthorizationViewModel(get(), get()) }
     viewModel<RegistrationViewModel> { RegistrationViewModel(get(), get()) }
@@ -52,25 +51,32 @@ val appModule = module {
 val dataModule = module {
     single<SharedPrefRepository> { SharedPrefRepositoryImpl(context = androidContext()) }
 
-    single<OkHttpClient> {
-        OkHttpClient.Builder()
-            .authenticator(TokenAuthenticator(get(), get()))
-            .build()
-    }
-
-    single<Retrofit> {
+    // Retrofit instance
+    single {
         Retrofit.Builder()
-            .baseUrl("https://localhost:8000") // todo: global server url
+            .baseUrl("https://localhost:8000") // Replace with your actual base URL
             .client(get<OkHttpClient>())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
+//
+//    // API Service
+//    single {
+//        get<Retrofit>().create(GlobalApiService::class.java)
+//    }
+//
+//    // TokenService Implementation
+//    single<TokenService> { TokenServiceImpl(get()) }
+//
+//    // OkHttpClient with Token Authenticator
+//    single {
+//        OkHttpClient.Builder()
+//            .authenticator(TokenAuthenticator(get(), get()))
+//            .build()
+//    }
 
-    single<GlobalApiService> {
-        get<Retrofit>().create(GlobalApiService::class.java)
-    }
-
-    single<GlobalRepository> { GlobalRepositoryImpl(apiService = get()) }
+    // Global Repository Implementation
+    single<GlobalRepository> { GlobalRepositoryImpl() }//apiService = get()) }
 }
 
 val domainModule = module {

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,11 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import ru.hse.gymvision.R
+import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 @Composable
 fun MyTitle(
@@ -111,17 +114,28 @@ fun LoadingBlock() {
 fun MyAlertDialog(
     title: String,
     text: String,
-    onDismiss: () -> Unit
+    onConfirm: () -> Unit,
+    confirmButtonText: String = "OK",
+    onDismissRequest: () -> Unit = onConfirm,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
         text = { Text(text = text) },
         confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("OK")
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+            ) {
+                Text(text = confirmButtonText)
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.error,
+        textContentColor = MaterialTheme.colorScheme.onErrorContainer,
     )
 }
 
@@ -167,5 +181,29 @@ fun MyPopup(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun MyAlertDialogLightPreview() {
+    GymVisionTheme {
+        MyAlertDialog(
+            title = "Title",
+            text = "Text",
+            onConfirm = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun MyAlertDialogDarkPreview() {
+    GymVisionTheme(darkTheme = true) {
+        MyAlertDialog(
+            title = "Title",
+            text = "Text",
+            onConfirm = {}
+        )
     }
 }

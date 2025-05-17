@@ -2,8 +2,10 @@ package ru.hse.gymvision.ui.gymlist
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,18 +21,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
-import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.ui.BitmapHelper
 import ru.hse.gymvision.ui.composables.LoadingBlock
+import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyTitle
 
 @Composable
@@ -69,9 +73,16 @@ fun GymListScreen(
             IdleState()
             viewModel.obtainEvent(GymListEvent.GetGymList)
         }
+
+        is GymListState.Error -> {
+            ErrorState(
+                errorText = (state.value as GymListState.Error).message,
+                onDismiss = {
+                    viewModel.obtainEvent(GymListEvent.GetGymList)
+                }
+            )
+        }
     }
-
-
 }
 
 @Composable
@@ -82,6 +93,24 @@ fun IdleState() {
 @Composable
 fun LoadingState() {
     LoadingBlock()
+}
+
+@Composable
+fun ErrorState(errorText: String?, onDismiss: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        MyAlertDialog(
+            stringResource(R.string.loading_error),
+            errorText ?: stringResource(R.string.unknown_error),
+            onDismiss,
+            stringResource(R.string.reload_button_text),
+        )
+    }
 }
 
 @Composable
@@ -96,7 +125,7 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Доступные залы")
+        MyTitle(text = stringResource(R.string.available_gyms_title))
         LazyColumn {
             itemsIndexed(state.gyms) { _, gym ->
 
@@ -118,7 +147,7 @@ fun MainState(
                         }
                         Image(
                             painter = painter,
-                            contentDescription = "Cover",
+                            contentDescription = stringResource(R.string.gym_avatar_description),
                             modifier = Modifier
                                 .size(64.dp)
                                 .padding(8.dp)

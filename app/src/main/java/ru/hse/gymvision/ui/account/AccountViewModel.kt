@@ -3,6 +3,7 @@ package ru.hse.gymvision.ui.account
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -78,34 +79,66 @@ class AccountViewModel(
     private fun getUserInfo() {
         _state.value = AccountState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            val userInfo = getUserInfoUseCase.execute()
-            Log.d("AccountViewModel", "getUserInfo: userInfo = $userInfo")
-            if (userInfo == null) {
-                logout()
-                Log.d("AccountViewModel", "getUserInfo: logout")
-                return@launch
-            }
-            withContext(Dispatchers.Main) {
-                _state.value = AccountState.Main(
-                    name = userInfo.name,
-                    surname = userInfo.surname,
-                    login = userInfo.login,
-                    password = userInfo.password
-                )
+            try {
+                val userInfo = getUserInfoUseCase.execute()
+                Log.d("AccountViewModel", "getUserInfo: userInfo = $userInfo")
+                if (userInfo == null) {
+                    logout()
+                    Log.d("AccountViewModel", "getUserInfo: logout")
+                    clear()
+                    return@launch
+                }
+                withContext(Dispatchers.Main) {
+                    _state.value = AccountState.Main(
+                        name = userInfo.name,
+                        surname = userInfo.surname,
+                        login = userInfo.login,
+                        password = userInfo.password
+                    )
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("AccountViewModel", "getUserInfo: error = $e")
+                    _state.value = AccountState.Error(
+                        message = "Не удалось соединиться с сервером. Проверьте подключение к интернету."
+                    )
+                }
             }
         }
     }
 
     private fun saveName(name: String, surname: String) {
         if (_state.value !is AccountState.EditName) return
-//        updateUserUseCase.execute()
-        _state.value = AccountState.Main(
-            name = name,
-            surname = surname,
-            login = (_state.value as AccountState.EditName).login,
-            password = (_state.value as AccountState.EditName).password
+        _state.value = (_state.value as AccountState.EditName).copy(
+            isLoading = true
         )
-        Log.d("AccountViewModel", "saveName: state = ${_state.value}")
+        viewModelScope.launch(Dispatchers.IO) {
+            // todo: проверить имя-фамилию как при регистрации
+            try {
+                updateUserUseCase.execute(
+                    name = name,
+                    surname = surname,
+                    login = (_state.value as AccountState.EditName).login,
+                )
+                _state.value = AccountState.Main(
+                    name = name,
+                    surname = surname,
+                    login = (_state.value as AccountState.EditName).login,
+                    password = (_state.value as AccountState.EditName).password
+                )
+                Log.d("AccountViewModel", "saveName: state = ${_state.value}")
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    _state.value = AccountState.EditName(
+                        name = name,
+                        surname = surname,
+                        login = (_state.value as AccountState.EditName).login,
+                        password = (_state.value as AccountState.EditName).password,
+                        isLoading = false
+                    ) // todo: все еще ошибки как в регистрации
+                }
+            }
+        }
     }
 
     private fun savePassword(newPassword: String, oldPassword: String, realPassword: String) {
@@ -184,7 +217,7 @@ class AccountViewModel(
     }
 
     private fun logout() {
-        if (_state.value !is AccountState.Main) return
+        if (_state.value !is AccountState.Main && _state.value !is AccountState.Loading) return
         _state.value = AccountState.Loading
         viewModelScope.launch(Dispatchers.IO) {
             logoutUseCase.execute()

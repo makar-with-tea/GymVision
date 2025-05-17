@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,7 @@ fun CameraScreen(
             navigateToGymScheme()
             viewModel.obtainEvent(CameraEvent.Clear)
         }
+
         null -> {}
     }
 
@@ -156,18 +158,19 @@ fun OneCameraState(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Камера")
+        MyTitle(text = stringResource(R.string.camera_title))
         mainPlayerView(
             state.camera1Link,
             state.isPlaying1,
             showControls,
             onError = { error ->
-            Log.d("CameraScreen", "Error: $error") },
+                Log.d("CameraScreen", "Error: $error")
+            },
             onRotateCamera = onRotateCamera,
             onMoveCamera = onMoveCamera,
             onZoomCamera = onZoomCamera,
             onPlay = onPlay
-            )
+        )
         FloatingActionButton(
             onClick = {
                 onAddCamera()
@@ -178,11 +181,10 @@ fun OneCameraState(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
-                contentDescription = "Добавить камеру",
+                contentDescription = stringResource(R.string.add_camera_button_description),
                 tint = Color.White
             )
         }
-
     }
 }
 
@@ -204,7 +206,7 @@ fun TwoCamerasState(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Камеры")
+        MyTitle(text = stringResource(R.string.camera_plural_title))
         Column {
             Box(
                 modifier = Modifier.weight(1f)
@@ -249,7 +251,7 @@ fun TwoCamerasState(
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
-                contentDescription = "Добавить камеру",
+                contentDescription = stringResource(R.string.add_camera_button_description),
                 tint = Color.White
             )
         }
@@ -280,7 +282,7 @@ fun ThreeCamerasState(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Камеры")
+        MyTitle(text = stringResource(R.string.camera_plural_title))
         Column {
             Box(
                 modifier = Modifier.weight(1f)
@@ -335,20 +337,6 @@ fun ThreeCamerasState(
                     }
                 }
             }
-        }
-        FloatingActionButton(
-            onClick = {
-                onAddCamera()
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd)
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
-                contentDescription = "Добавить камеру",
-                tint = Color.White
-            )
         }
     }
 }

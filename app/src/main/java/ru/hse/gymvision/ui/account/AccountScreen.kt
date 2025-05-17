@@ -1,7 +1,10 @@
 package ru.hse.gymvision.ui.account
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,9 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
+import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPasswordField
 import ru.hse.gymvision.ui.composables.MyTitle
 
@@ -82,6 +89,18 @@ fun AccountScreen(
             IdleState()
             viewModel.obtainEvent(AccountEvent.GetUserInfo)
         }
+
+        is AccountState.Error -> {
+            ErrorState(
+                errorText = (state.value as AccountState.Error).message,
+                onDismiss = {
+                    viewModel.obtainEvent(AccountEvent.GetUserInfo)
+                },
+                onConfirm = {
+                    viewModel.obtainEvent(AccountEvent.GetUserInfo)
+                }
+            )
+        }
     }
 }
 
@@ -112,43 +131,41 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Мой профиль")
-        Text("Имя: ${state.name}")
-        Text("Фамилия: ${state.surname}")
-        Text("Логин: ${state.login}")
-        Button(onClick = {
-            onEditName()
-        }) {
-            Text("Редактировать")
+        MyTitle(
+            text = stringResource(
+                R.string.my_profile_title
+            )
+        )
+        Text("${stringResource(id = R.string.name)}: ${state.name}")
+        Text("${stringResource(id = R.string.surname)}: ${state.surname}")
+        Text("${stringResource(id = R.string.login)}: ${state.login}")
+        Button(onClick = { onEditName() }) {
+            Text(stringResource(id = R.string.edit))
         }
-        Button(onClick = {
-            onChangePassword()
-        }) {
-            Text("Сменить пароль")
+        Button(onClick = { onChangePassword() }) {
+            Text(stringResource(id = R.string.change_password))
         }
-        Button(onClick = {
-            onLogout()
-        }) {
-            Text("Выйти")
+        Button(onClick = { onLogout() }) {
+            Text(stringResource(id = R.string.logout))
         }
         Button(onClick = { showDeleteDialog.value = true }) {
-            Text("Удалить аккаунт")
+            Text(stringResource(id = R.string.delete_account))
         }
-
     }
+
     if (showDeleteDialog.value) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog.value = false },
-            title = { Text("Удаление аккаунта") },
-            text = { Text("Вы уверены, что хотите удалить аккаунт?") },
+            title = { Text(stringResource(id = R.string.delete_account_title)) },
+            text = { Text(stringResource(id = R.string.delete_account_confirmation)) },
             confirmButton = {
                 Button(onClick = { onDeleteAccount() }) {
-                    Text("Да")
+                    Text(stringResource(id = R.string.yes))
                 }
             },
             dismissButton = {
                 Button(onClick = { showDeleteDialog.value = false }) {
-                    Text("Нет")
+                    Text(stringResource(id = R.string.no))
                 }
             }
         )
@@ -168,11 +185,11 @@ fun EditNameState(state: AccountState.EditName,
     ) {
         val name = remember { mutableStateOf(state.name) }
         val surname = remember { mutableStateOf(state.surname) }
-        MyTitle(text = "Редактирование имени")
-        TextField(value = name.value, onValueChange = { name.value = it }, label = { Text("Имя") })
-        TextField(value = surname.value, onValueChange = { surname.value = it }, label = { Text("Фамилия") })
-        Button(onClick = { onSaveName(name.value, surname.value)}) {
-            Text("Сохранить")
+        MyTitle(text = stringResource(id = R.string.edit_name))
+        TextField(value = name.value, onValueChange = { name.value = it }, label = { Text(stringResource(id = R.string.name)) })
+        TextField(value = surname.value, onValueChange = { surname.value = it }, label = { Text(stringResource(id = R.string.surname)) })
+        Button(onClick = { onSaveName(name.value, surname.value) }) {
+            Text(stringResource(id = R.string.save))
         }
     }
 }
@@ -194,12 +211,12 @@ fun ChangePasswordState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Смена пароля")
+        MyTitle(text = stringResource(id = R.string.change_password_title))
 
 
         MyPasswordField(
             value = "",
-            label = "Старый пароль",
+            label = stringResource(id = R.string.old_password),
             isError = false,
             onValueChange = { oldPassword.value = it },
             onIconClick = { onShowOldPassword() },
@@ -207,19 +224,45 @@ fun ChangePasswordState(
         )
         MyPasswordField(
             value = "",
-            label = "Новый пароль",
+            label = stringResource(id = R.string.new_password),
             isError = false,
             onValueChange = { newPassword.value = it },
             onIconClick = { onShowNewPassword() },
             passwordVisibility = state.newPasswordRepeatVisibility
         )
-        Button(onClick = { onSavePassword(newPassword.value,
-            oldPassword.value, state.password
-            ) }) {
-            Text("Сохранить")
+        Button(onClick = {
+            onSavePassword(
+                newPassword.value,
+                oldPassword.value, state.password
+            )
+        }) {
+            Text(stringResource(id = R.string.save))
         }
     }
     if (state.isLoading) {
         LoadingBlock()
+    }
+}
+
+@Composable
+fun ErrorState(
+    errorText: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        MyAlertDialog(
+            title = stringResource(id = R.string.loading_error),
+            text = errorText ?: stringResource(id = R.string.unknown_error),
+            onConfirm = { onConfirm() },
+            onDismissRequest = { onDismiss() },
+            confirmButtonText = stringResource(id = R.string.reload_button_text),
+        )
     }
 }

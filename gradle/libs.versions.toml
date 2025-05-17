@@ -17,6 +17,7 @@ activityCompose = "1.9.3"
 composeBom = "2023.08.00"
 materialIconsExtended = "1.7.7"
 media3Exoplayer = "1.4.1"
+mockitoCore = "5.5.0"
 navigationCompose = "2.8.6"
 uiTextGoogleFonts = "1.7.6"
 media3ExoplayerHls = "1.4.1"
@@ -56,6 +57,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json-v173 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 libvlc-all = { module = "org.videolan.android:libvlc-all", version.ref = "libvlcAll" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 
 [plugins]

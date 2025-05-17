@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
@@ -89,13 +90,18 @@ fun GymSchemeScreen(
             viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
         }
         is GymSchemeState.Error -> {
-            ErrorState((state.value as GymSchemeState.Error).errorText) {
-                viewModel.obtainEvent(GymSchemeEvent.Clear)
-                navigateToGymList()
-            }
+            ErrorState(
+                errorText = (state.value as GymSchemeState.Error).errorText,
+                onConfirm = {
+                    viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
+                },
+                onDismiss = {
+                    viewModel.obtainEvent(GymSchemeEvent.Clear)
+                    navigateToGymList()
+                }
+            )
         }
     }
-
 }
 
 @Composable
@@ -119,7 +125,7 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Схема зала")
+        MyTitle(text = stringResource(R.string.gym_scheme_title))
         val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
         val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.image)
         val painter: Painter = remember(imageBitmap) {
@@ -135,7 +141,7 @@ fun MainState(
         ) {
             Image(
                 painter = painter,
-                contentDescription = "Gym scheme",
+                contentDescription = stringResource(R.string.gym_scheme_image_description),
                 modifier = Modifier
                     .wrapContentSize(Alignment.Center)
                     .onGloballyPositioned {
@@ -144,7 +150,6 @@ fun MainState(
                         imHeight = with(density) { imageSize.height.toDp() }
                     }
             )
-
 
             val clickableTrainers = gymScheme.value?.clickableTrainers ?: emptyList()
             val clickableCameras = gymScheme.value?.clickableCameras ?: emptyList()
@@ -193,7 +198,7 @@ fun MainState(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_camera),
-                            contentDescription = "Camera",
+                            contentDescription = stringResource(R.string.camera_icon_description),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -211,11 +216,10 @@ fun MainState(
 
             if (state.showDialog) {
                 MyAlertDialog(
-                    "Камера недоступна",
-                    "Камера временно недоступна. Попробуйте позже.",
-                ) {
-                    onHideDialog()
-                }
+                    title = stringResource(R.string.camera_unavailable_title),
+                    text = stringResource(R.string.camera_unavailable_message),
+                    onConfirm = { onHideDialog() }
+                )
             }
         }
         if (state.isLoading) {
@@ -235,7 +239,11 @@ fun IdleState() {
 }
 
 @Composable
-fun ErrorState(errorText: String?, onDismiss: () -> Unit) {
+fun ErrorState(
+    errorText: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -244,9 +252,11 @@ fun ErrorState(errorText: String?, onDismiss: () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         MyAlertDialog(
-            "Ошибка",
-            errorText ?: "Неизвестная ошибка",
-            onDismiss
+            title = stringResource(R.string.loading_error),
+            text = errorText ?: stringResource(R.string.unknown_error),
+            onConfirm = { onConfirm() },
+            onDismissRequest = { onDismiss() },
+            confirmButtonText = stringResource(R.string.reload_button_text),
         )
     }
 }

@@ -77,13 +77,11 @@ class AuthorizationViewModel(
             try {
                 val res = loginUseCase.execute(login, password)
                 if (!res) {
-                    _state.value = (_state.value as AuthorizationState.Main).copy(
-                        loginError = true,
-                        passwordError = true,
-                        loginErrorText = "Неверный логин или пароль",
-                    )
                     withContext(Dispatchers.Main) {
                         _state.value = (_state.value as AuthorizationState.Main).copy(
+                            loginError = true,
+                            passwordError = true,
+                            loginErrorText = "Неверный логин или пароль",
                             loading = false
                         )
                     }
