@@ -42,7 +42,7 @@ sealed class CameraEvent {
     data class PlayCameraButtonClicked(val cameraNum: Int) : CameraEvent()
     data class DeleteCameraButtonClicked(val cameraNum: Int) : CameraEvent()
     data class MakeCameraMainButtonClicked(val cameraNum: Int) : CameraEvent()
-    data class ChangeAIState(val isAiEnabled: Boolean) : CameraEvent()
+    data class ChangeAiState(val isAiEnabled: Boolean) : CameraEvent()
     data class InitCameras(val newCameraId: Int?, val gymId: Int) : CameraEvent()
     data object Clear : CameraEvent()
     data class SavePlayers(

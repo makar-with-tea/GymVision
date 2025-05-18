@@ -4,6 +4,7 @@
     <string name="loading_error">Ошибка загрузки</string>
     <string name="unknown_error">Неизвестная ошибка</string>
     <string name="reload_button_text">Перезагрузить</string>
+    <string name="retry_button_text">Попробовать снова</string>
 
     <string name="available_gyms_title">Доступные залы</string>
     <string name="gym_avatar_description">Аватар зала</string>

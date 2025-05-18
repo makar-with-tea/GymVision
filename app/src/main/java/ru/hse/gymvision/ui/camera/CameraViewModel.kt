@@ -63,7 +63,7 @@ class CameraViewModel(
             is CameraEvent.InitCameras -> initCameras(event.newCameraId, event.gymId)
             is CameraEvent.MakeCameraMainButtonClicked -> makeCameraMain(event.cameraNum)
             is CameraEvent.SavePlayers -> savePlayers(event.player1, event.player2, event.player3)
-            is CameraEvent.ChangeAIState -> changeAIState(event.isAiEnabled)
+            is CameraEvent.ChangeAiState -> changeAIState(event.isAiEnabled)
         }
     }
 

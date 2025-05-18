@@ -75,7 +75,7 @@ fun CameraScreen(
                 viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(1))
             },
             onChangeAIState = { isAiEnabled ->
-                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
+                viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
             }
         )
 
@@ -106,7 +106,7 @@ fun CameraScreen(
                 viewModel.obtainEvent(CameraEvent.MakeCameraMainButtonClicked(2))
             },
             onChangeAIState = { isAiEnabled ->
-                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
+                viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
             }
         )
 
@@ -143,7 +143,7 @@ fun CameraScreen(
                 viewModel.obtainEvent(CameraEvent.MakeCameraMainButtonClicked(3))
             },
             onChangeAIState = { isAiEnabled ->
-                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
+                viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
             }
         )
     }
