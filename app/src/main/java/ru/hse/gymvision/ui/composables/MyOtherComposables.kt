@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -86,14 +87,20 @@ fun MyPasswordField(
         trailingIcon = {
             IconButton(onClick = onIconClick) {
                 Icon(
-                    painterResource(id =
-                    if (passwordVisibility) R.drawable.ic_visibility
-                    else R.drawable.ic_visibility_off),
-                    contentDescription = null
+                    painterResource(
+                        id =
+                            if (passwordVisibility) R.drawable.ic_visibility
+                            else R.drawable.ic_visibility_off
+                    ),
+                    contentDescription =
+                        if (passwordVisibility)
+                            stringResource(R.string.turn_visibility_off_description)
+                        else stringResource(R.string.turn_visibility_on_description),
                 )
             }
         },
-        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
+        visualTransformation =
+            if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     )
 }
 
@@ -115,7 +122,7 @@ fun MyAlertDialog(
     title: String,
     text: String,
     onConfirm: () -> Unit,
-    confirmButtonText: String = "OK",
+    confirmButtonText: String = stringResource(R.string.confirmation),
     onDismissRequest: () -> Unit = onConfirm,
 ) {
     AlertDialog(

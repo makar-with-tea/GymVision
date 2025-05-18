@@ -39,16 +39,17 @@ sealed class CameraEvent {
     data class RotateCameraButtonClicked(val direction: CameraRotation) : CameraEvent()
     data class MoveCameraButtonClicked(val direction: CameraMovement) : CameraEvent()
     data class ZoomCameraButtonClicked(val direction: CameraZoom) : CameraEvent()
-    data object PlayFirstCameraButtonClicked : CameraEvent()
-    data object PlaySecondCameraButtonClicked : CameraEvent()
-    data object PlayThirdCameraButtonClicked : CameraEvent()
-    data object DeleteSecondCameraButtonClicked : CameraEvent()
-    data object DeleteThirdCameraButtonClicked : CameraEvent()
-    data object MakeSecondCameraMainButtonClicked : CameraEvent()
-    data object MakeThirdCameraMainButtonClicked : CameraEvent()
+    data class PlayCameraButtonClicked(val cameraNum: Int) : CameraEvent()
+    data class DeleteCameraButtonClicked(val cameraNum: Int) : CameraEvent()
+    data class MakeCameraMainButtonClicked(val cameraNum: Int) : CameraEvent()
+    data class ChangeAIState(val isAiEnabled: Boolean) : CameraEvent()
     data class InitCameras(val newCameraId: Int?, val gymId: Int) : CameraEvent()
-    data object Clear: CameraEvent()
-    data class SavePlayers(val player1: MediaPlayer, val player2: MediaPlayer, val player3: MediaPlayer) : CameraEvent()
+    data object Clear : CameraEvent()
+    data class SavePlayers(
+        val player1: MediaPlayer,
+        val player2: MediaPlayer,
+        val player3: MediaPlayer
+    ) : CameraEvent()
 }
 
 sealed class CameraAction {

@@ -63,21 +63,25 @@ class GymSchemeViewModel(
             }
             if (id < 0) {
                 withContext(Dispatchers.Main) {
-                    _state.value = GymSchemeState.Error("Зал не найден, выберите другой зал.")
+                    _state.value = GymSchemeState.Error(GymSchemeState.GymSchemeError.GYM_NOT_FOUND)
                 }
                 return@launch
             }
             try {
-                val gymScheme = getGymSchemeUseCase.execute(id)
+                val gymScheme = getGymSchemeUseCase.execute(id) ?: run {
+                    withContext(Dispatchers.Main) {
+                        _state.value =
+                            GymSchemeState.Error(GymSchemeState.GymSchemeError.GYM_NOT_FOUND)
+                    }
+                    return@launch
+                }
                 withContext(Dispatchers.Main) {
                     _state.value = GymSchemeState.Main(gymScheme = gymScheme)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Log.e("GymSchemeViewModel", "Error getting gym scheme:", e)
-                    _state.value = GymSchemeState.Error(
-                        "Не удалось соединиться с сервером. Проверьте подключение к интернету."
-                    )
+                    _state.value = GymSchemeState.Error(GymSchemeState.GymSchemeError.NETWORK_ERROR)
                 }
             }
         }
@@ -94,7 +98,7 @@ class GymSchemeViewModel(
             }
             if (id < 0) {
                 withContext(Dispatchers.Main) {
-                    _state.value = GymSchemeState.Error("Зал не найден, выберите другой зал.")
+                    _state.value = GymSchemeState.Error(GymSchemeState.GymSchemeError.GYM_NOT_FOUND)
                 }
                 return@launch
             }

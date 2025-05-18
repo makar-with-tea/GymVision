@@ -21,4 +21,5 @@ interface GlobalRepository {
     suspend fun moveCamera(gymId: Int, cameraId: Int, direction: CameraMovement)
     suspend fun rotateCamera(gymId: Int, cameraId: Int, direction: CameraRotation)
     suspend fun zoomCamera(gymId: Int, cameraId: Int, direction: CameraZoom)
+    suspend fun changeAiState(gymId: Int, cameraId: Int, isAiEnabled: Boolean)
 }

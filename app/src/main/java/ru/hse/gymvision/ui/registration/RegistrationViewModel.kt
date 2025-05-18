@@ -80,65 +80,54 @@ class RegistrationViewModel(
             login = login,
             password = password,
             passwordRepeat = passwordRepeat,
-            nameIsError = false,
-            surnameIsError = false,
-            loginIsError = false,
-            passwordIsError = false,
-            passwordRepeatIsError = false,
-            nameErrorText = null,
-            surnameErrorText = null,
-            loginErrorText = null,
-            passwordErrorText = null,
-            passwordRepeatErrorText = null
+            nameError = RegistrationState.RegistrationError.IDLE,
+            surnameError = RegistrationState.RegistrationError.IDLE,
+            loginError = RegistrationState.RegistrationError.IDLE,
+            passwordError = RegistrationState.RegistrationError.IDLE,
+            passwordRepeatError = RegistrationState.RegistrationError.IDLE,
+            loading = true
         )
 
         var isError = false
         if (name.length < 2 || name.length > 20) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                nameErrorText = "Имя должно быть длиной от 2 до 20 символов",
-                nameIsError = true
+                nameError = RegistrationState.RegistrationError.NAME_LENGTH,
             )
             isError = true
         }
         if (surname.length < 2 || surname.length > 20) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                surnameErrorText = "Фамилия должна быть длиной от 2 до 20 символов",
-                surnameIsError = true
+                surnameError = RegistrationState.RegistrationError.SURNAME_LENGTH,
             )
             isError = true
         }
         if (login.length < 5 || login.length > 15) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                loginErrorText = "Логин должен быть длиной от 5 до 15 символов",
-                loginIsError = true
+                loginError = RegistrationState.RegistrationError.LOGIN_LENGTH,
             )
             isError = true
         }
         if (login.any { !it.isDigit() && !LATIN.contains(it.lowercase()) }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                loginErrorText = "Логин должен содержать только латинские буквы и цифры",
-                loginIsError = true
+                loginError = RegistrationState.RegistrationError.LOGIN_CONTENT,
             )
             isError = true
         }
         if (password.length < 8) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                passwordErrorText = "Пароль должен быть длиной не менее 8 символов",
-                passwordIsError = true
+                passwordError = RegistrationState.RegistrationError.PASSWORD_LENGTH,
             )
             isError = true
         }
         if (password.all { !it.isDigit() } || password.all { !it.isLetter() }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                passwordErrorText = "Пароль должен содержать латинские буквы и цифры",
-                passwordIsError = true
+                passwordError = RegistrationState.RegistrationError.PASSWORD_CONTENT,
             )
             isError = true
         }
         if (password != passwordRepeat) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                passwordRepeatErrorText = "Пароли не совпадают",
-                passwordRepeatIsError = true
+                passwordRepeatError = RegistrationState.RegistrationError.PASSWORD_MISMATCH,
             )
             isError = true
         }
@@ -147,28 +136,44 @@ class RegistrationViewModel(
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            val isAvailable = checkLoginAvailableUseCase.execute(login)
-            if (!isAvailable) {
-                withContext(Dispatchers.Main) {
-                    _state.value = (_state.value as RegistrationState.Main).copy(
-                        loginErrorText = "Данный логин уже занят",
-                        loginIsError = true
-                    )
+            try {
+                val isAvailable = checkLoginAvailableUseCase.execute(login)
+                if (!isAvailable) {
+                    withContext(Dispatchers.Main) {
+                        _state.value = (_state.value as RegistrationState.Main).copy(
+                            loginError = RegistrationState.RegistrationError.LOGIN_TAKEN,
+                        )
+                    }
+                    return@launch
                 }
-                return@launch
-            }
-            val success = registerUseCase.execute(name, surname, login, password)
-            withContext(Dispatchers.Main) {
-                if (!success) {
+                val success = registerUseCase.execute(name, surname, login, password)
+                withContext(Dispatchers.Main) {
+                    if (!success) {
+                        _state.value = RegistrationState.Main(
+                            name = name,
+                            surname = surname,
+                            login = login,
+                            password = password,
+                            loginError = RegistrationState.RegistrationError.REGISTRATION_FAILED,
+                        )
+                    } else _action.value = RegistrationAction.NavigateToGymList
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
                     _state.value = RegistrationState.Main(
                         name = name,
                         surname = surname,
                         login = login,
                         password = password,
-                        loginErrorText = "Не удалось зарегистрироваться",
-                        loginIsError = true
+                        loginError = RegistrationState.RegistrationError.NETWORK,
                     )
-                } else _action.value = RegistrationAction.NavigateToGymList
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    _state.value = (_state.value as RegistrationState.Main).copy(
+                        loading = false
+                    )
+                }
             }
         }
     }

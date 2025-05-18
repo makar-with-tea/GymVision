@@ -36,7 +36,6 @@ fun AccountScreen(
 ) {
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
-    // todo: тут половина недоделана((
 
     when (action.value) {
         is AccountAction.NavigateToAuthorization -> {
@@ -92,7 +91,7 @@ fun AccountScreen(
 
         is AccountState.Error -> {
             ErrorState(
-                errorText = (state.value as AccountState.Error).message,
+                errorText = (state.value as AccountState.Error).error.toText(),
                 onDismiss = {
                     viewModel.obtainEvent(AccountEvent.GetUserInfo)
                 },
@@ -186,8 +185,14 @@ fun EditNameState(state: AccountState.EditName,
         val name = remember { mutableStateOf(state.name) }
         val surname = remember { mutableStateOf(state.surname) }
         MyTitle(text = stringResource(id = R.string.edit_name))
-        TextField(value = name.value, onValueChange = { name.value = it }, label = { Text(stringResource(id = R.string.name)) })
-        TextField(value = surname.value, onValueChange = { surname.value = it }, label = { Text(stringResource(id = R.string.surname)) })
+        TextField(
+            value = name.value,
+            onValueChange = { name.value = it },
+            label = { Text(stringResource(id = R.string.name)) })
+        TextField(
+            value = surname.value,
+            onValueChange = { surname.value = it },
+            label = { Text(stringResource(id = R.string.surname)) })
         Button(onClick = { onSaveName(name.value, surname.value) }) {
             Text(stringResource(id = R.string.save))
         }
@@ -265,4 +270,32 @@ fun ErrorState(
             confirmButtonText = stringResource(id = R.string.reload_button_text),
         )
     }
+}
+
+@Composable
+fun AccountState.AccountError.toText() = when (this) {
+    AccountState.AccountError.IDLE -> ""
+    AccountState.AccountError.NAME_LENGTH -> stringResource(id = R.string.name_length_error)
+    AccountState.AccountError.SURNAME_LENGTH -> stringResource(id = R.string.surname_length_error)
+    AccountState.AccountError.PASSWORD_LENGTH -> stringResource(id = R.string.password_length_error)
+    AccountState.AccountError.PASSWORD_CONTENT ->
+        stringResource(id = R.string.password_content_error)
+
+    AccountState.AccountError.PASSWORD_MISMATCH ->
+        stringResource(id = R.string.password_mismatch_error)
+
+    AccountState.AccountError.PASSWORD_INCORRECT ->
+        stringResource(id = R.string.password_incorrect_error)
+
+    AccountState.AccountError.CHANGE_FAILED ->
+        stringResource(id = R.string.change_failed_error)
+
+    AccountState.AccountError.NETWORK ->
+        stringResource(id = R.string.network_error_short)
+
+    AccountState.AccountError.ACCOUNT_NOT_FOUND ->
+        stringResource(id = R.string.account_not_found_error)
+
+    AccountState.AccountError.ACCOUNT_DELETE ->
+        stringResource(id = R.string.account_delete_error)
 }

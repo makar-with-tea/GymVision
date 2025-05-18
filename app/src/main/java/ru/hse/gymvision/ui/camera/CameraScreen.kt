@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
@@ -28,7 +27,6 @@ import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
-import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 @Composable
 fun CameraScreen(
@@ -74,8 +72,12 @@ fun CameraScreen(
                 viewModel.obtainEvent(CameraEvent.AddCameraButtonClicked)
             },
             onPlay = {
-                viewModel.obtainEvent(CameraEvent.PlayFirstCameraButtonClicked)
-            })
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(1))
+            },
+            onChangeAIState = { isAiEnabled ->
+                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
+            }
+        )
 
         is CameraState.TwoCameras -> TwoCamerasState(
             state.value as CameraState.TwoCameras,
@@ -92,16 +94,19 @@ fun CameraScreen(
                 viewModel.obtainEvent(CameraEvent.AddCameraButtonClicked)
             },
             onDeleteCamera2 = {
-                viewModel.obtainEvent(CameraEvent.DeleteSecondCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.DeleteCameraButtonClicked(2))
             },
             onPlay1 = {
-                viewModel.obtainEvent(CameraEvent.PlayFirstCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(1))
             },
             onPlay2 = {
-                viewModel.obtainEvent(CameraEvent.PlaySecondCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(2))
             },
             onMakeMainCamera2 = {
-                viewModel.obtainEvent(CameraEvent.MakeSecondCameraMainButtonClicked)
+                viewModel.obtainEvent(CameraEvent.MakeCameraMainButtonClicked(2))
+            },
+            onChangeAIState = { isAiEnabled ->
+                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
             }
         )
 
@@ -116,29 +121,29 @@ fun CameraScreen(
             onZoomCamera = { zoom ->
                 viewModel.obtainEvent(CameraEvent.ZoomCameraButtonClicked(zoom))
             },
-            onAddCamera = {
-                viewModel.obtainEvent(CameraEvent.AddCameraButtonClicked)
-            },
             onDeleteCamera2 = {
-                viewModel.obtainEvent(CameraEvent.DeleteSecondCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.DeleteCameraButtonClicked(2))
             },
             onDeleteCamera3 = {
-                viewModel.obtainEvent(CameraEvent.DeleteThirdCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.DeleteCameraButtonClicked(3))
             },
             onPlay1 = {
-                viewModel.obtainEvent(CameraEvent.PlayFirstCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(1))
             },
             onPlay2 = {
-                viewModel.obtainEvent(CameraEvent.PlaySecondCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(2))
             },
             onPlay3 = {
-                viewModel.obtainEvent(CameraEvent.PlayThirdCameraButtonClicked)
+                viewModel.obtainEvent(CameraEvent.PlayCameraButtonClicked(3))
             },
             onMakeMainCamera2 = {
-                viewModel.obtainEvent(CameraEvent.MakeSecondCameraMainButtonClicked)
+                viewModel.obtainEvent(CameraEvent.MakeCameraMainButtonClicked(2))
             },
             onMakeMainCamera3 = {
-                viewModel.obtainEvent(CameraEvent.MakeThirdCameraMainButtonClicked)
+                viewModel.obtainEvent(CameraEvent.MakeCameraMainButtonClicked(3))
+            },
+            onChangeAIState = { isAiEnabled ->
+                viewModel.obtainEvent(CameraEvent.ChangeAIState(isAiEnabled))
             }
         )
     }
@@ -151,7 +156,9 @@ fun OneCameraState(
     onMoveCamera: (CameraMovement) -> Unit,
     onZoomCamera: (CameraZoom) -> Unit,
     onAddCamera: () -> Unit,
-    onPlay: () -> Unit) {
+    onPlay: () -> Unit,
+    onChangeAIState: (Boolean) -> Unit,
+) {
     val showControls = remember { mutableStateOf(false) }
 
     Box(
@@ -169,7 +176,8 @@ fun OneCameraState(
             onRotateCamera = onRotateCamera,
             onMoveCamera = onMoveCamera,
             onZoomCamera = onZoomCamera,
-            onPlay = onPlay
+            onPlay = onPlay,
+            onChangeAi = onChangeAIState
         )
         FloatingActionButton(
             onClick = {
@@ -198,8 +206,9 @@ fun TwoCamerasState(
     onDeleteCamera2: () -> Unit,
     onMakeMainCamera2: () -> Unit,
     onPlay1: () -> Unit,
-    onPlay2: () -> Unit
-    ) {
+    onPlay2: () -> Unit,
+    onChangeAIState: (Boolean) -> Unit
+) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
     Box(
@@ -221,7 +230,8 @@ fun TwoCamerasState(
                     onRotateCamera = onRotateCamera,
                     onMoveCamera = onMoveCamera,
                     onZoomCamera = onZoomCamera,
-                    onPlay = onPlay1
+                    onPlay = onPlay1,
+                    onChangeAi = onChangeAIState
                 )
             }
 
@@ -265,14 +275,14 @@ fun ThreeCamerasState(
     onRotateCamera: (CameraRotation) -> Unit,
     onMoveCamera: (CameraMovement) -> Unit,
     onZoomCamera: (CameraZoom) -> Unit,
-    onAddCamera: () -> Unit,
     onDeleteCamera2: () -> Unit,
     onDeleteCamera3: () -> Unit,
     onMakeMainCamera2: () -> Unit,
     onMakeMainCamera3: () -> Unit,
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
-    onPlay3: () -> Unit
+    onPlay3: () -> Unit,
+    onChangeAIState: (Boolean) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -297,7 +307,8 @@ fun ThreeCamerasState(
                     onRotateCamera = onRotateCamera,
                     onMoveCamera = onMoveCamera,
                     onZoomCamera = onZoomCamera,
-                    onPlay = onPlay1
+                    onPlay = onPlay1,
+                    onChangeAi = onChangeAIState
                 )
             }
 
@@ -349,24 +360,4 @@ fun LoadingState() {
 @Composable
 fun IdleState() {
     LoadingBlock()
-}
-
-@Preview(
-    showBackground = true
-)
-@Composable
-fun MainViewPreview() {
-    GymVisionTheme {
-        OneCameraState(
-            state = CameraState.OneCamera(
-                camera1Link = "https://media.geeksforgeeks.org/wp-content/uploads/20201217163353/Screenrecorder-2020-12-17-16-32-03-350.mp4",
-                isPlaying1 = false
-            ),
-            onRotateCamera = { },
-            onMoveCamera = { },
-            onZoomCamera = { },
-            onAddCamera = { },
-            onPlay = { }
-        )
-    }
 }

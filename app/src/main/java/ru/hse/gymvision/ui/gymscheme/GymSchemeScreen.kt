@@ -91,7 +91,7 @@ fun GymSchemeScreen(
         }
         is GymSchemeState.Error -> {
             ErrorState(
-                errorText = (state.value as GymSchemeState.Error).errorText,
+                errorText = (state.value as GymSchemeState.Error).error.toText(),
                 onConfirm = {
                     viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
                 },
@@ -226,6 +226,13 @@ fun MainState(
             LoadingBlock()
         }
     }
+}
+
+@Composable
+private fun GymSchemeState.GymSchemeError.toText() = when (this) {
+    GymSchemeState.GymSchemeError.GYM_NOT_FOUND -> stringResource(R.string.gym_not_found_error)
+    GymSchemeState.GymSchemeError.NETWORK_ERROR -> stringResource(R.string.network_error_short)
+    GymSchemeState.GymSchemeError.IDLE -> stringResource(R.string.unknown_error)
 }
 
 @Composable

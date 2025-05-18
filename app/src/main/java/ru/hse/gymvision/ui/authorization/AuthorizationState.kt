@@ -1,14 +1,19 @@
 package ru.hse.gymvision.ui.authorization
 
 sealed class AuthorizationState {
+    enum class AuthorizationError {
+        EMPTY_LOGIN,
+        EMPTY_PASSWORD,
+        INVALID_CREDENTIALS,
+        NETWORK_ERROR,
+        IDLE
+    }
     data class Main(
         val login: String = "",
         val password: String = "",
         val passwordVisibility: Boolean = false,
-        val loginError: Boolean = false,
-        val loginErrorText: String? = null,
-        val passwordError: Boolean = false,
-        val passwordErrorText: String? = null,
+        val loginError: AuthorizationError = AuthorizationError.IDLE,
+        val passwordError: AuthorizationError = AuthorizationError.IDLE,
         val loading: Boolean = false
     ) : AuthorizationState()
 

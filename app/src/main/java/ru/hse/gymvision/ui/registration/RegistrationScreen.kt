@@ -109,20 +109,35 @@ fun MainState(
             .padding(16.dp)
     ) {
         MyTitle(stringResource(R.string.registration_title))
-        MyTextField(value = name.value, label = stringResource(R.string.name_label), isError = state.nameIsError, errorText = state.nameErrorText) {
+        MyTextField(
+            value = name.value,
+            label = stringResource(R.string.name_label),
+            isError = state.nameError != RegistrationState.RegistrationError.IDLE,
+            errorText = state.nameError.getText()
+        ) {
             name.value = it
         }
-        MyTextField(value = surname.value, label = stringResource(R.string.surname_label), isError = state.surnameIsError, errorText = state.surnameErrorText) {
+        MyTextField(
+            value = surname.value,
+            label = stringResource(R.string.surname_label),
+            isError = state.surnameError != RegistrationState.RegistrationError.IDLE,
+            errorText = state.surnameError.getText()
+        ) {
             surname.value = it
         }
-        MyTextField(value = login.value, label = stringResource(R.string.login_label), isError = state.loginIsError, errorText = state.loginErrorText) {
+        MyTextField(
+            value = login.value,
+            label = stringResource(R.string.login_label),
+            isError = state.loginError != RegistrationState.RegistrationError.IDLE,
+            errorText = state.loginError.getText()
+        ) {
             login.value = it
         }
         MyPasswordField(
             value = password.value,
             label = stringResource(R.string.password_label),
-            isError = state.passwordIsError,
-            errorText = state.passwordErrorText,
+            isError = state.passwordError != RegistrationState.RegistrationError.IDLE,
+            errorText = state.passwordError.getText(),
             onValueChange = { password.value = it },
             onIconClick = { onShowPasswordClick() },
             passwordVisibility = state.passwordVisibility
@@ -130,11 +145,11 @@ fun MainState(
         MyPasswordField(
             value = passwordRepeat.value,
             label = stringResource(R.string.repeat_password_label),
-            isError = state.passwordRepeatIsError,
+            isError = state.passwordRepeatError != RegistrationState.RegistrationError.IDLE,
             onValueChange = { passwordRepeat.value = it },
             onIconClick = { onShowPasswordRepeatClick() },
             passwordVisibility = state.passwordRepeatVisibility,
-            errorText = state.passwordRepeatErrorText
+            errorText = state.passwordRepeatError.getText()
         )
         Button(onClick = {
             onRegistrationClick(
@@ -160,6 +175,33 @@ fun MainState(
                 Text(stringResource(R.string.login_button), modifier = Modifier.padding(0.dp))
             }
         }
+    }
+}
+
+@Composable
+private fun RegistrationState.RegistrationError.getText(): String {
+    return when (this) {
+        RegistrationState.RegistrationError.NAME_LENGTH ->
+            stringResource(R.string.name_length_error)
+        RegistrationState.RegistrationError.SURNAME_LENGTH ->
+            stringResource(R.string.surname_length_error)
+        RegistrationState.RegistrationError.LOGIN_LENGTH ->
+            stringResource(R.string.login_length_error)
+        RegistrationState.RegistrationError.LOGIN_CONTENT ->
+            stringResource(R.string.login_content_error)
+        RegistrationState.RegistrationError.PASSWORD_LENGTH ->
+            stringResource(R.string.password_length_error)
+        RegistrationState.RegistrationError.PASSWORD_CONTENT ->
+            stringResource(R.string.password_content_error)
+        RegistrationState.RegistrationError.PASSWORD_MISMATCH ->
+            stringResource(R.string.password_mismatch_error)
+        RegistrationState.RegistrationError.LOGIN_TAKEN ->
+            stringResource(R.string.login_taken_error)
+        RegistrationState.RegistrationError.REGISTRATION_FAILED ->
+            stringResource(R.string.registration_failed_error)
+        RegistrationState.RegistrationError.NETWORK ->
+            stringResource(R.string.network_error_short)
+        RegistrationState.RegistrationError.IDLE -> ""
     }
 }
 

@@ -43,9 +43,7 @@ class GymListViewModel(
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Log.e("GymListViewModel", "Error getting gym list:", e)
-                    _state.value = GymListState.Error(
-                        "Не удалось соединиться с сервером. Проверьте подключение к интернету."
-                    )
+                    _state.value = GymListState.Error
                 }
             }
         }

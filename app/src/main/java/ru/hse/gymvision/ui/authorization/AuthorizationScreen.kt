@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
@@ -105,21 +104,21 @@ fun MainState(
             MyTextField(
                 value = login.value,
                 label = stringResource(id = R.string.login_label),
-                isError = state.loginError,
-                errorText = state.loginErrorText
+                isError = state.loginError != AuthorizationState.AuthorizationError.IDLE,
+                errorText = state.loginError.toText()
             ) {
                 login.value = it
             }
             MyPasswordField(
                 value = password.value,
                 label = stringResource(id = R.string.password_label),
-                isError = state.passwordError,
+                isError = state.passwordError != AuthorizationState.AuthorizationError.IDLE,
                 onValueChange = { password.value = it },
                 onIconClick = {
                     onShowPasswordClick()
                 },
                 passwordVisibility = state.passwordVisibility,
-                errorText = state.passwordErrorText
+                errorText = state.passwordError.toText()
             )
             Button(onClick = {
                 onLoginClick(login.value, password.value)
@@ -149,6 +148,19 @@ fun MainState(
     if (state.loading) {
         LoadingBlock()
     }
+}
+
+@Composable
+private fun AuthorizationState.AuthorizationError.toText() = when (this) {
+    AuthorizationState.AuthorizationError.EMPTY_LOGIN ->
+        stringResource(id = R.string.empty_login_error)
+    AuthorizationState.AuthorizationError.EMPTY_PASSWORD ->
+        stringResource(id = R.string.empty_password_error)
+    AuthorizationState.AuthorizationError.INVALID_CREDENTIALS ->
+        stringResource(id = R.string.invalid_credentials_error)
+    AuthorizationState.AuthorizationError.NETWORK_ERROR ->
+        stringResource(id = R.string.network_error_short)
+    AuthorizationState.AuthorizationError.IDLE -> ""
 }
 
 @Composable

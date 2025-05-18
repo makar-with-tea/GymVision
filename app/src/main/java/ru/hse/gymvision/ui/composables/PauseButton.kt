@@ -14,10 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.videolan.libvlc.MediaPlayer
+import ru.hse.gymvision.R
 
 @Composable
 fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
@@ -44,7 +46,7 @@ fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
         Icon(
             modifier = Modifier.size(50.dp),
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-            contentDescription = "пауза/воспроизведение",
+            contentDescription = stringResource(R.string.pause_description),
             tint = MaterialTheme.colorScheme.primary
         )
     }

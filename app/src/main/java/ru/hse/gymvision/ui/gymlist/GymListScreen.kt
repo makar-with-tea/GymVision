@@ -76,7 +76,7 @@ fun GymListScreen(
 
         is GymListState.Error -> {
             ErrorState(
-                errorText = (state.value as GymListState.Error).message,
+                errorText = stringResource(R.string.network_error_long),
                 onDismiss = {
                     viewModel.obtainEvent(GymListEvent.GetGymList)
                 }

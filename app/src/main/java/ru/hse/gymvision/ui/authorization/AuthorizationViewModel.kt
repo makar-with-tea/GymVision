@@ -53,8 +53,7 @@ class AuthorizationViewModel(
 
         if (login.isEmpty()) {
             _state.value = (_state.value as AuthorizationState.Main).copy(
-                loginError = true,
-                loginErrorText = "Поле не может быть пустым",
+                loginError = AuthorizationState.AuthorizationError.EMPTY_LOGIN,
                 loading = false
             )
             isError = true
@@ -62,8 +61,7 @@ class AuthorizationViewModel(
 
         if (password.isEmpty()) {
             _state.value = (_state.value as AuthorizationState.Main).copy(
-                passwordError = true,
-                passwordErrorText = "Поле не может быть пустым",
+                passwordError = AuthorizationState.AuthorizationError.EMPTY_PASSWORD,
                 loading = false
             )
             isError = true
@@ -79,9 +77,8 @@ class AuthorizationViewModel(
                 if (!res) {
                     withContext(Dispatchers.Main) {
                         _state.value = (_state.value as AuthorizationState.Main).copy(
-                            loginError = true,
-                            passwordError = true,
-                            loginErrorText = "Неверный логин или пароль",
+                            passwordError =
+                                AuthorizationState.AuthorizationError.INVALID_CREDENTIALS,
                             loading = false
                         )
                     }
@@ -94,9 +91,8 @@ class AuthorizationViewModel(
                 Log.e("AuthorizationViewModel", "Login error: ${e.message}")
                 withContext(Dispatchers.Main) {
                     _state.value = (_state.value as AuthorizationState.Main).copy(
-                        loginError = true,
-                        passwordError = true,
-                        passwordErrorText = "Ошибка сети",
+                        passwordError =
+                            AuthorizationState.AuthorizationError.NETWORK_ERROR,
                         loading = false
                     )
                 }

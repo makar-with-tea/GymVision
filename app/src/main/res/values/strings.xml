@@ -53,4 +53,43 @@
     <string name="repeat_password_label">Повторите пароль</string>
     <string name="already_have_account">Уже есть аккаунт?</string>
 
+    <string name="name_length_error">Имя должно быть длиной от 2 до 20 символов</string>
+    <string name="surname_length_error">Фамилия должна быть длиной от 2 до 20 символов</string>
+    <string name="login_length_error">Логин должен быть длиной от 5 до 15 символов</string>
+    <string name="login_content_error">Логин должен содержать только латинские буквы и цифры</string>
+    <string name="password_length_error">Пароль должен быть длиной не менее 8 символов</string>
+    <string name="password_content_error">Пароль должен содержать латинские буквы и цифры</string>
+    <string name="password_mismatch_error">Пароли не совпадают</string>
+    <string name="login_taken_error">Данный логин уже занят</string>
+    <string name="registration_failed_error">Ошибка регистрации</string>
+
+    <string name="empty_login_error">"Логин не может быть пустым</string>
+    <string name="empty_password_error">Пароль не может быть пустым</string>
+    <string name="invalid_credentials_error">Неверный логин или пароль</string>
+
+    <string name="network_error_short">Ошибка сети</string>
+    <string name="network_error_long">Не удалось соединиться с сервером. Проверьте подключение к интернету.</string>
+
+    <string name="gym_not_found_error">Зал не найден, выберите другой зал.</string>
+
+    <string name="password_incorrect_error">Неверный пароль</string>
+    <string name="change_failed_error">Ошибка изменения информации</string>
+    <string name="account_not_found_error">Аккаунт не найден</string>
+    <string name="account_delete_error">Не удалось удалить аккаунт</string>
+
+    <string name="turn_visibility_off_description">Сделать пароль невидимым</string>
+    <string name="turn_visibility_on_description">Сделать пароль видимым</string>
+    <string name="pause_description">Пауза/воспроизведение</string>
+    <string name="rotate_camera_left_description">Повернуть камеру влево</string>
+    <string name="rotate_camera_right_description">Повернуть камеру вправо</string>
+    <string name="move_camera_up_description">Поднять камеру</string>
+    <string name="move_camera_down_description">Опустить камеру</string>
+    <string name="zoom_out_description">Приблизить камеру</string>
+    <string name="zoom_in_description">Отдалить камеру</string>
+    <string name="make_main_camera_description">Сделать главной камерой</string>
+    <string name="delete_camera_description">Удалить камеру</string>
+    <string name="ai_analysis_description">Включить/выключить AI-анализ</string>
+
+    <string name="vlc_error">Ошибка в VLC</string>
+    <string name="confirmation">ОК</string>
 </resources>

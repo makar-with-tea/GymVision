@@ -9,9 +9,7 @@ sealed class GymListState {
     ) : GymListState()
 
     data object Loading : GymListState()
-    data class Error(
-        val message: String
-    ) : GymListState()
+    data object Error : GymListState()
 }
 
 sealed class GymListEvent {
