@@ -93,4 +93,6 @@
 
     <string name="vlc_error">Ошибка в VLC</string>
     <string name="confirmation">ОК</string>
+
+    <string name="repeat_new_password_label">Повторите новый пароль</string>
 </resources>

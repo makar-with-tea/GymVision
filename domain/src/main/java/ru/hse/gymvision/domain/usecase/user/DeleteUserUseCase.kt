@@ -8,7 +8,7 @@ class DeleteUserUseCase(
     private val sharedPrefRepository: SharedPrefRepository
 ) {
     suspend fun execute(login: String) {
-        sharedPrefRepository.clearInfo()
         globalRepository.deleteUser(login)
+        sharedPrefRepository.clearInfo()
     }
 }

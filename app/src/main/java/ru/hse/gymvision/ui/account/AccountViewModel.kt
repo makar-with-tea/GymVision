@@ -13,6 +13,8 @@ import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
 import ru.hse.gymvision.domain.usecase.user.LogoutUseCase
 import ru.hse.gymvision.domain.usecase.user.UpdateUserUseCase
 
+private const val TAG = "AccountViewModel"
+
 class AccountViewModel(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
@@ -53,6 +55,10 @@ class AccountViewModel(
                 showNewPassword()
             }
 
+            is AccountEvent.ShowNewPasswordRepeatButtonClicked -> {
+                showNewPasswordRepeat()
+            }
+
             is AccountEvent.EditNameButtonClicked -> {
                 editName()
             }
@@ -78,6 +84,7 @@ class AccountViewModel(
     private fun getUserInfo() {
         _state.value = AccountState.Loading
         viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG, "getUserInfo: state = ${_state.value}")
             try {
                 val userInfo = getUserInfoUseCase.execute() ?: run {
                     withContext(Dispatchers.Main) {
@@ -87,7 +94,7 @@ class AccountViewModel(
                     }
                     return@launch
                 }
-                Log.d("AccountViewModel", "getUserInfo: userInfo = $userInfo")
+                Log.d(TAG, "getUserInfo: userInfo = $userInfo")
                 withContext(Dispatchers.Main) {
                     _state.value = AccountState.Main(
                         name = userInfo.name,
@@ -98,7 +105,7 @@ class AccountViewModel(
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Log.e("AccountViewModel", "getUserInfo: error = $e")
+                    Log.e(TAG, "getUserInfo: error = $e")
                     _state.value = AccountState.Error(
                         error = AccountState.AccountError.NETWORK
                     )
@@ -144,7 +151,7 @@ class AccountViewModel(
                     login = (_state.value as AccountState.EditName).login,
                     password = (_state.value as AccountState.EditName).password
                 )
-                Log.d("AccountViewModel", "saveName: state = ${_state.value}")
+                Log.d(TAG, "saveName: state = ${_state.value}")
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     _state.value = AccountState.EditName(
@@ -153,6 +160,7 @@ class AccountViewModel(
                         login = (_state.value as AccountState.EditName).login,
                         password = (_state.value as AccountState.EditName).password,
                         surnameError = AccountState.AccountError.NETWORK,
+                        nameError = AccountState.AccountError.NETWORK,
                         isLoading = false
                     )
                 }
@@ -199,19 +207,29 @@ class AccountViewModel(
     private fun showOldPassword() {
         if (_state.value is AccountState.ChangePassword) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                oldPasswordVisibility = !(_state.value as AccountState.ChangePassword).oldPasswordVisibility)
+                oldPasswordVisibility =
+                    !(_state.value as AccountState.ChangePassword).oldPasswordVisibility)
         }
     }
 
     private fun showNewPassword() {
         if (_state.value is AccountState.ChangePassword) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                newPasswordRepeatVisibility = !(_state.value as AccountState.ChangePassword).newPasswordRepeatVisibility)
+                newPasswordRepeatVisibility =
+                    !(_state.value as AccountState.ChangePassword).newPasswordRepeatVisibility)
+        }
+    }
+
+    private fun showNewPasswordRepeat() {
+        if (_state.value is AccountState.ChangePassword) {
+            _state.value = (_state.value as AccountState.ChangePassword).copy(
+                newPasswordVisibility =
+                    !(_state.value as AccountState.ChangePassword).newPasswordVisibility)
         }
     }
 
     private fun editName() {
-        Log.d("AccountViewModel", "editName: state = ${_state.value}")
+        Log.d(TAG, "editName: state = ${_state.value}")
         if (_state.value !is AccountState.Main) {
             return
         }
@@ -221,7 +239,7 @@ class AccountViewModel(
             login = (_state.value as AccountState.Main).login,
             password = (_state.value as AccountState.Main).password
         )
-        Log.d("AccountViewModel", "editName: state = ${_state.value}")
+        Log.d(TAG, "editName: state = ${_state.value}")
     }
 
     private fun editPassword() {
@@ -236,17 +254,21 @@ class AccountViewModel(
 
     private fun deleteAccount(login: String) {
         if (_state.value !is AccountState.Main) return
-        _state.value = AccountState.Loading
+        _state.value = (_state.value as AccountState.Main).copy(
+            isLoading = true
+        )
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                Log.d(TAG, "deleting account: state = ${_state.value}")
                 deleteUserUseCase.execute(login)
                 withContext(Dispatchers.Main) {
                     _action.value = AccountAction.NavigateToAuthorization
+                    Log.d(TAG, "deletion finished: action = ${_action.value}")
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    _state.value = AccountState.Error(
-                        error = AccountState.AccountError.ACCOUNT_DELETE
+                    _state.value = AccountState.DeletionError(
+                        login = (state.value as AccountState.Main).login
                     )
                 }
             }
@@ -258,9 +280,11 @@ class AccountViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 logoutUseCase.execute()
+                Log.d(TAG, "logout finished: state = ${_state.value}")
             } finally {
                 withContext(Dispatchers.Main) {
                     _action.value = AccountAction.NavigateToAuthorization
+                    Log.d(TAG, "logout finished: action = ${_action.value}")
                 }
             }
         }

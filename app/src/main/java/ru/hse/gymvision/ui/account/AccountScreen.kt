@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -27,6 +26,7 @@ import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPasswordField
+import ru.hse.gymvision.ui.composables.MyTextField
 import ru.hse.gymvision.ui.composables.MyTitle
 
 @Composable
@@ -48,14 +48,21 @@ fun AccountScreen(
 
     when (state.value) {
         is AccountState.Main -> {
-            MainState(state.value as AccountState.Main,
+            MainState(
+                state.value as AccountState.Main,
                 onEditName = { viewModel.obtainEvent(AccountEvent.EditNameButtonClicked) },
-                onChangePassword = { viewModel.obtainEvent(AccountEvent.EditPasswordButtonClicked) },
-                onDeleteAccount = { viewModel.obtainEvent(AccountEvent.DeleteAccountButtonClicked(
-                    (state.value as AccountState.Main).login
-                )) },
+                onChangePassword = {
+                    viewModel.obtainEvent(AccountEvent.EditPasswordButtonClicked)
+                },
+                onDeleteAccount = {
+                    viewModel.obtainEvent(
+                        AccountEvent.DeleteAccountButtonClicked(
+                            (state.value as AccountState.Main).login
+                        )
+                    )
+                },
                 onLogout = { viewModel.obtainEvent(AccountEvent.LogoutButtonClicked) }
-                )
+            )
         }
 
         is AccountState.Loading -> {
@@ -75,12 +82,18 @@ fun AccountScreen(
             ChangePasswordState(
                 state.value as AccountState.ChangePassword,
                 onSavePassword = { newPassword, oldPassword, realPassword ->
-                    viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword,
-                        oldPassword, realPassword
-                        ))
+                    viewModel.obtainEvent(
+                        AccountEvent.SavePasswordButtonClicked(
+                            newPassword,
+                            oldPassword, realPassword
+                        )
+                    )
                 },
                 onShowOldPassword = { viewModel.obtainEvent(AccountEvent.ShowOldPasswordButtonClicked) },
-                onShowNewPassword = { viewModel.obtainEvent(AccountEvent.ShowNewPasswordButtonClicked) }
+                onShowNewPassword = { viewModel.obtainEvent(AccountEvent.ShowNewPasswordButtonClicked) },
+                onShowNewPasswordRepeat = {
+                    viewModel.obtainEvent(AccountEvent.ShowNewPasswordRepeatButtonClicked)
+                }
             )
         }
 
@@ -93,10 +106,26 @@ fun AccountScreen(
             ErrorState(
                 errorText = (state.value as AccountState.Error).error.toText(),
                 onDismiss = {
-                    viewModel.obtainEvent(AccountEvent.GetUserInfo)
+                    viewModel.obtainEvent(AccountEvent.LogoutButtonClicked)
                 },
                 onConfirm = {
                     viewModel.obtainEvent(AccountEvent.GetUserInfo)
+                }
+            )
+        }
+
+        is AccountState.DeletionError -> {
+            ErrorState(
+                errorText = stringResource(R.string.account_delete_error),
+                onDismiss = {
+                    viewModel.obtainEvent(AccountEvent.GetUserInfo)
+                },
+                onConfirm = {
+                    viewModel.obtainEvent(
+                        AccountEvent.DeleteAccountButtonClicked(
+                            (state.value as AccountState.DeletionError).login
+                        )
+                    )
                 }
             )
         }
@@ -185,14 +214,21 @@ fun EditNameState(state: AccountState.EditName,
         val name = remember { mutableStateOf(state.name) }
         val surname = remember { mutableStateOf(state.surname) }
         MyTitle(text = stringResource(id = R.string.edit_name))
-        TextField(
+        MyTextField(
             value = name.value,
             onValueChange = { name.value = it },
-            label = { Text(stringResource(id = R.string.name)) })
-        TextField(
+            label = stringResource(id = R.string.name),
+            isError = state.nameError != AccountState.AccountError.IDLE,
+            errorText = if (state.nameError != AccountState.AccountError.NETWORK)
+                state.nameError.toText() else null
+        )
+        MyTextField(
             value = surname.value,
             onValueChange = { surname.value = it },
-            label = { Text(stringResource(id = R.string.surname)) })
+            label = stringResource(id = R.string.surname),
+            isError = state.surnameError != AccountState.AccountError.IDLE,
+            errorText = state.surnameError.toText()
+        )
         Button(onClick = { onSaveName(name.value, surname.value) }) {
             Text(stringResource(id = R.string.save))
         }
@@ -204,10 +240,12 @@ fun ChangePasswordState(
     state: AccountState.ChangePassword,
     onSavePassword: (String, String, String) -> Unit,
     onShowOldPassword: () -> Unit,
-    onShowNewPassword: () -> Unit
+    onShowNewPassword: () -> Unit,
+    onShowNewPasswordRepeat: () -> Unit
 ) {
     val oldPassword: MutableState<String> = remember { mutableStateOf(state.oldPassword) }
     val newPassword: MutableState<String> = remember { mutableStateOf(state.newPassword) }
+    val newPasswordRepeat: MutableState<String> = remember { mutableStateOf(state.newPassword) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -218,21 +256,33 @@ fun ChangePasswordState(
     ) {
         MyTitle(text = stringResource(id = R.string.change_password_title))
 
-
         MyPasswordField(
-            value = "",
+            value = oldPassword.value,
             label = stringResource(id = R.string.old_password),
-            isError = false,
+            isError = state.oldPasswordError != AccountState.AccountError.IDLE,
+            errorText = if (state.oldPasswordError != AccountState.AccountError.NETWORK)
+                state.oldPasswordError.toText() else null,
             onValueChange = { oldPassword.value = it },
             onIconClick = { onShowOldPassword() },
             passwordVisibility = state.oldPasswordVisibility
         )
         MyPasswordField(
-            value = "",
+            value = newPassword.value,
             label = stringResource(id = R.string.new_password),
-            isError = false,
+            isError = state.newPasswordError != AccountState.AccountError.IDLE,
+            errorText = if (state.newPasswordError != AccountState.AccountError.NETWORK)
+                state.newPasswordError.toText() else null,
             onValueChange = { newPassword.value = it },
             onIconClick = { onShowNewPassword() },
+            passwordVisibility = state.newPasswordVisibility
+        )
+        MyPasswordField(
+            value = newPasswordRepeat.value,
+            label = stringResource(id = R.string.repeat_new_password_label),
+            isError = state.newPasswordRepeatError != AccountState.AccountError.IDLE,
+            errorText = state.newPasswordRepeatError.toText(),
+            onValueChange = { newPasswordRepeat.value = it },
+            onIconClick = { onShowNewPasswordRepeat() },
             passwordVisibility = state.newPasswordRepeatVisibility
         )
         Button(onClick = {
@@ -265,16 +315,16 @@ fun ErrorState(
         MyAlertDialog(
             title = stringResource(id = R.string.loading_error),
             text = errorText ?: stringResource(id = R.string.unknown_error),
-            onConfirm = { onConfirm() },
-            onDismissRequest = { onDismiss() },
-            confirmButtonText = stringResource(id = R.string.reload_button_text),
+            onConfirm = onConfirm,
+            onDismissRequest = onDismiss,
+            confirmButtonText = stringResource(id = R.string.retry_button_text)
         )
     }
 }
 
 @Composable
 fun AccountState.AccountError.toText() = when (this) {
-    AccountState.AccountError.IDLE -> ""
+    AccountState.AccountError.IDLE -> null
     AccountState.AccountError.NAME_LENGTH -> stringResource(id = R.string.name_length_error)
     AccountState.AccountError.SURNAME_LENGTH -> stringResource(id = R.string.surname_length_error)
     AccountState.AccountError.PASSWORD_LENGTH -> stringResource(id = R.string.password_length_error)
@@ -295,7 +345,4 @@ fun AccountState.AccountError.toText() = when (this) {
 
     AccountState.AccountError.ACCOUNT_NOT_FOUND ->
         stringResource(id = R.string.account_not_found_error)
-
-    AccountState.AccountError.ACCOUNT_DELETE ->
-        stringResource(id = R.string.account_delete_error)
 }

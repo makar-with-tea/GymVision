@@ -166,6 +166,10 @@ class RegistrationViewModel(
                         login = login,
                         password = password,
                         loginError = RegistrationState.RegistrationError.NETWORK,
+                        surnameError = RegistrationState.RegistrationError.NETWORK,
+                        nameError = RegistrationState.RegistrationError.NETWORK,
+                        passwordError = RegistrationState.RegistrationError.NETWORK,
+                        passwordRepeatError = RegistrationState.RegistrationError.NETWORK,
                     )
                 }
             } finally {

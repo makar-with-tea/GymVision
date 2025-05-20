@@ -113,7 +113,8 @@ fun MainState(
             value = name.value,
             label = stringResource(R.string.name_label),
             isError = state.nameError != RegistrationState.RegistrationError.IDLE,
-            errorText = state.nameError.getText()
+            errorText = if (state.nameError != RegistrationState.RegistrationError.NETWORK)
+                state.nameError.getText() else null
         ) {
             name.value = it
         }
@@ -121,7 +122,8 @@ fun MainState(
             value = surname.value,
             label = stringResource(R.string.surname_label),
             isError = state.surnameError != RegistrationState.RegistrationError.IDLE,
-            errorText = state.surnameError.getText()
+            errorText = if (state.surnameError != RegistrationState.RegistrationError.NETWORK)
+                state.surnameError.getText() else null
         ) {
             surname.value = it
         }
@@ -129,7 +131,8 @@ fun MainState(
             value = login.value,
             label = stringResource(R.string.login_label),
             isError = state.loginError != RegistrationState.RegistrationError.IDLE,
-            errorText = state.loginError.getText()
+            errorText = if (state.loginError != RegistrationState.RegistrationError.NETWORK)
+                state.loginError.getText() else null
         ) {
             login.value = it
         }
@@ -137,7 +140,8 @@ fun MainState(
             value = password.value,
             label = stringResource(R.string.password_label),
             isError = state.passwordError != RegistrationState.RegistrationError.IDLE,
-            errorText = state.passwordError.getText(),
+            errorText = if (state.passwordError != RegistrationState.RegistrationError.NETWORK)
+                state.passwordError.getText() else null,
             onValueChange = { password.value = it },
             onIconClick = { onShowPasswordClick() },
             passwordVisibility = state.passwordVisibility

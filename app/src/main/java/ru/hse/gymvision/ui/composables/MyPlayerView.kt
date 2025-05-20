@@ -144,7 +144,7 @@ fun mainPlayerView(
                 iconId = if (isAIEnabled.value)
                     R.drawable.ic_sparkles_crossed else R.drawable.ic_sparkles,
                 contentDescription = stringResource(R.string.ai_analysis_description),
-                alignment = Alignment.BottomEnd,
+                alignment = Alignment.BottomStart,
             ) {
                 isAIEnabled.value = !isAIEnabled.value
                 onChangeAi(isAIEnabled.value)
@@ -189,12 +189,6 @@ fun secondaryPlayerView(
 
     Box(
         modifier = Modifier
-            .padding(
-                start = 0.dp,
-                end = 0.dp,
-                bottom = 50.dp,
-                top = 0.dp
-            )
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .pointerInput(Unit) {

@@ -92,7 +92,8 @@ class AuthorizationViewModel(
                 withContext(Dispatchers.Main) {
                     _state.value = (_state.value as AuthorizationState.Main).copy(
                         passwordError =
-                            AuthorizationState.AuthorizationError.NETWORK_ERROR,
+                            AuthorizationState.AuthorizationError.NETWORK,
+                        loginError = AuthorizationState.AuthorizationError.NETWORK,
                         loading = false
                     )
                 }

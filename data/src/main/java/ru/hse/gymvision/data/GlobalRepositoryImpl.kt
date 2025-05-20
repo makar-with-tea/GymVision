@@ -28,13 +28,13 @@ class GlobalRepositoryImpl(
 
     override suspend fun getGymScheme(id: Int): GymSchemeModel? {
         if (Random.nextBoolean())
-            throw Exception("aaa")
+            throw Exception("get gym scheme repo")
         return gymSchemeExample
     }
 
     override suspend fun getUserInfo(login: String): UserModel? {
         if (Random.nextBoolean())
-            throw Exception("aaa")
+            throw Exception("get user repo")
         if (userExample.login == login) {
             return userExample
         }

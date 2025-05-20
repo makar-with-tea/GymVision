@@ -105,7 +105,8 @@ fun MainState(
                 value = login.value,
                 label = stringResource(id = R.string.login_label),
                 isError = state.loginError != AuthorizationState.AuthorizationError.IDLE,
-                errorText = state.loginError.toText()
+                errorText = if (state.loginError != AuthorizationState.AuthorizationError.NETWORK)
+                    state.loginError.toText() else null
             ) {
                 login.value = it
             }
@@ -158,7 +159,7 @@ private fun AuthorizationState.AuthorizationError.toText() = when (this) {
         stringResource(id = R.string.empty_password_error)
     AuthorizationState.AuthorizationError.INVALID_CREDENTIALS ->
         stringResource(id = R.string.invalid_credentials_error)
-    AuthorizationState.AuthorizationError.NETWORK_ERROR ->
+    AuthorizationState.AuthorizationError.NETWORK ->
         stringResource(id = R.string.network_error_short)
     AuthorizationState.AuthorizationError.IDLE -> ""
 }

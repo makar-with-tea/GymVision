@@ -13,7 +13,6 @@ sealed class AccountState {
         CHANGE_FAILED,
         ACCOUNT_NOT_FOUND,
         NETWORK,
-        ACCOUNT_DELETE,
         IDLE
     }
     data object Idle : AccountState()
@@ -41,6 +40,7 @@ sealed class AccountState {
         val oldPassword: String = "",
         val newPassword: String = "",
         val oldPasswordVisibility: Boolean = false,
+        val newPasswordVisibility: Boolean = false,
         val newPasswordRepeatVisibility: Boolean = false,
         val name: String = "",
         val surname: String = "",
@@ -57,6 +57,10 @@ sealed class AccountState {
     data class Error(
         val error: AccountError = AccountError.IDLE,
     ) : AccountState()
+
+    data class DeletionError(
+        val login: String,
+    ): AccountState()
 }
 
 sealed class AccountEvent {
@@ -73,6 +77,7 @@ sealed class AccountEvent {
 
     data object ShowOldPasswordButtonClicked : AccountEvent()
     data object ShowNewPasswordButtonClicked : AccountEvent()
+    data object ShowNewPasswordRepeatButtonClicked : AccountEvent()
     data object EditNameButtonClicked : AccountEvent()
     data object EditPasswordButtonClicked: AccountEvent()
     data class DeleteAccountButtonClicked(val login: String): AccountEvent()

@@ -5,7 +5,7 @@ sealed class AuthorizationState {
         EMPTY_LOGIN,
         EMPTY_PASSWORD,
         INVALID_CREDENTIALS,
-        NETWORK_ERROR,
+        NETWORK,
         IDLE
     }
     data class Main(
