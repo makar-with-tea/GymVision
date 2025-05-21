@@ -1,36 +1,65 @@
 package ru.hse.gymvision.data
 
+import ru.hse.gymvision.data.api.GlobalApiService
+import ru.hse.gymvision.data.model.CameraInfoDTO
+import ru.hse.gymvision.data.model.UserDTO
+import ru.hse.gymvision.domain.CameraMovement
+import ru.hse.gymvision.domain.CameraRotation
+import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.domain.exampledata.gymListExample
 import ru.hse.gymvision.domain.exampledata.gymSchemeExample
 import ru.hse.gymvision.domain.exampledata.userExample
+import ru.hse.gymvision.domain.model.ClickableCamera
+import ru.hse.gymvision.domain.model.ClickableTrainer
 import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.domain.model.GymSchemeModel
 import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.repos.GlobalRepository
 import kotlin.random.Random
 
-class GlobalRepositoryImpl: GlobalRepository {
+class GlobalRepositoryImpl(
+//    private val apiService: GlobalApiService
+) : GlobalRepository {
     override suspend fun getGymList(): List<GymInfoModel> {
+        if (Random.nextBoolean())
+            throw Exception("aaa")
         return gymListExample
     }
 
     override suspend fun getGymScheme(id: Int): GymSchemeModel? {
+        if (Random.nextBoolean())
+            throw Exception("get gym scheme repo")
         return gymSchemeExample
     }
 
-    override suspend fun getUserInfo(): UserModel? {
-        return userExample
+    override suspend fun getUserInfo(login: String): UserModel? {
+        if (Random.nextBoolean())
+            throw Exception("get user repo")
+        if (userExample.login == login) {
+            return userExample
+        }
+        return null
     }
 
     override suspend fun login(login: String, password: String): Boolean {
-        return true
+        if (Random.nextBoolean())
+            throw Exception("aaa")
+        return userExample.login == login && userExample.password == password
     }
 
     override suspend fun register(name: String, surname: String, login: String, password: String): Boolean {
+        userExample = userExample.copy(
+            name = name,
+            surname = surname,
+            login = login,
+            password = password
+        )
         return true
     }
 
     override suspend fun updateUser(name: String?, surname: String?, login: String, password: String?) {
+        if (Random.nextBoolean())
+            throw Exception("aaa")
         userExample = userExample.copy(
             name = name ?: userExample.name,
             surname = surname ?: userExample.surname,
@@ -39,15 +68,38 @@ class GlobalRepositoryImpl: GlobalRepository {
         )
     }
 
-    override suspend fun logout() {
-        // а надо ли оно мне
-    }
-
     override suspend fun deleteUser(login: String) {
-        // well.
+        if (Random.nextBoolean())
+            throw Exception("aaa")
+        userExample = UserModel(
+            name = "",
+            surname = "",
+            login = "",
+            password = ""
+        )
     }
 
-    override suspend fun checkCameraAccessibility(id: Int): Boolean {
+    override suspend fun checkLoginAvailable(login: String): Boolean {
+        return userExample.login != login
+    }
+
+    override suspend fun checkCameraAccessibility(gymId: Int, cameraId: Int): Boolean {
         return Random.nextBoolean()
+    }
+
+    override suspend fun getCameraLink(gymId: Int, cameraId: Int): String {
+        return "https://media.geeksforgeeks.org/wp-content/uploads/20201217163353/Screenrecorder-2020-12-17-16-32-03-350.mp4"
+    }
+
+    override suspend fun moveCamera(gymId: Int, cameraId: Int, direction: CameraMovement) {
+    }
+
+    override suspend fun rotateCamera(gymId: Int, cameraId: Int, direction: CameraRotation) {
+    }
+
+    override suspend fun zoomCamera(gymId: Int, cameraId: Int, direction: CameraZoom) {
+    }
+
+    override suspend fun changeAiState(gymId: Int, cameraId: Int, isAiEnabled: Boolean) {
     }
 }

@@ -19,10 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
+import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyPasswordField
 import ru.hse.gymvision.ui.composables.MyTextField
@@ -99,30 +100,37 @@ fun MainState(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            MyTitle("Авторизация")
-            MyTextField(value = login.value, label = "Логин", isError = false) {
+            MyTitle(stringResource(id = R.string.authorization_title))
+            MyTextField(
+                value = login.value,
+                label = stringResource(id = R.string.login_label),
+                isError = state.loginError != AuthorizationState.AuthorizationError.IDLE,
+                errorText = if (state.loginError != AuthorizationState.AuthorizationError.NETWORK)
+                    state.loginError.toText() else null
+            ) {
                 login.value = it
             }
             MyPasswordField(
                 value = password.value,
-                label = "Пароль",
-                isError = false,
+                label = stringResource(id = R.string.password_label),
+                isError = state.passwordError != AuthorizationState.AuthorizationError.IDLE,
                 onValueChange = { password.value = it },
                 onIconClick = {
                     onShowPasswordClick()
                 },
-                passwordVisibility = state.passwordVisibility
+                passwordVisibility = state.passwordVisibility,
+                errorText = state.passwordError.toText()
             )
             Button(onClick = {
                 onLoginClick(login.value, password.value)
             }) {
-                Text("Войти")
+                Text(stringResource(id = R.string.login_button))
             }
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Нет аккаунта?")
+                Text(stringResource(id = R.string.no_account))
                 TextButton(
                     onClick = {
                         onRegistrationClick(login.value, password.value)
@@ -132,7 +140,7 @@ fun MainState(
                         .wrapContentSize(),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text("Зарегистрироваться", modifier = Modifier.padding(0.dp))
+                    Text(stringResource(id = R.string.register_button), modifier = Modifier.padding(0.dp))
                 }
             }
         }
@@ -141,6 +149,19 @@ fun MainState(
     if (state.loading) {
         LoadingBlock()
     }
+}
+
+@Composable
+private fun AuthorizationState.AuthorizationError.toText() = when (this) {
+    AuthorizationState.AuthorizationError.EMPTY_LOGIN ->
+        stringResource(id = R.string.empty_login_error)
+    AuthorizationState.AuthorizationError.EMPTY_PASSWORD ->
+        stringResource(id = R.string.empty_password_error)
+    AuthorizationState.AuthorizationError.INVALID_CREDENTIALS ->
+        stringResource(id = R.string.invalid_credentials_error)
+    AuthorizationState.AuthorizationError.NETWORK ->
+        stringResource(id = R.string.network_error_short)
+    AuthorizationState.AuthorizationError.IDLE -> ""
 }
 
 @Composable

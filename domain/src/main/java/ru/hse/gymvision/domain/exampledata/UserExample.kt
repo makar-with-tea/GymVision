@@ -6,5 +6,5 @@ var userExample = UserModel(
     name = "John",
     surname = "Doe",
     login = "johndoe",
-    password = "password",
+    password = "password1",
 )

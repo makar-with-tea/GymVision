@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,14 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import ru.hse.gymvision.R
+import ru.hse.gymvision.ui.theme.GymVisionTheme
 
 @Composable
 fun MyTitle(
@@ -49,6 +53,7 @@ fun MyTextField(
     label: String,
     isError: Boolean,
     enabled: Boolean = true,
+    errorText: String? = null,
     onValueChange: (String) -> Unit
 ) {
     TextField(
@@ -57,7 +62,8 @@ fun MyTextField(
         label = { Text(label) },
         isError = isError,
         enabled = enabled,
-        onValueChange = onValueChange
+        onValueChange = onValueChange,
+        supportingText = { errorText?.let { Text(it) } }
     )
 }
 
@@ -68,25 +74,33 @@ fun MyPasswordField(
     isError: Boolean,
     onValueChange: (String) -> Unit,
     onIconClick: () -> Unit,
-    passwordVisibility: Boolean
+    passwordVisibility: Boolean,
+    errorText: String? = null
 ) {
     TextField(
         modifier = Modifier.padding(8.dp),
         value = value,
         label = { Text(label) },
         isError = isError,
+        supportingText = { errorText?.let { Text(it) } },
         onValueChange = onValueChange,
         trailingIcon = {
             IconButton(onClick = onIconClick) {
                 Icon(
-                    painterResource(id =
-                    if (passwordVisibility) R.drawable.ic_visibility
-                    else R.drawable.ic_visibility_off),
-                    contentDescription = null
+                    painterResource(
+                        id =
+                            if (passwordVisibility) R.drawable.ic_visibility
+                            else R.drawable.ic_visibility_off
+                    ),
+                    contentDescription =
+                        if (passwordVisibility)
+                            stringResource(R.string.turn_visibility_off_description)
+                        else stringResource(R.string.turn_visibility_on_description),
                 )
             }
         },
-        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
+        visualTransformation =
+            if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     )
 }
 
@@ -104,31 +118,31 @@ fun LoadingBlock() {
 }
 
 @Composable
-fun LoadingScreen() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
 fun MyAlertDialog(
     title: String,
     text: String,
-    onDismiss: () -> Unit
+    onConfirm: () -> Unit,
+    confirmButtonText: String = stringResource(R.string.confirmation),
+    onDismissRequest: () -> Unit = onConfirm,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
         text = { Text(text = text) },
         confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("OK")
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+            ) {
+                Text(text = confirmButtonText)
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        titleContentColor = MaterialTheme.colorScheme.error,
+        textContentColor = MaterialTheme.colorScheme.onErrorContainer,
     )
 }
 
@@ -174,5 +188,29 @@ fun MyPopup(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun MyAlertDialogLightPreview() {
+    GymVisionTheme {
+        MyAlertDialog(
+            title = "Title",
+            text = "Text",
+            onConfirm = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun MyAlertDialogDarkPreview() {
+    GymVisionTheme(darkTheme = true) {
+        MyAlertDialog(
+            title = "Title",
+            text = "Text",
+            onConfirm = {}
+        )
     }
 }

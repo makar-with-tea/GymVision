@@ -66,23 +66,22 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.exoplayer.dash)
-    implementation(libs.androidx.media3.ui)
-
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.media3.exoplayer.hls)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation(libs.kotlinx.serialization.json)
 
     // FLow
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
     // Koin
-    implementation("io.insert-koin:koin-androidx-compose:4.0.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.kotlinx.serialization.json.v173)
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    implementation(libs.libvlc.all)
 
     implementation(project(":domain"))
     implementation(project(":data"))

@@ -5,10 +5,10 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 import java.lang.Thread.sleep
 
 class GetGymSchemeUseCase(
-    private val repo: GlobalRepository
+    private val globalRepository: GlobalRepository
 ) {
     suspend fun execute(id: Int): GymSchemeModel? {
             sleep(1000)
-            return repo.getGymScheme(id)
+            return globalRepository.getGymScheme(id)
     }
 }

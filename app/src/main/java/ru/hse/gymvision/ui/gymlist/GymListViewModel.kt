@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.gymlist
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +24,7 @@ class GymListViewModel(
                 getGymList()
             }
             is GymListEvent.SelectGym -> {
-                selectGym(event.gym)
+                selectGym(event.gymId)
             }
             is GymListEvent.Clear -> {
                 clear()
@@ -34,15 +35,22 @@ class GymListViewModel(
     private fun getGymList() {
         _state.value = GymListState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            val gyms = getGymListUseCase.execute()
-            withContext(Dispatchers.Main) {
-                _state.value = GymListState.Main(gyms)
+            try {
+                val gyms = getGymListUseCase.execute()
+                withContext(Dispatchers.Main) {
+                    _state.value = GymListState.Main(gyms)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("GymListViewModel", "Error getting gym list:", e)
+                    _state.value = GymListState.Error
+                }
             }
         }
     }
 
-    private fun selectGym(gym: GymInfoModel) {
-        _action.value = GymListAction.NavigateToGym(gym.id)
+    private fun selectGym(gymId: Int) {
+        _action.value = GymListAction.NavigateToGym(gymId)
     }
 
     private fun clear() {

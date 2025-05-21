@@ -1,3 +1,98 @@
 <resources>
     <string name="app_name">GymVision</string>
+
+    <string name="loading_error">Ошибка загрузки</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="reload_button_text">Перезагрузить</string>
+    <string name="retry_button_text">Попробовать снова</string>
+
+    <string name="available_gyms_title">Доступные залы</string>
+    <string name="gym_avatar_description">Аватар зала</string>
+
+    <string name="my_profile_title">Мой профиль</string>
+    <string name="name">Имя</string>
+    <string name="surname">Фамилия</string>
+    <string name="login">Логин</string>
+    <string name="edit">Редактировать</string>
+    <string name="change_password">Сменить пароль</string>
+    <string name="logout">Выйти</string>
+    <string name="delete_account">Удалить аккаунт</string>
+    <string name="delete_account_title">Удаление аккаунта</string>
+    <string name="delete_account_confirmation">Вы уверены, что хотите удалить аккаунт?</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
+    <string name="edit_name">Редактирование имени</string>
+    <string name="save">Сохранить</string>
+    <string name="old_password">Старый пароль</string>
+    <string name="new_password">Новый пароль</string>
+    <string name="change_password_title">Смена пароля</string>
+
+    <string name="authorization_title">Авторизация</string>
+    <string name="login_label">Логин</string>
+    <string name="password_label">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="no_account">Нет аккаунта?</string>
+    <string name="register_button">Зарегистрироваться</string>
+
+    <string name="camera_title">Камера</string>
+    <string name="camera_plural_title">Камеры</string>
+    <string name="add_camera_button_description">Добавить камеру</string>
+
+    <string name="gym_scheme_title">Схема зала</string>
+    <string name="gym_scheme_image_description">Схема зала</string>
+    <string name="camera_icon_description">Камера</string>
+    <string name="camera_unavailable_title">Камера недоступна</string>
+    <string name="camera_unavailable_message">Камера временно недоступна. Попробуйте позже.</string>
+
+    <string name="home_icon_description">Главная</string>
+    <string name="gym_icon_description">Зал</string>
+    <string name="account_icon_description">Аккаунт</string>
+
+    <string name="registration_title">Регистрация</string>
+    <string name="name_label">Имя</string>
+    <string name="surname_label">Фамилия</string>
+    <string name="repeat_password_label">Повторите пароль</string>
+    <string name="already_have_account">Уже есть аккаунт?</string>
+
+    <string name="name_length_error">Имя должно быть длиной от 2 до 20 символов</string>
+    <string name="surname_length_error">Фамилия должна быть длиной от 2 до 20 символов</string>
+    <string name="login_length_error">Логин должен быть длиной от 5 до 15 символов</string>
+    <string name="login_content_error">Логин должен содержать только латинские буквы и цифры</string>
+    <string name="password_length_error">Пароль должен быть длиной не менее 8 символов</string>
+    <string name="password_content_error">Пароль должен содержать латинские буквы и цифры</string>
+    <string name="password_mismatch_error">Пароли не совпадают</string>
+    <string name="login_taken_error">Данный логин уже занят</string>
+    <string name="registration_failed_error">Ошибка регистрации</string>
+
+    <string name="empty_login_error">"Логин не может быть пустым</string>
+    <string name="empty_password_error">Пароль не может быть пустым</string>
+    <string name="invalid_credentials_error">Неверный логин или пароль</string>
+
+    <string name="network_error_short">Ошибка сети</string>
+    <string name="network_error_long">Не удалось соединиться с сервером. Проверьте подключение к интернету.</string>
+
+    <string name="gym_not_found_error">Зал не найден, выберите другой зал.</string>
+
+    <string name="password_incorrect_error">Неверный пароль</string>
+    <string name="change_failed_error">Ошибка изменения информации</string>
+    <string name="account_not_found_error">Аккаунт не найден</string>
+    <string name="account_delete_error">Не удалось удалить аккаунт</string>
+
+    <string name="turn_visibility_off_description">Сделать пароль невидимым</string>
+    <string name="turn_visibility_on_description">Сделать пароль видимым</string>
+    <string name="pause_description">Пауза/воспроизведение</string>
+    <string name="rotate_camera_left_description">Повернуть камеру влево</string>
+    <string name="rotate_camera_right_description">Повернуть камеру вправо</string>
+    <string name="move_camera_up_description">Поднять камеру</string>
+    <string name="move_camera_down_description">Опустить камеру</string>
+    <string name="zoom_out_description">Приблизить камеру</string>
+    <string name="zoom_in_description">Отдалить камеру</string>
+    <string name="make_main_camera_description">Сделать главной камерой</string>
+    <string name="delete_camera_description">Удалить камеру</string>
+    <string name="ai_analysis_description">Включить/выключить AI-анализ</string>
+
+    <string name="vlc_error">Ошибка в VLC</string>
+    <string name="confirmation">ОК</string>
+
+    <string name="repeat_new_password_label">Повторите новый пароль</string>
 </resources>

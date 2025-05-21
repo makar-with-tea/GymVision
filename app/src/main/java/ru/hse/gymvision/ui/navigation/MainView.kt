@@ -17,6 +17,8 @@ import ru.hse.gymvision.ui.camera.CameraScreen
 import ru.hse.gymvision.ui.gymlist.GymListScreen
 import ru.hse.gymvision.ui.gymscheme.GymSchemeScreen
 import ru.hse.gymvision.ui.registration.RegistrationScreen
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 sealed class Route(val route: String) {
     data object Authorization: Route("authorization")
@@ -25,11 +27,19 @@ sealed class Route(val route: String) {
 
     data object GymList: Route("gym_list")
 
-    data object GymScheme: Route("gym_scheme")
+    data object GymScheme: Route("gym_scheme/{gym_id}") {
+        fun createRoute(gymId: Int): String {
+            return "gym_scheme/$gymId"
+        }
+    }
 
     data object Account: Route("account")
 
-    data object Camera: Route("camera")
+    data object Camera: Route("camera/{gym_id}/{new_camera_id}") {
+        fun createRoute(gymId: Int, newCameraId: Int): String {
+            return "camera/$gymId/$newCameraId"
+        }
+    }
 }
 
 @Composable
@@ -77,6 +87,10 @@ fun MainView() {
                     AuthorizationScreen(
                         navigateToRegistration = {
                             navController.navigate(Route.Registration.route) {
+                                popUpTo(Route.Authorization.route) {
+                                    inclusive = true
+                                    saveState = false
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -95,6 +109,10 @@ fun MainView() {
                     RegistrationScreen(
                         navigateToGymList = {
                             navController.navigate(Route.GymList.route) {
+                                popUpTo(Route.Registration.route) {
+                                    inclusive = true
+                                    saveState = false
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -111,8 +129,8 @@ fun MainView() {
                 }
                 composable(Route.GymList.route) {
                     GymListScreen(
-                        navigateToGymScheme = {
-                            navController.navigate(Route.GymScheme.route) {
+                        navigateToGymScheme = { gymId: Int ->
+                            navController.navigate(Route.GymScheme.createRoute(gymId)) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -120,14 +138,24 @@ fun MainView() {
                         },
                     )
                 }
-                composable(Route.GymScheme.route) {
+
+                composable(Route.GymScheme.route) { backStackEntry ->
+                    val gymId = backStackEntry.arguments?.getString("gym_id")?.toIntOrNull()
                     GymSchemeScreen(
-                        navigateToCamera = {
-                            navController.navigate(Route.Camera.route) {
+                        id = gymId,
+                        navigateToCamera = { id: Int, newCameraId: Int ->
+                            navController.navigate(Route.Camera.createRoute(id, newCameraId)) {
                                 launchSingleTop = true
                                 restoreState = true
                             }
                             Log.d("Navigation", "Navigate to Camera from GymScheme")
+                        },
+                        navigateToGymList = {
+                            navController.navigate(Route.GymList.route) {
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            Log.d("Navigation", "Navigate to GymList from GymScheme")
                         },
                     )
                 }
@@ -147,9 +175,15 @@ fun MainView() {
                     )
                 }
                 composable(Route.Camera.route) { backStackEntry ->
-//                    val camera: Route.Camera = backStackEntry.toRoute()
-                    // todo: разобраться, что делать с несколькими камерами
+                    val gymId = backStackEntry.arguments?.getString("gym_id")?.toIntOrNull()
+                    val newCameraId = backStackEntry.arguments?.getString("new_camera_id")?.toIntOrNull()
+                    if (gymId == null) {
+                        Log.e("CameraScreen", "Gym ID is null")
+                        return@composable
+                    }
                     CameraScreen(
+                        gymId = gymId,
+                        newCameraId = newCameraId,
                         navigateToGymScheme = {
                             navController.navigate(Route.GymScheme.route) {
                                 launchSingleTop = true

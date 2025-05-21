@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
@@ -45,15 +46,19 @@ val CAMERA_SIZE = 24.dp
 @Composable
 fun GymSchemeScreen(
     id: Int? = null,
-    navigateToCamera: (Int) -> Unit,
-    viewModel: GymSchemeViewModel = koinViewModel()
+    navigateToCamera: (Int, Int) -> Unit,
+    viewModel: GymSchemeViewModel = koinViewModel(),
+    navigateToGymList: () -> Unit
 ) {
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
     when (action.value) {
         is GymSchemeAction.NavigateToCamera -> {
-            navigateToCamera(0) // todo: передать айди камеры
+            navigateToCamera(
+                (action.value as GymSchemeAction.NavigateToCamera).gymId,
+                (action.value as GymSchemeAction.NavigateToCamera).cameraId
+            )
             viewModel.obtainEvent(GymSchemeEvent.Clear)
         }
         null -> {}
@@ -64,10 +69,10 @@ fun GymSchemeScreen(
             MainState(
                 state.value as GymSchemeState.Main,
                 onCameraClicked = { cameraId ->
-                    viewModel.obtainEvent(GymSchemeEvent.CameraClicked(cameraId))
+                    viewModel.obtainEvent(GymSchemeEvent.CameraClicked(id, cameraId))
                 },
-                onTrainerClicked = { name, description, id ->
-                    viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(id, name, description, id))
+                onTrainerClicked = { name, description, trainerId ->
+                    viewModel.obtainEvent(GymSchemeEvent.TrainerClicked(name, description, trainerId))
                 },
                 onHidePopup = {
                     viewModel.obtainEvent(GymSchemeEvent.HidePopup)
@@ -84,8 +89,19 @@ fun GymSchemeScreen(
             IdleState()
             viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
         }
+        is GymSchemeState.Error -> {
+            ErrorState(
+                errorText = (state.value as GymSchemeState.Error).error.toText(),
+                onConfirm = {
+                    viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
+                },
+                onDismiss = {
+                    viewModel.obtainEvent(GymSchemeEvent.Clear)
+                    navigateToGymList()
+                }
+            )
+        }
     }
-
 }
 
 @Composable
@@ -109,7 +125,7 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = "Схема зала")
+        MyTitle(text = stringResource(R.string.gym_scheme_title))
         val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
         val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.image)
         val painter: Painter = remember(imageBitmap) {
@@ -125,7 +141,7 @@ fun MainState(
         ) {
             Image(
                 painter = painter,
-                contentDescription = "Gym scheme",
+                contentDescription = stringResource(R.string.gym_scheme_image_description),
                 modifier = Modifier
                     .wrapContentSize(Alignment.Center)
                     .onGloballyPositioned {
@@ -134,7 +150,6 @@ fun MainState(
                         imHeight = with(density) { imageSize.height.toDp() }
                     }
             )
-
 
             val clickableTrainers = gymScheme.value?.clickableTrainers ?: emptyList()
             val clickableCameras = gymScheme.value?.clickableCameras ?: emptyList()
@@ -178,12 +193,12 @@ fun MainState(
                             .size(CAMERA_SIZE)
                             .background(Color.Transparent)
                             .clickable {
-                                onCameraClicked(0) // что-то с айди придумать
+                                onCameraClicked(clickableCamera.id)
                             }
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_camera),
-                            contentDescription = "Camera",
+                            contentDescription = stringResource(R.string.camera_icon_description),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -201,17 +216,23 @@ fun MainState(
 
             if (state.showDialog) {
                 MyAlertDialog(
-                    "Камера недоступна",
-                    "Камера временно недоступна. Попробуйте позже.",
-                ) {
-                    onHideDialog()
-                }
+                    title = stringResource(R.string.camera_unavailable_title),
+                    text = stringResource(R.string.camera_unavailable_message),
+                    onConfirm = { onHideDialog() }
+                )
             }
         }
         if (state.isLoading) {
             LoadingBlock()
         }
     }
+}
+
+@Composable
+private fun GymSchemeState.GymSchemeError.toText() = when (this) {
+    GymSchemeState.GymSchemeError.GYM_NOT_FOUND -> stringResource(R.string.gym_not_found_error)
+    GymSchemeState.GymSchemeError.NETWORK_ERROR -> stringResource(R.string.network_error_short)
+    GymSchemeState.GymSchemeError.IDLE -> stringResource(R.string.unknown_error)
 }
 
 @Composable
@@ -222,4 +243,27 @@ fun LoadingState() {
 @Composable
 fun IdleState() {
     LoadingBlock()
+}
+
+@Composable
+fun ErrorState(
+    errorText: String?,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable { },
+        contentAlignment = Alignment.Center
+    ) {
+        MyAlertDialog(
+            title = stringResource(R.string.loading_error),
+            text = errorText ?: stringResource(R.string.unknown_error),
+            onConfirm = { onConfirm() },
+            onDismissRequest = { onDismiss() },
+            confirmButtonText = stringResource(R.string.reload_button_text),
+        )
+    }
 }

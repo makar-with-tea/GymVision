@@ -1,6 +1,5 @@
 package ru.hse.gymvision.ui.registration
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,26 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import org.koin.androidx.compose.koinViewModel
-import ru.hse.gymvision.ui.authorization.AuthorizationAction
-import ru.hse.gymvision.ui.authorization.AuthorizationEvent
-import ru.hse.gymvision.ui.authorization.AuthorizationState
-import ru.hse.gymvision.ui.authorization.AuthorizationViewModel
+import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyPasswordField
 import ru.hse.gymvision.ui.composables.MyTextField
@@ -58,41 +51,46 @@ fun RegistrationScreen(
         null -> {}
     }
 
-    MainState(
-        state.value as RegistrationState.Main,
-        onRegistrationClick = { name, surname, login, password ->
-            viewModel.obtainEvent(
-                RegistrationEvent.RegistrationButtonClicked(
-                    name,
-                    surname,
-                    login,
-                    password
+    when (state.value) {
+        RegistrationState.Idle -> IdleState()
+        RegistrationState.Loading -> LoadingState()
+        is RegistrationState.Main -> MainState(
+            state.value as RegistrationState.Main,
+            onRegistrationClick = { name, surname, login, password, passwordRepeat ->
+                viewModel.obtainEvent(
+                    RegistrationEvent.RegistrationButtonClicked(
+                        name,
+                        surname,
+                        login,
+                        password,
+                        passwordRepeat
+                    )
                 )
-            )
-        },
-        onShowPasswordClick = {
-            viewModel.obtainEvent(RegistrationEvent.ShowPasswordButtonClicked)
-        },
-        onShowPasswordRepeatClick = {
-            viewModel.obtainEvent(RegistrationEvent.ShowPasswordRepeatButtonClicked)
-        },
-        onLoginClick = { login, password ->
-            viewModel.obtainEvent(RegistrationEvent.Clear)
-            viewModel.obtainEvent(
-                RegistrationEvent.LoginButtonClicked(
-                    login,
-                    password
+            },
+            onShowPasswordClick = {
+                viewModel.obtainEvent(RegistrationEvent.ShowPasswordButtonClicked)
+            },
+            onShowPasswordRepeatClick = {
+                viewModel.obtainEvent(RegistrationEvent.ShowPasswordRepeatButtonClicked)
+            },
+            onLoginClick = { login, password ->
+                viewModel.obtainEvent(RegistrationEvent.Clear)
+                viewModel.obtainEvent(
+                    RegistrationEvent.LoginButtonClicked(
+                        login,
+                        password
+                    )
                 )
-            )
-        }
-    )
+            }
+        )
+    }
 
 }
 
 @Composable
 fun MainState(
     state: RegistrationState.Main,
-    onRegistrationClick: (String, String, String, String) -> Unit,
+    onRegistrationClick: (String, String, String, String, String) -> Unit,
     onLoginClick: (String, String) -> Unit,
     onShowPasswordClick: () -> Unit,
     onShowPasswordRepeatClick: () -> Unit
@@ -110,56 +108,115 @@ fun MainState(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        MyTitle("Регистрация")
-        MyTextField(value = name.value, label = "Имя", isError = false) {
+        MyTitle(stringResource(R.string.registration_title))
+        MyTextField(
+            value = name.value,
+            label = stringResource(R.string.name_label),
+            isError = state.nameError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.nameError != RegistrationState.RegistrationError.NETWORK)
+                state.nameError.getText() else null
+        ) {
             name.value = it
         }
-        MyTextField(value = surname.value, label = "Фамилия", isError = false) {
+        MyTextField(
+            value = surname.value,
+            label = stringResource(R.string.surname_label),
+            isError = state.surnameError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.surnameError != RegistrationState.RegistrationError.NETWORK)
+                state.surnameError.getText() else null
+        ) {
             surname.value = it
         }
-        MyTextField(value = login.value, label = "Логин", isError = false) {
+        MyTextField(
+            value = login.value,
+            label = stringResource(R.string.login_label),
+            isError = state.loginError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.loginError != RegistrationState.RegistrationError.NETWORK)
+                state.loginError.getText() else null
+        ) {
             login.value = it
         }
         MyPasswordField(
             value = password.value,
-            label = "Пароль",
-            isError = false,
+            label = stringResource(R.string.password_label),
+            isError = state.passwordError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.passwordError != RegistrationState.RegistrationError.NETWORK)
+                state.passwordError.getText() else null,
             onValueChange = { password.value = it },
             onIconClick = { onShowPasswordClick() },
             passwordVisibility = state.passwordVisibility
         )
         MyPasswordField(
             value = passwordRepeat.value,
-            label = "Повторите пароль",
-            isError = false,
+            label = stringResource(R.string.repeat_password_label),
+            isError = state.passwordRepeatError != RegistrationState.RegistrationError.IDLE,
             onValueChange = { passwordRepeat.value = it },
             onIconClick = { onShowPasswordRepeatClick() },
-            passwordVisibility = state.passwordRepeatVisibility
+            passwordVisibility = state.passwordRepeatVisibility,
+            errorText = state.passwordRepeatError.getText()
         )
         Button(onClick = {
             onRegistrationClick(
                 name.value,
                 surname.value,
                 login.value,
-                password.value
+                password.value,
+                passwordRepeat.value
             )
         }) {
-            Text("Зарегистрироваться")
+            Text(stringResource(R.string.register_button))
         }
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Уже есть аккаунт?")
+            Text(stringResource(R.string.already_have_account))
             TextButton(
                 onClick = { onLoginClick(login.value, password.value) },
                 modifier = Modifier.wrapContentWidth(),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Text("Войти", modifier = Modifier.padding(0.dp))
+                Text(stringResource(R.string.login_button), modifier = Modifier.padding(0.dp))
             }
         }
     }
+}
+
+@Composable
+private fun RegistrationState.RegistrationError.getText(): String {
+    return when (this) {
+        RegistrationState.RegistrationError.NAME_LENGTH ->
+            stringResource(R.string.name_length_error)
+        RegistrationState.RegistrationError.SURNAME_LENGTH ->
+            stringResource(R.string.surname_length_error)
+        RegistrationState.RegistrationError.LOGIN_LENGTH ->
+            stringResource(R.string.login_length_error)
+        RegistrationState.RegistrationError.LOGIN_CONTENT ->
+            stringResource(R.string.login_content_error)
+        RegistrationState.RegistrationError.PASSWORD_LENGTH ->
+            stringResource(R.string.password_length_error)
+        RegistrationState.RegistrationError.PASSWORD_CONTENT ->
+            stringResource(R.string.password_content_error)
+        RegistrationState.RegistrationError.PASSWORD_MISMATCH ->
+            stringResource(R.string.password_mismatch_error)
+        RegistrationState.RegistrationError.LOGIN_TAKEN ->
+            stringResource(R.string.login_taken_error)
+        RegistrationState.RegistrationError.REGISTRATION_FAILED ->
+            stringResource(R.string.registration_failed_error)
+        RegistrationState.RegistrationError.NETWORK ->
+            stringResource(R.string.network_error_short)
+        RegistrationState.RegistrationError.IDLE -> ""
+    }
+}
+
+@Composable
+fun IdleState() {
+    LoadingBlock()
+}
+
+@Composable
+fun LoadingState() {
+    LoadingBlock()
 }
 
 @Preview(showBackground = true)

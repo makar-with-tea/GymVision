@@ -4,9 +4,9 @@ import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.domain.repos.GlobalRepository
 
 class GetGymListUseCase(
-    private val repo: GlobalRepository
+    private val globalRepository: GlobalRepository
 ) {
     suspend fun execute(): List<GymInfoModel> {
-        return repo.getGymList()
+        return globalRepository.getGymList()
     }
 }

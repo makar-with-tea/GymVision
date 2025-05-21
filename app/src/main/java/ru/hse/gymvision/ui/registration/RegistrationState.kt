@@ -1,6 +1,20 @@
 package ru.hse.gymvision.ui.registration
 
 sealed class RegistrationState {
+    enum class RegistrationError {
+        NAME_LENGTH,
+        SURNAME_LENGTH,
+        LOGIN_LENGTH,
+        LOGIN_CONTENT,
+        PASSWORD_LENGTH,
+        PASSWORD_CONTENT,
+        PASSWORD_MISMATCH,
+        LOGIN_TAKEN,
+        REGISTRATION_FAILED,
+        NETWORK,
+        IDLE
+    }
+
     data class Main(
         val name: String = "",
         val surname: String = "",
@@ -9,12 +23,16 @@ sealed class RegistrationState {
         val passwordVisibility: Boolean = false,
         val passwordRepeat: String = "",
         val passwordRepeatVisibility: Boolean = false,
-        val isError: Boolean = false,
+        val nameError: RegistrationError = RegistrationError.IDLE,
+        val surnameError: RegistrationError = RegistrationError.IDLE,
+        val loginError: RegistrationError = RegistrationError.IDLE,
+        val passwordError: RegistrationError = RegistrationError.IDLE,
+        val passwordRepeatError: RegistrationError = RegistrationError.IDLE,
         val loading: Boolean = false
     ) : RegistrationState()
 
-//    data object Idle : RegistrationState()
-//    data object Loading : RegistrationState()
+    data object Idle : RegistrationState()
+    data object Loading : RegistrationState()
 }
 
 sealed class RegistrationEvent {
@@ -22,7 +40,8 @@ sealed class RegistrationEvent {
         val name: String,
         val surname: String,
         val login: String,
-        val password: String
+        val password: String,
+        val passwordRepeat: String
     ): RegistrationEvent()
     data class LoginButtonClicked(
         val login: String,
