@@ -89,8 +89,12 @@ fun AccountScreen(
                         )
                     )
                 },
-                onShowOldPassword = { viewModel.obtainEvent(AccountEvent.ShowOldPasswordButtonClicked) },
-                onShowNewPassword = { viewModel.obtainEvent(AccountEvent.ShowNewPasswordButtonClicked) },
+                onShowOldPassword = {
+                    viewModel.obtainEvent(AccountEvent.ShowOldPasswordButtonClicked)
+                },
+                onShowNewPassword = {
+                    viewModel.obtainEvent(AccountEvent.ShowNewPasswordButtonClicked)
+                },
                 onShowNewPasswordRepeat = {
                     viewModel.obtainEvent(AccountEvent.ShowNewPasswordRepeatButtonClicked)
                 }

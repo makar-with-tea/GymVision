@@ -215,16 +215,16 @@ class AccountViewModel(
     private fun showNewPassword() {
         if (_state.value is AccountState.ChangePassword) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                newPasswordRepeatVisibility =
-                    !(_state.value as AccountState.ChangePassword).newPasswordRepeatVisibility)
+                newPasswordVisibility =
+                    !(_state.value as AccountState.ChangePassword).newPasswordVisibility)
         }
     }
 
     private fun showNewPasswordRepeat() {
         if (_state.value is AccountState.ChangePassword) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                newPasswordVisibility =
-                    !(_state.value as AccountState.ChangePassword).newPasswordVisibility)
+                newPasswordRepeatVisibility =
+                    !(_state.value as AccountState.ChangePassword).newPasswordRepeatVisibility)
         }
     }
 
