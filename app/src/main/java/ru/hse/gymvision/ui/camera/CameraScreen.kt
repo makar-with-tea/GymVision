@@ -30,6 +30,8 @@ import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
 
+// todo: save players
+
 @Composable
 fun CameraScreen(
     gymId: Int = -1,

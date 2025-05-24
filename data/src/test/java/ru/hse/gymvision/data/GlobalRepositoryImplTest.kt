@@ -24,18 +24,16 @@ import java.time.LocalDateTime
 fun createMockGlobalApiService(): GlobalApiService {
     val mockService = mock(GlobalApiService::class.java)
 
-    // Mock getGymList
     runBlocking {
         `when`(mockService.getGymList()).thenReturn(
             listOf(
-                GymInfoDTO(1, "Gym A", "Address A", null),
-                GymInfoDTO(2, "Gym B", "Address B", null)
+                GymInfoDTO(1, "Gym 1", "Address 1",null),
+                GymInfoDTO(2, "Gym 1", "Address 1", null)
             )
         )
         `when`(mockService.getGymList()).thenThrow(RuntimeException("Failed to fetch gym list"))
     }
 
-    // Mock getGymScheme
     runBlocking {
         `when`(mockService.getGymScheme(1)).thenReturn(
             GymSchemeDTO(
@@ -45,52 +43,58 @@ fun createMockGlobalApiService(): GlobalApiService {
                 clickableTrainerDTOS = emptyList()
             )
         )
-        `when`(mockService.getGymScheme(-1)).thenThrow(RuntimeException("Invalid gym ID"))
+        `when`(mockService.getGymScheme(-1)).thenThrow(RuntimeException("Invalid gym id"))
     }
 
-    // Mock getUserInfo
     runBlocking {
         `when`(mockService.getUserInfo("validUser")).thenReturn(
-            UserDTO("John", "Doe", "validUser", "password123")
+            UserDTO("John", "Doe", "johndoe", "password1")
         )
-        `when`(mockService.getUserInfo("invalidUser")).thenThrow(RuntimeException("User not found"))
+        `when`(mockService.getUserInfo("invalidLogin"))
+            .thenThrow(RuntimeException("User not found"))
     }
 
-    // Mock login
     runBlocking {
-        `when`(mockService.login(UserDTO("", "", "validUser", "password123"))).thenReturn(
+        `when`(mockService.login(
+            UserDTO("John", "Doe", "johndoe", "password123"))
+        ).thenReturn(
             mapOf("success" to true)
         )
-        `when`(mockService.login(UserDTO("", "", "invalidUser", "wrongPassword"))).thenThrow(
-            RuntimeException("Invalid credentials")
+        `when`(mockService.login(
+            UserDTO("Some", "One", "invalidLogin", "badPassword1"))
+        ).thenThrow(
+            RuntimeException("Registration failed")
         )
     }
 
-    // Mock register
     runBlocking {
-        `when`(mockService.register(UserDTO("John", "Doe", "newUser", "password123"))).thenReturn(
+        `when`(mockService.register(
+            UserDTO("John", "Doe", "johndoe", "password1"))
+        ).thenReturn(
             mapOf("success" to true)
         )
-        `when`(mockService.register(UserDTO("John", "Doe", "existingUser", "password123"))).thenThrow(
+        `when`(mockService.register(
+            UserDTO("John", "Doe", "bodydouble", "password1"))
+        ).thenThrow(
             RuntimeException("User already exists")
         )
     }
 
-    // Mock updateUser
     runBlocking {
-        `when`(mockService.updateUser("validUser", "UpdatedName", "UpdatedSurname", "newPassword"))
-            .thenReturn(mapOf("success" to true))
-        `when`(mockService.updateUser("invalidUser", null, null, null))
+        `when`(mockService.updateUser(
+            "johndoe", "Jo", "Doe", "password1")
+        ).thenReturn(mapOf("success" to true))
+        `when`(mockService.updateUser(
+            "invalidLogin", null, null, null)
+        ).thenThrow(RuntimeException("User not found"))
+    }
+
+    runBlocking {
+        `when`(mockService.deleteUser("johndoe")).thenReturn(mapOf("success" to true))
+        `when`(mockService.deleteUser("invalidLogin"))
             .thenThrow(RuntimeException("User not found"))
     }
 
-    // Mock deleteUser
-    runBlocking {
-        `when`(mockService.deleteUser("validUser")).thenReturn(mapOf("success" to true))
-        `when`(mockService.deleteUser("invalidUser")).thenThrow(RuntimeException("User not found"))
-    }
-
-    // Mock getCameras
     runBlocking {
         `when`(mockService.getCameras()).thenReturn(
             listOf(CameraInfoDTO(1), CameraInfoDTO(2))
@@ -98,7 +102,6 @@ fun createMockGlobalApiService(): GlobalApiService {
         `when`(mockService.getCameras()).thenThrow(RuntimeException("Failed to fetch cameras"))
     }
 
-    // Mock startStream
     runBlocking {
         `when`(mockService.startStream(CameraInfoDTO(1))).thenReturn(
             StreamInfoDTO("http://example.com/stream1", 0)
@@ -108,7 +111,6 @@ fun createMockGlobalApiService(): GlobalApiService {
         )
     }
 
-    // Mock stopStream
     runBlocking {
         `when`(mockService.stopStream(CameraInfoDTO(1))).thenReturn(
             mapOf("status" to "stopped")
@@ -118,7 +120,6 @@ fun createMockGlobalApiService(): GlobalApiService {
         )
     }
 
-    // Mock getStats
     runBlocking {
         `when`(
             mockService.getStats(

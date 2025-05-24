@@ -1,7 +1,5 @@
 package ru.hse.gymvision.ui.account
 
-import ru.hse.gymvision.ui.registration.RegistrationState.RegistrationError
-
 sealed class AccountState {
     enum class AccountError {
         NAME_LENGTH,
@@ -10,8 +8,8 @@ sealed class AccountState {
         PASSWORD_CONTENT,
         PASSWORD_MISMATCH,
         PASSWORD_INCORRECT,
-        CHANGE_FAILED,
         ACCOUNT_NOT_FOUND,
+        NETWORK_FATAL,
         NETWORK,
         IDLE
     }
