@@ -1,8 +1,8 @@
 package ru.hse.gymvision.ui.camera
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +29,9 @@ class CameraViewModel(
     private val getCameraIdsUseCase: GetCameraIdsUseCase,
     private val getCameraLinksUseCase: GetCameraLinksUseCase,
     private val getNewCameraLinkUseCase: GetNewCameraLinkUseCase,
-    private val changeAIState: ChangeAiStateUseCase
+    private val changeAIState: ChangeAiStateUseCase,
+    private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
     private var mediaPlayer1: MediaPlayer? = null
     private var mediaPlayer2: MediaPlayer? = null
@@ -46,6 +48,7 @@ class CameraViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        // Release media players to free resources
         mediaPlayer1?.release()
         mediaPlayer2?.release()
         mediaPlayer3?.release()
@@ -73,21 +76,25 @@ class CameraViewModel(
     }
 
     private fun savePlayers(player1: MediaPlayer?, player2: MediaPlayer?, player3: MediaPlayer?) {
+        // Release previous media players if they somehow weren't released earlier
+        mediaPlayer1?.release()
+        mediaPlayer2?.release()
+        mediaPlayer3?.release()
+
         mediaPlayer1 = player1
         mediaPlayer2 = player2
         mediaPlayer3 = player3
     }
 
     private fun initCameras(newCameraId: Int?, gymId: Int) {
-        this.gymId = gymId
         if (_state.value != CameraState.Idle) {
             return
         }
+        this.gymId = gymId
         _state.value = CameraState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             val cameras = getCameraIdsUseCase.execute().toMutableList()
             val cameraLinks = getCameraLinksUseCase.execute().toMutableList()
-            Log.d("CameraViewModel", "cameras: $cameras, newCameraId: $newCameraId")
 
             if (newCameraId != null && !cameras.contains(newCameraId)) {
                 val newCameraLink = getNewCameraLinkUseCase.execute(gymId, newCameraId)
@@ -95,7 +102,7 @@ class CameraViewModel(
                 cameraLinks.add(0, newCameraLink)
                 saveCamerasUseCase.execute(cameras, cameraLinks)
             }
-            withContext(Dispatchers.Main) {
+            withContext(dispatcherMain) {
                 _state.value = when (cameras.size) {
                     1 -> CameraState.OneCamera(
                         camera1Id = cameras[0],
@@ -110,7 +117,6 @@ class CameraViewModel(
                     )
 
                     3 -> {
-                        Log.d("CameraViewModel", "3 cameras: $cameras")
                         CameraState.ThreeCameras(
                             camera1Id = cameras[0],
                             camera1Link = cameraLinks[0],
@@ -141,7 +147,7 @@ class CameraViewModel(
             is CameraState.ThreeCameras -> (_state.value as CameraState.ThreeCameras).camera1Id
             else -> return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             moveCameraUseCase.execute(gymId, cameraId, direction)
         }
     }
@@ -153,7 +159,7 @@ class CameraViewModel(
             is CameraState.ThreeCameras -> (_state.value as CameraState.ThreeCameras).camera1Id
             else -> return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             rotateCameraUseCase.execute(gymId, cameraId, direction)
         }
     }
@@ -165,7 +171,7 @@ class CameraViewModel(
             is CameraState.ThreeCameras -> (_state.value as CameraState.ThreeCameras).camera1Id
             else -> return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             zoomCameraUseCase.execute(gymId, cameraId, direction)
         }
     }
@@ -203,9 +209,9 @@ class CameraViewModel(
 
                     else -> return
                 }
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcherMain) {
                         _state.value = when (_state.value) {
                             is CameraState.ThreeCameras -> {
                                 CameraState.TwoCameras(
@@ -239,6 +245,10 @@ class CameraViewModel(
                         }
                     }
                 }
+
+                mediaPlayer2?.release()
+                mediaPlayer2 = mediaPlayer3
+                mediaPlayer3 = null
             }
 
             3 -> {
@@ -253,9 +263,9 @@ class CameraViewModel(
                     (_state.value as CameraState.ThreeCameras).camera1Link,
                     (_state.value as CameraState.ThreeCameras).camera2Link
                 )
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcherMain) {
                         _state.value = CameraState.TwoCameras(
                             camera1Id = (_state.value as CameraState.ThreeCameras).camera1Id,
                             camera1Link = (_state.value as CameraState.ThreeCameras).camera1Link,
@@ -266,6 +276,9 @@ class CameraViewModel(
                         )
                     }
                 }
+
+                mediaPlayer3?.release()
+                mediaPlayer3 = null
             }
         }
     }
@@ -346,9 +359,9 @@ class CameraViewModel(
 
                     else -> return
                 }
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcherMain) {
                         _state.value = when (_state.value) {
                             is CameraState.ThreeCameras -> {
                                 CameraState.ThreeCameras(
@@ -379,6 +392,10 @@ class CameraViewModel(
                         }
                     }
                 }
+
+                val temp = mediaPlayer1
+                mediaPlayer1 = mediaPlayer2
+                mediaPlayer2 = temp
             }
 
             3 -> {
@@ -395,9 +412,9 @@ class CameraViewModel(
                     (_state.value as CameraState.ThreeCameras).camera1Link,
                     (_state.value as CameraState.ThreeCameras).camera2Link
                 )
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcherMain) {
                         _state.value = CameraState.ThreeCameras(
                             camera1Id = newCameraIds[0],
                             camera1Link = (_state.value as CameraState.ThreeCameras).camera3Link,
@@ -411,6 +428,11 @@ class CameraViewModel(
                         )
                     }
                 }
+
+                val temp = mediaPlayer1
+                mediaPlayer1 = mediaPlayer3
+                mediaPlayer3 = mediaPlayer2
+                mediaPlayer2 = temp
             }
         }
     }
@@ -422,7 +444,7 @@ class CameraViewModel(
             is CameraState.ThreeCameras -> (_state.value as CameraState.ThreeCameras).camera1Id
             else -> return
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             changeAIState.execute(gymId, cameraId, isAiEnabled)
         }
     }

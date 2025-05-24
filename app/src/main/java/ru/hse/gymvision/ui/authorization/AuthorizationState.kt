@@ -14,7 +14,7 @@ sealed class AuthorizationState {
         val passwordVisibility: Boolean = false,
         val loginError: AuthorizationError = AuthorizationError.IDLE,
         val passwordError: AuthorizationError = AuthorizationError.IDLE,
-        val loading: Boolean = false
+        val isLoading: Boolean = false
     ) : AuthorizationState()
 
     data object Idle : AuthorizationState()

@@ -341,11 +341,11 @@ fun AccountState.AccountError.toText() = when (this) {
     AccountState.AccountError.PASSWORD_INCORRECT ->
         stringResource(id = R.string.password_incorrect_error)
 
-    AccountState.AccountError.CHANGE_FAILED ->
-        stringResource(id = R.string.change_failed_error)
-
     AccountState.AccountError.NETWORK ->
         stringResource(id = R.string.network_error_short)
+
+    AccountState.AccountError.NETWORK_FATAL ->
+        stringResource(id = R.string.network_error_long)
 
     AccountState.AccountError.ACCOUNT_NOT_FOUND ->
         stringResource(id = R.string.account_not_found_error)

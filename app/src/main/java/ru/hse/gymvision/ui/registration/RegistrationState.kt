@@ -28,7 +28,7 @@ sealed class RegistrationState {
         val loginError: RegistrationError = RegistrationError.IDLE,
         val passwordError: RegistrationError = RegistrationError.IDLE,
         val passwordRepeatError: RegistrationError = RegistrationError.IDLE,
-        val loading: Boolean = false
+        val isLoading: Boolean = false
     ) : RegistrationState()
 
     data object Idle : RegistrationState()

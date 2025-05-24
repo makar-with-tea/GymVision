@@ -1,17 +1,18 @@
 package ru.hse.gymvision.ui.gymlist
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.hse.gymvision.domain.model.GymInfoModel
 import ru.hse.gymvision.domain.usecase.gym.GetGymListUseCase
 
 class GymListViewModel(
-    private val getGymListUseCase: GetGymListUseCase
+    private val getGymListUseCase: GetGymListUseCase,
+    private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
     private val _state = MutableStateFlow<GymListState>(GymListState.Idle)
     val state = _state
@@ -34,15 +35,14 @@ class GymListViewModel(
 
     private fun getGymList() {
         _state.value = GymListState.Loading
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherIO) {
             try {
                 val gyms = getGymListUseCase.execute()
-                withContext(Dispatchers.Main) {
+                withContext(dispatcherMain) {
                     _state.value = GymListState.Main(gyms)
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Log.e("GymListViewModel", "Error getting gym list:", e)
+                withContext(dispatcherMain) {
                     _state.value = GymListState.Error
                 }
             }

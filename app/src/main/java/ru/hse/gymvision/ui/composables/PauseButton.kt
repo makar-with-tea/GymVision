@@ -16,8 +16,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.R
 
@@ -26,9 +24,7 @@ fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
     var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
     LaunchedEffect(player.isPlaying) {
-        withContext(Dispatchers.Main) {
-            isPlaying = player.isPlaying
-        }
+        isPlaying = player.isPlaying // todo: тут был withContext(Dispatchers.Main) - не знаю, нужно ли
     }
 
     IconButton(

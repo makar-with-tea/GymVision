@@ -3,7 +3,7 @@ package ru.hse.gymvision.domain.model
 data class GymSchemeModel(
     val id: Int,
     val name: String,
-    var image: ByteArray,
+    var image: ByteArray?,
     val clickableTrainers: List<ClickableTrainer>,
     val clickableCameras: List<ClickableCamera>,
     ) {
