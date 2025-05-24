@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
@@ -170,13 +171,20 @@ fun MainState(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(stringResource(R.string.already_have_account))
+            Text(
+                text = stringResource(R.string.already_have_account),
+                fontSize = 14.sp
+            )
             TextButton(
                 onClick = { onLoginClick(login.value, password.value) },
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier.width(50.dp),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Text(stringResource(R.string.login_button), modifier = Modifier.padding(0.dp))
+                Text(
+                    text = stringResource(R.string.login_button),
+                    modifier = Modifier.padding(0.dp),
+                    fontSize = 14.sp
+                )
             }
         }
     }
