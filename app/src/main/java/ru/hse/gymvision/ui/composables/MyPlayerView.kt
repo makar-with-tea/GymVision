@@ -101,46 +101,46 @@ fun mainPlayerView(
             ControlButton(
                 iconId = R.drawable.ic_arrow_left,
                 contentDescription = stringResource(R.string.rotate_camera_left_description),
-                alignment = Alignment.CenterStart
-            ) {
-                onRotateCamera(CameraRotation.LEFT)
-            }
+                alignment = Alignment.CenterStart,
+                onPress = { onRotateCamera(CameraRotation.LEFT) },
+                onRelease = { onRotateCamera(CameraRotation.STOP) }
+            )
             ControlButton(
                 iconId = R.drawable.ic_arrow_right,
                 contentDescription = stringResource(R.string.rotate_camera_right_description),
-                alignment = Alignment.CenterEnd
-            ) {
-                onRotateCamera(CameraRotation.RIGHT)
-            }
+                alignment = Alignment.CenterEnd,
+                onPress = { onRotateCamera(CameraRotation.RIGHT) },
+                onRelease = { onRotateCamera(CameraRotation.STOP) }
+            )
             ControlButton(
                 iconId = R.drawable.ic_arrow_up,
                 contentDescription = stringResource(R.string.move_camera_up_description),
-                alignment = Alignment.TopCenter
-            ) {
-                onMoveCamera(CameraMovement.UP)
-            }
+                alignment = Alignment.TopCenter,
+                onPress = { onMoveCamera(CameraMovement.UP) },
+                onRelease = { onMoveCamera(CameraMovement.STOP) }
+            )
             ControlButton(
                 iconId = R.drawable.ic_arrow_down,
                 contentDescription = stringResource(R.string.move_camera_down_description),
-                alignment = Alignment.BottomCenter
-            ) {
-                onMoveCamera(CameraMovement.DOWN)
-            }
+                alignment = Alignment.BottomCenter,
+                onPress = { onMoveCamera(CameraMovement.DOWN) },
+                onRelease = { onMoveCamera(CameraMovement.STOP) }
+            )
             ControlButton(
                 iconId = R.drawable.ic_zoom_out,
                 contentDescription = stringResource(R.string.zoom_out_description),
-                alignment = Alignment.TopStart
-            ) {
-                onZoomCamera(CameraZoom.OUT)
-            }
+                alignment = Alignment.TopStart,
+                onPress = { onZoomCamera(CameraZoom.OUT) },
+                onRelease = { onZoomCamera(CameraZoom.STOP) }
+            )
             ControlButton(
                 iconId = R.drawable.ic_zoom_in,
                 contentDescription = stringResource(R.string.zoom_in_description),
-                alignment = Alignment.TopEnd
-            ) {
-                onZoomCamera(CameraZoom.IN)
-            }
-            ControlButton(
+                alignment = Alignment.TopEnd,
+                onPress = { onZoomCamera(CameraZoom.IN) },
+                onRelease = { onZoomCamera(CameraZoom.STOP) }
+            )
+            ControlButtonSimple(
                 iconId = if (isAIEnabled.value)
                     R.drawable.ic_sparkles_crossed else R.drawable.ic_sparkles,
                 contentDescription = stringResource(R.string.ai_analysis_description),
@@ -220,14 +220,14 @@ fun secondaryPlayerView(
             ) {
                 PauseButton(mediaPlayer, onPlay)
             }
-            ControlButton(
+            ControlButtonSimple(
                 iconId = R.drawable.ic_crop_free,
                 contentDescription = stringResource(R.string.make_main_camera_description),
                 alignment = Alignment.CenterStart
             ) {
                 onMakeMainCamera()
             }
-            ControlButton(
+            ControlButtonSimple(
                 iconId = R.drawable.ic_delete,
                 contentDescription = stringResource(R.string.delete_camera_description),
                 alignment = Alignment.CenterEnd

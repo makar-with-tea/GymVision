@@ -85,8 +85,8 @@
     <string name="rotate_camera_right_description">Повернуть камеру вправо</string>
     <string name="move_camera_up_description">Поднять камеру</string>
     <string name="move_camera_down_description">Опустить камеру</string>
-    <string name="zoom_out_description">Приблизить камеру</string>
-    <string name="zoom_in_description">Отдалить камеру</string>
+    <string name="zoom_out_description">Отдалить камеру</string>
+    <string name="zoom_in_description">Приблизить камеру</string>
     <string name="make_main_camera_description">Сделать главной камерой</string>
     <string name="delete_camera_description">Удалить камеру</string>
     <string name="ai_analysis_description">Включить/выключить AI-анализ</string>

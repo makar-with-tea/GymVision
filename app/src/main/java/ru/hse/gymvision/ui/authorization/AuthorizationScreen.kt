@@ -79,7 +79,6 @@ fun AuthorizationScreen(
     }
 }
 
-
 @Composable
 fun MainState(
     state: AuthorizationState.Main,
