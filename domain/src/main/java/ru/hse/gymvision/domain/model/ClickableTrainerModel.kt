@@ -1,6 +1,6 @@
 package ru.hse.gymvision.domain.model
 
-data class ClickableTrainer(
+data class ClickableTrainerModel(
     val id: Int = 0,
     val name: String = "",
     val description: String = "",

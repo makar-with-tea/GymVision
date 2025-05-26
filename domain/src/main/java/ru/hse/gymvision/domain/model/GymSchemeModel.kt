@@ -3,9 +3,9 @@ package ru.hse.gymvision.domain.model
 data class GymSchemeModel(
     val id: Int,
     val name: String,
-    var image: ByteArray,
-    val clickableTrainers: List<ClickableTrainer>,
-    val clickableCameras: List<ClickableCamera>,
+    var image: ByteArray?,
+    val clickableTrainerModels: List<ClickableTrainerModel>,
+    val clickableCameraModels: List<ClickableCameraModel>,
     ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -16,14 +16,14 @@ data class GymSchemeModel(
     }
 
     override fun hashCode(): Int {
-        var result = clickableTrainers.hashCode()
-        result = 31 * result + clickableCameras.hashCode()
+        var result = clickableTrainerModels.hashCode()
+        result = 31 * result + clickableCameraModels.hashCode()
         result = 31 * result + id
         result = 31 * result + name.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "GymSchemeModel(name=$name, clickableTrainers=$clickableTrainers, clickableCameras=$clickableCameras)"
+        return "GymSchemeModel(name=$name, clickableTrainers=$clickableTrainerModels, clickableCameras=$clickableCameraModels)"
     }
 }

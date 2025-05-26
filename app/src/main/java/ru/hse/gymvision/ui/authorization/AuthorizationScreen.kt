@@ -151,7 +151,7 @@ fun MainState(
         }
     }
 
-    if (state.loading) {
+    if (state.isLoading) {
         LoadingBlock()
     }
 }

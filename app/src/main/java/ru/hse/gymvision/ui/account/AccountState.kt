@@ -1,7 +1,5 @@
 package ru.hse.gymvision.ui.account
 
-import ru.hse.gymvision.ui.registration.RegistrationState.RegistrationError
-
 sealed class AccountState {
     enum class AccountError {
         NAME_LENGTH,
@@ -10,8 +8,8 @@ sealed class AccountState {
         PASSWORD_CONTENT,
         PASSWORD_MISMATCH,
         PASSWORD_INCORRECT,
-        CHANGE_FAILED,
         ACCOUNT_NOT_FOUND,
+        NETWORK_FATAL,
         NETWORK,
         IDLE
     }
@@ -21,7 +19,6 @@ sealed class AccountState {
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = "",
         val isLoading: Boolean = false,
     ) : AccountState()
 
@@ -29,7 +26,6 @@ sealed class AccountState {
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = "",
         val isLoading: Boolean = false,
         val nameError: AccountError = AccountError.IDLE,
         val surnameError: AccountError = AccountError.IDLE,
@@ -39,13 +35,13 @@ sealed class AccountState {
     data class ChangePassword(
         val oldPassword: String = "",
         val newPassword: String = "",
+        val newPasswordRepeat: String = "",
         val oldPasswordVisibility: Boolean = false,
         val newPasswordVisibility: Boolean = false,
         val newPasswordRepeatVisibility: Boolean = false,
         val name: String = "",
         val surname: String = "",
         val login: String = "",
-        val password: String = "",
         val oldPasswordError: AccountError = AccountError.IDLE,
         val newPasswordError: AccountError = AccountError.IDLE,
         val newPasswordRepeatError: AccountError = AccountError.IDLE,
@@ -72,7 +68,7 @@ sealed class AccountEvent {
     data class SavePasswordButtonClicked(
         val newPassword: String,
         val oldPassword: String,
-        val realPassword: String
+        val newPasswordRepeat: String
     ): AccountEvent()
 
     data object ShowOldPasswordButtonClicked : AccountEvent()
