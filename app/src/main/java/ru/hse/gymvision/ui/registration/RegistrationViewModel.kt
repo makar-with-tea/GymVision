@@ -8,14 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.hse.gymvision.domain.usecase.user.CheckLoginAvailableUseCase
+import ru.hse.gymvision.domain.exception.LoginAlreadyInUseException
 import ru.hse.gymvision.domain.usecase.user.RegisterUseCase
 
 const val LATIN = "abcdefghijklmnopqrstuvwxyz"
 
 class RegistrationViewModel(
     private val registerUseCase: RegisterUseCase,
-    private val checkLoginAvailableUseCase: CheckLoginAvailableUseCase,
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
@@ -143,30 +142,19 @@ class RegistrationViewModel(
 
         viewModelScope.launch(dispatcherIO) {
             try {
-                val isAvailable = checkLoginAvailableUseCase.execute(login)
-                if (!isAvailable) {
-                    withContext(dispatcherMain) {
+                registerUseCase.execute(name, surname, login, password)
+                withContext(dispatcherMain) {
+                    _action.value = RegistrationAction.NavigateToGymList
+                }
+            } catch (e: Exception) {
+                withContext(dispatcherMain) {
+                    if (e is LoginAlreadyInUseException) {
                         _state.value = (_state.value as RegistrationState.Main).copy(
                             loginError = RegistrationState.RegistrationError.LOGIN_TAKEN,
                             isLoading = false
                         )
+                        return@withContext
                     }
-                    return@launch
-                }
-                val success = registerUseCase.execute(name, surname, login, password)
-                withContext(dispatcherMain) {
-                    if (!success) {
-                        _state.value = RegistrationState.Main(
-                            name = name,
-                            surname = surname,
-                            login = login,
-                            password = password,
-                            loginError = RegistrationState.RegistrationError.REGISTRATION_FAILED,
-                        )
-                    } else _action.value = RegistrationAction.NavigateToGymList
-                }
-            } catch (e: Exception) {
-                withContext(dispatcherMain) {
                     _state.value = RegistrationState.Main(
                         name = name,
                         surname = surname,
@@ -177,11 +165,6 @@ class RegistrationViewModel(
                         nameError = RegistrationState.RegistrationError.NETWORK,
                         passwordError = RegistrationState.RegistrationError.NETWORK,
                         passwordRepeatError = RegistrationState.RegistrationError.NETWORK,
-                    )
-                }
-            } finally {
-                withContext(dispatcherMain) {
-                    _state.value = (_state.value as RegistrationState.Main).copy(
                         isLoading = false
                     )
                 }

@@ -151,8 +151,8 @@ fun MainState(
                     }
             )
 
-            val clickableTrainers = gymScheme.value?.clickableTrainers ?: emptyList()
-            val clickableCameras = gymScheme.value?.clickableCameras ?: emptyList()
+            val clickableTrainers = gymScheme.value?.clickableTrainerModels ?: emptyList()
+            val clickableCameras = gymScheme.value?.clickableCameraModels ?: emptyList()
 
             Box(
                 modifier = Modifier.size(imWidth, imHeight)

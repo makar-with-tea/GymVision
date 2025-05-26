@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.user.ChangePasswordUseCase
+import ru.hse.gymvision.domain.usecase.user.CheckPasswordUseCase
 import ru.hse.gymvision.domain.usecase.user.DeleteUserUseCase
 import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
+import ru.hse.gymvision.domain.usecase.user.LoginUseCase
 import ru.hse.gymvision.domain.usecase.user.LogoutUseCase
 import ru.hse.gymvision.domain.usecase.user.UpdateUserUseCase
 
@@ -19,6 +21,7 @@ class AccountViewModel(
     private val updateUserUseCase: UpdateUserUseCase,
     private val deleteUserUseCase: DeleteUserUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val checkPasswordUseCase: CheckPasswordUseCase,
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
@@ -43,7 +46,7 @@ class AccountViewModel(
 
             is AccountEvent.SavePasswordButtonClicked -> {
                 savePassword(
-                    event.newPassword, event.oldPassword, event.realPassword
+                    event.newPassword, event.oldPassword, event.newPasswordRepeat
                 )
             }
 
@@ -97,8 +100,7 @@ class AccountViewModel(
                     _state.value = AccountState.Main(
                         name = userInfo.name,
                         surname = userInfo.surname,
-                        login = userInfo.login,
-                        password = userInfo.password
+                        login = userInfo.login
                     )
                 }
             } catch (e: Exception) {
@@ -145,8 +147,7 @@ class AccountViewModel(
                 _state.value = AccountState.Main(
                     name = name,
                     surname = surname,
-                    login = (_state.value as AccountState.EditName).login,
-                    password = (_state.value as AccountState.EditName).password
+                    login = (_state.value as AccountState.EditName).login
                 )
             } catch (e: Exception) {
                 withContext(dispatcherMain) {
@@ -154,7 +155,6 @@ class AccountViewModel(
                         name = name,
                         surname = surname,
                         login = (_state.value as AccountState.EditName).login,
-                        password = (_state.value as AccountState.EditName).password,
                         surnameError = AccountState.AccountError.NETWORK,
                         nameError = AccountState.AccountError.NETWORK,
                         isLoading = false
@@ -164,7 +164,7 @@ class AccountViewModel(
         }
     }
 
-    private fun savePassword(newPassword: String, oldPassword: String, realPassword: String) {
+    private fun savePassword(newPassword: String, oldPassword: String, newPasswordRepeat: String) {
         if (_state.value !is AccountState.ChangePassword) return
 
         if (newPassword.length < 8 || newPassword.length > 20) {
@@ -181,24 +181,35 @@ class AccountViewModel(
             return
         }
 
-        if (oldPassword != realPassword) {
+        if (newPassword != newPasswordRepeat) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                oldPasswordError = AccountState.AccountError.PASSWORD_INCORRECT
+                newPasswordRepeatError = AccountState.AccountError.PASSWORD_MISMATCH
             )
             return
         }
+
         _state.value = (_state.value as AccountState.ChangePassword).copy(
             isLoading = true
         )
         viewModelScope.launch(dispatcherIO) {
             try {
+                val isOldPasswordCorrect = checkPasswordUseCase.execute(
+                    (_state.value as AccountState.ChangePassword).login,
+                    oldPassword
+                )
+                if (!isOldPasswordCorrect) {
+                    _state.value = (_state.value as AccountState.ChangePassword).copy(
+                        oldPasswordError = AccountState.AccountError.PASSWORD_INCORRECT,
+                        isLoading = false
+                    )
+                    return@launch
+                }
                 changePasswordUseCase.execute(
                     (_state.value as AccountState.ChangePassword).login,
                     newPassword
                 )
                 withContext(dispatcherMain) {
                     _state.value = AccountState.Main(
-                        password = newPassword,
                         name = (_state.value as AccountState.ChangePassword).name,
                         surname = (_state.value as AccountState.ChangePassword).surname,
                         login = (_state.value as AccountState.ChangePassword).login
@@ -249,7 +260,6 @@ class AccountViewModel(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
             login = (_state.value as AccountState.Main).login,
-            password = (_state.value as AccountState.Main).password
         )
     }
 
@@ -259,7 +269,6 @@ class AccountViewModel(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
             login = (_state.value as AccountState.Main).login,
-            password = (_state.value as AccountState.Main).password
         )
     }
 

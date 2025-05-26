@@ -81,11 +81,12 @@ fun AccountScreen(
         is AccountState.ChangePassword -> {
             ChangePasswordState(
                 state.value as AccountState.ChangePassword,
-                onSavePassword = { newPassword, oldPassword, realPassword ->
+                onSavePassword = { newPassword, oldPassword, newPasswordRepeat ->
                     viewModel.obtainEvent(
                         AccountEvent.SavePasswordButtonClicked(
                             newPassword,
-                            oldPassword, realPassword
+                            oldPassword,
+                            newPasswordRepeat
                         )
                     )
                 },
@@ -292,7 +293,8 @@ fun ChangePasswordState(
         Button(onClick = {
             onSavePassword(
                 newPassword.value,
-                oldPassword.value, state.password
+                oldPassword.value,
+                newPasswordRepeat.value
             )
         }) {
             Text(stringResource(id = R.string.save))

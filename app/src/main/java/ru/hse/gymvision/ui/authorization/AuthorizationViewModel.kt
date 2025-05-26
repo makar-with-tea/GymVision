@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ru.hse.gymvision.domain.exception.InvalidCredentialsException
 import ru.hse.gymvision.domain.usecase.user.GetPastLoginUseCase
 import ru.hse.gymvision.domain.usecase.user.LoginUseCase
 
@@ -74,22 +75,20 @@ class AuthorizationViewModel(
 
         viewModelScope.launch(dispatcherIO) {
             try {
-                val res = loginUseCase.execute(login, password)
-                if (!res) {
-                    withContext(dispatcherMain) {
-                        _state.value = (_state.value as AuthorizationState.Main).copy(
-                            passwordError =
-                                AuthorizationState.AuthorizationError.INVALID_CREDENTIALS,
-                            isLoading = false
-                        )
-                    }
-                    return@launch
-                }
+                loginUseCase.execute(login, password)
                 withContext(dispatcherMain) {
                     _action.value = AuthorizationAction.NavigateToGymList
                 }
             } catch (e: Exception) {
                 withContext(dispatcherMain) {
+                    if (e is InvalidCredentialsException) {
+                        _state.value = (_state.value as AuthorizationState.Main).copy(
+                            loginError = AuthorizationState.AuthorizationError.IDLE,
+                            passwordError = AuthorizationState.AuthorizationError.INVALID_CREDENTIALS,
+                            isLoading = false
+                        )
+                        return@withContext
+                    }
                     _state.value = (_state.value as AuthorizationState.Main).copy(
                         passwordError =
                             AuthorizationState.AuthorizationError.NETWORK,
