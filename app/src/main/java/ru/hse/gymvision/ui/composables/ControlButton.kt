@@ -1,7 +1,7 @@
 package ru.hse.gymvision.ui.composables
 
 import android.util.Log
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -30,12 +31,12 @@ fun ControlButtonSimple(iconId: Int,
             .fillMaxSize()
             .padding(20.dp), contentAlignment = alignment
     ) {
-        IconButton(modifier = Modifier.size(64.dp), onClick = onClick) {
+        IconButton(modifier = Modifier.size(40.dp), onClick = onClick) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = iconId),
                 contentDescription = contentDescription,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(50.dp),
+                modifier = Modifier.size(32.dp),
             )
         }
     }
@@ -46,54 +47,51 @@ fun ControlButtonSimple(iconId: Int,
 fun ControlButton(
     iconId: Int,
     contentDescription: String,
-    alignment: Alignment,
+    modifier: Modifier = Modifier,
     onPress: () -> Unit,
-    onRelease: () -> Unit
+    onRelease: () -> Unit,
+    size: Dp = 40.dp,
+    iconSize: Dp = 32.dp,
+    padding: Dp = 20.dp
 ) {
     val isPressed = remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        contentAlignment = alignment
-    ) {
-        IconButton(
-            onClick = {},
-            modifier = Modifier
-                .size(64.dp)
-                .pointerInteropFilter { event ->
-                    when (event.action) {
-                        android.view.MotionEvent.ACTION_DOWN -> {
-                            if (!isPressed.value) {
-                                isPressed.value = true
-                                onPress()
-                                Log.d("marathinks", "Button pressed")
-                            }
-                            true
+    IconButton(
+        onClick = {},
+        modifier = modifier
+            .padding(padding)
+            .size(size)
+            .border(1.dp, MaterialTheme.colorScheme.primary)
+            .pointerInteropFilter { event ->
+                when (event.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        if (!isPressed.value) {
+                            Log.d("ControlButton", "Button pressed")
+                            isPressed.value = true
+                            onPress()
                         }
-
-                        android.view.MotionEvent.ACTION_UP,
-                        android.view.MotionEvent.ACTION_CANCEL -> {
-                            if (isPressed.value) {
-                                isPressed.value = false
-                                onRelease()
-                                Log.d("marathinks", "Button released")
-                            }
-                            true
-                        }
-
-                        else -> false // Не обрабатываем другие события
+                        true
                     }
-                },
-            interactionSource = remember { MutableInteractionSource() }
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = iconId),
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(50.dp),
-            )
-        }
+
+                    android.view.MotionEvent.ACTION_UP,
+                    android.view.MotionEvent.ACTION_CANCEL -> {
+                        if (isPressed.value) {
+                            Log.d("ControlButton", "Button released")
+                            isPressed.value = false
+                            onRelease()
+                        }
+                        true
+                    }
+
+                    else -> false // Не обрабатываем другие события
+                }
+            },
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = iconId),
+            contentDescription = contentDescription,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(iconSize),
+        )
     }
 }
