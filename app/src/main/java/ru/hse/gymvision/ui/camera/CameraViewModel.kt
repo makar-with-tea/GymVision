@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.camera
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -8,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.videolan.libvlc.media.MediaPlayer
+import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
@@ -47,17 +48,15 @@ class CameraViewModel(
         get() = _action
 
     override fun onCleared() {
+        Log.d("CameraViewModel", "onCleared")
+        clearState()
         super.onCleared()
-        // Release media players to free resources
-        mediaPlayer1?.release()
-        mediaPlayer2?.release()
-        mediaPlayer3?.release()
     }
 
     fun obtainEvent(event: CameraEvent) {
         when (event) {
             is CameraEvent.AddCameraButtonClicked -> addCamera()
-            is CameraEvent.Clear -> clear()
+            is CameraEvent.Clear -> clearState()
             is CameraEvent.MoveCameraButtonClicked -> moveCamera(event.direction)
             is CameraEvent.PlayCameraButtonClicked -> playCamera(event.cameraNum)
             is CameraEvent.RotateCameraButtonClicked -> rotateCamera(event.direction)
@@ -70,20 +69,24 @@ class CameraViewModel(
         }
     }
 
-    private fun clear() {
+    private fun clearState() {
         _state.value = CameraState.Idle
         _action.value = null
+        // Release media players to free resources
+//        mediaPlayer1?.release()
+//        mediaPlayer2?.release()
+//        mediaPlayer3?.release()
     }
 
     private fun savePlayers(player1: MediaPlayer?, player2: MediaPlayer?, player3: MediaPlayer?) {
         // Release previous media players if they somehow weren't released earlier
-        mediaPlayer1?.release()
-        mediaPlayer2?.release()
-        mediaPlayer3?.release()
-
-        mediaPlayer1 = player1
-        mediaPlayer2 = player2
-        mediaPlayer3 = player3
+//        mediaPlayer1?.release()
+//        mediaPlayer2?.release()
+//        mediaPlayer3?.release()
+//
+//        mediaPlayer1 = player1
+//        mediaPlayer2 = player2
+//        mediaPlayer3 = player3
     }
 
     private fun initCameras(newCameraId: Int?, gymId: Int) {

@@ -9,6 +9,7 @@ sealed class RegistrationState {
         PASSWORD_LENGTH,
         PASSWORD_CONTENT,
         PASSWORD_MISMATCH,
+        EMAIL_CONTENT,
         LOGIN_TAKEN,
         REGISTRATION_FAILED,
         NETWORK,
@@ -18,6 +19,7 @@ sealed class RegistrationState {
     data class Main(
         val name: String = "",
         val surname: String = "",
+        val email: String = "",
         val login: String = "",
         val password: String = "",
         val passwordVisibility: Boolean = false,
@@ -25,6 +27,7 @@ sealed class RegistrationState {
         val passwordRepeatVisibility: Boolean = false,
         val nameError: RegistrationError = RegistrationError.IDLE,
         val surnameError: RegistrationError = RegistrationError.IDLE,
+        val emailError: RegistrationError = RegistrationError.IDLE,
         val loginError: RegistrationError = RegistrationError.IDLE,
         val passwordError: RegistrationError = RegistrationError.IDLE,
         val passwordRepeatError: RegistrationError = RegistrationError.IDLE,
@@ -39,6 +42,7 @@ sealed class RegistrationEvent {
     data class RegistrationButtonClicked(
         val name: String,
         val surname: String,
+        val email: String,
         val login: String,
         val password: String,
         val passwordRepeat: String

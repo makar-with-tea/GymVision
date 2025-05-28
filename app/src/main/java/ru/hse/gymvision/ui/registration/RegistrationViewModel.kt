@@ -19,14 +19,7 @@ class RegistrationViewModel(
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
     private val _state: MutableStateFlow<RegistrationState> = MutableStateFlow(
-        RegistrationState.Main(
-            login = "",
-            password = "",
-            passwordRepeat = "",
-            passwordVisibility = false,
-            passwordRepeatVisibility = false,
-            isLoading = false
-        )
+        RegistrationState.Main()
     )
     val state: StateFlow<RegistrationState>
         get() = _state
@@ -40,6 +33,7 @@ class RegistrationViewModel(
                 register(
                     event.name,
                     event.surname,
+                    event.email,
                     event.login,
                     event.password,
                     event.passwordRepeat
@@ -69,6 +63,7 @@ class RegistrationViewModel(
     private fun register(
         name: String,
         surname: String,
+        email: String,
         login: String,
         password: String,
         passwordRepeat: String
@@ -103,6 +98,15 @@ class RegistrationViewModel(
             )
             isError = true
         }
+
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!email.matches(emailRegex)) {
+            _state.value = (_state.value as RegistrationState.Main).copy(
+                emailError = RegistrationState.RegistrationError.EMAIL_CONTENT,
+            )
+            isError = true
+        }
+
         if (login.length < 5 || login.length > 15) {
             _state.value = (_state.value as RegistrationState.Main).copy(
                 loginError = RegistrationState.RegistrationError.LOGIN_LENGTH,
@@ -142,7 +146,7 @@ class RegistrationViewModel(
 
         viewModelScope.launch(dispatcherIO) {
             try {
-                registerUseCase.execute(name, surname, login, password)
+                registerUseCase.execute(name, surname, email, login, password)
                 withContext(dispatcherMain) {
                     _action.value = RegistrationAction.NavigateToGymList
                 }
@@ -162,6 +166,7 @@ class RegistrationViewModel(
                         password = password,
                         loginError = RegistrationState.RegistrationError.NETWORK,
                         surnameError = RegistrationState.RegistrationError.NETWORK,
+                        emailError = RegistrationState.RegistrationError.NETWORK,
                         nameError = RegistrationState.RegistrationError.NETWORK,
                         passwordError = RegistrationState.RegistrationError.NETWORK,
                         passwordRepeatError = RegistrationState.RegistrationError.NETWORK,

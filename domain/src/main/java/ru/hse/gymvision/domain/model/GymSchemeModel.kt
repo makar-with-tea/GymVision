@@ -3,10 +3,10 @@ package ru.hse.gymvision.domain.model
 data class GymSchemeModel(
     val id: Int,
     val name: String,
-    var image: ByteArray?,
+    var scheme: ByteArray?,
     val clickableTrainerModels: List<ClickableTrainerModel>,
     val clickableCameraModels: List<ClickableCameraModel>,
-    ) {
+) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

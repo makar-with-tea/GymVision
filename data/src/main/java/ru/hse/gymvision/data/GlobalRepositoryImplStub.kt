@@ -13,7 +13,6 @@ import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.repos.GlobalRepository
 import kotlin.random.Random
 
-
 class GlobalRepositoryImplStub: GlobalRepository {
     override suspend fun getGymList(): List<GymInfoModel> {
         if (Random.nextBoolean())
@@ -48,6 +47,7 @@ class GlobalRepositoryImplStub: GlobalRepository {
     override suspend fun register(
         name: String,
         surname: String,
+        email: String,
         login: String,
         password: String
     ): TokenModel {
@@ -80,6 +80,7 @@ class GlobalRepositoryImplStub: GlobalRepository {
         userExample = UserModel(
             name = "",
             surname = "",
+            email = "",
             login = ""
         )
     }

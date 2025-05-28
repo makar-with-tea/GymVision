@@ -7,10 +7,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.account.AccountScreen
 import ru.hse.gymvision.ui.authorization.AuthorizationScreen
 import ru.hse.gymvision.ui.camera.CameraScreen
@@ -69,6 +71,24 @@ fun MainView() {
     }
 
     Scaffold(
+        topBar = {
+            val screenTitle = when (currentRoute) {
+                Route.Authorization.route -> stringResource(id = R.string.authorization_title)
+                Route.Registration.route -> stringResource(id = R.string.registration_title)
+                Route.GymList.route -> stringResource(id = R.string.available_gyms_title)
+                Route.GymScheme.route -> stringResource(id = R.string.gym_scheme_title)
+                Route.Account.route -> stringResource(id = R.string.my_profile_title)
+                Route.Camera.route -> stringResource(id = R.string.camera_title)
+                else -> ""
+            }
+
+            if (currentRoute != Route.Authorization.route && currentRoute != Route.Registration.route) {
+                TopBar(
+                    title = screenTitle,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+        },
         bottomBar = {
             Log.d("SetUpNavHost", "Current route: $currentRoute")
             if (currentRoute != Route.Authorization.route && currentRoute != Route.Registration.route) {
