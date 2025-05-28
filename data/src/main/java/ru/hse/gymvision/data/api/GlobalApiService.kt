@@ -13,10 +13,12 @@ import ru.hse.gymvision.data.model.GymSchemeDTO
 import ru.hse.gymvision.data.model.LoginRequestDTO
 import ru.hse.gymvision.data.model.RefreshRequestDTO
 import ru.hse.gymvision.data.model.RegisterRequestDTO
+import ru.hse.gymvision.data.model.RotateInfoDTO
 import ru.hse.gymvision.data.model.StreamInfoDTO
 import ru.hse.gymvision.data.model.TokenResponseDTO
 import ru.hse.gymvision.data.model.UserCheckPasswordDTO
 import ru.hse.gymvision.data.model.UserDTO
+import ru.hse.gymvision.data.model.ZoomInfoDTO
 
 interface GlobalApiService {
     @GET("global/gyms")
@@ -51,12 +53,24 @@ interface GlobalApiService {
     @POST("auth/refresh")
     suspend fun refreshToken(@Body request: RefreshRequestDTO): TokenResponseDTO
 
-    @GET("streams/cameras")
+    @GET("cameras")
     suspend fun getCameras(): List<CameraInfoDTO>
 
-    @POST("streams/start")
-    suspend fun startStream(@Body cameraInfoDTO: CameraInfoDTO): StreamInfoDTO
+    @POST("start")
+    suspend fun startStream(@Body cameraInfo: CameraInfoDTO): StreamInfoDTO
 
-    @POST("streams/stop")
-    suspend fun stopStream(@Body cameraInfoDTO: CameraInfoDTO): Map<String, String>
+    @POST("stop")
+    suspend fun stopStream(@Body cameraInfo: CameraInfoDTO): Map<String, String>
+
+    @POST("move")
+    suspend fun moveCamera(@Body rotateInfo: RotateInfoDTO): Map<String, String>
+
+    @POST("stop_move")
+    suspend fun stopMove(@Body cameraInfo: CameraInfoDTO): Map<String, String>
+
+    @POST("zoom")
+    suspend fun zoomCamera(@Body zoomInfo: ZoomInfoDTO): Map<String, String>
+
+    @POST("stop_zoom")
+    suspend fun stopZoom(@Body cameraInfo: CameraInfoDTO): Map<String, String>
 }

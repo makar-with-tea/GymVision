@@ -40,12 +40,23 @@ data class UserDTO(
 )
 
 data class CameraInfoDTO(
-    val cameraId: Int
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("ai_enabled") val aiEnabled: Boolean
+)
+
+data class RotateInfoDTO(
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("rotate_x") val rotateX: Float,
+    @SerializedName("rotate_y") val rotateY: Float
+)
+
+data class ZoomInfoDTO(
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("zoom_level") val zoomLevel: Float
 )
 
 data class StreamInfoDTO(
-    val streamUrl: String,
-    val startedAt: Long
+    @SerializedName("stream_url") val streamUrl: String,
 )
 
 data class RegisterRequestDTO(
