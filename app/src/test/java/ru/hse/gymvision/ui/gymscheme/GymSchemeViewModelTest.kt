@@ -17,7 +17,6 @@ import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import ru.hse.gymvision.domain.model.GymSchemeModel
-import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase

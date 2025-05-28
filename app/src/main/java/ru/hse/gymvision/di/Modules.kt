@@ -15,7 +15,6 @@ import ru.hse.gymvision.data.SharedPrefRepositoryImpl
 import ru.hse.gymvision.data.api.GlobalApiService
 import ru.hse.gymvision.domain.repos.GlobalRepository
 import ru.hse.gymvision.domain.repos.SharedPrefRepository
-import ru.hse.gymvision.domain.usecase.camera.ChangeAiStateUseCase
 import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraIdsUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraLinksUseCase
@@ -51,7 +50,15 @@ val appModule = module {
     viewModel<GymSchemeViewModel> { GymSchemeViewModel(get(), get(), get(), get()) }
     viewModel<GymListViewModel> { GymListViewModel(get()) }
     viewModel<AccountViewModel> { AccountViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel<CameraViewModel> { CameraViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+    viewModel<CameraViewModel> { CameraViewModel(
+        moveCameraUseCase = get(),
+        rotateCameraUseCase = get(),
+        zoomCameraUseCase = get(),
+        saveCamerasUseCase = get(),
+        getCameraIdsUseCase = get(),
+        getCameraLinksUseCase = get(),
+        getNewCameraLinkUseCase = get(),
+    ) }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -102,6 +109,5 @@ val domainModule = module {
     factory<GetCameraIdsUseCase> { GetCameraIdsUseCase(get()) }
     factory<GetNewCameraLinkUseCase> { GetNewCameraLinkUseCase(get()) }
     factory<GetCameraLinksUseCase> { GetCameraLinksUseCase(get()) }
-    factory<ChangeAiStateUseCase> { ChangeAiStateUseCase(get()) }
     factory<CheckPasswordUseCase> { CheckPasswordUseCase(get()) }
 }

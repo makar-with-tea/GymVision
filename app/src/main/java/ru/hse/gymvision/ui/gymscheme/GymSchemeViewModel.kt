@@ -12,6 +12,7 @@ import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
+import kotlin.properties.Delegates
 
 class GymSchemeViewModel(
     private val getGymSchemeUseCase: GetGymSchemeUseCase,
@@ -102,7 +103,15 @@ class GymSchemeViewModel(
                 }
                 return@launch
             }
-            val isAccessible = checkCameraAccessibilityUseCase.execute(id, cameraId)
+            var isAccessible by Delegates.notNull<Boolean>()
+            try {
+                isAccessible = checkCameraAccessibilityUseCase.execute(cameraId)
+            } catch (e: Exception) {
+                withContext(dispatcherMain) {
+                    _state.value = GymSchemeState.Error(GymSchemeState.GymSchemeError.NETWORK_ERROR)
+                }
+                return@launch
+            }
             withContext(dispatcherMain) {
                 if (!isAccessible) {
                     if (state.value is GymSchemeState.Main) {

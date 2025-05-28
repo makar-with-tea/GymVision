@@ -5,7 +5,7 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 class CheckCameraAccessibilityUseCase(
     private val globalRepository: GlobalRepository
 ) {
-    suspend fun execute(gymId: Int, cameraId: Int): Boolean {
-        return globalRepository.checkCameraAccessibility(gymId, cameraId)
+    suspend fun execute(cameraId: Int): Boolean {
+        return globalRepository.checkCameraAccessibility(cameraId)
     }
 }
