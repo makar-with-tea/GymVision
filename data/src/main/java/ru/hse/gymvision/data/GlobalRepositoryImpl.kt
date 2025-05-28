@@ -1,5 +1,6 @@
 package ru.hse.gymvision.data
 
+import android.annotation.SuppressLint
 import android.util.Base64
 import android.util.Log
 import retrofit2.HttpException
@@ -7,10 +8,13 @@ import ru.hse.gymvision.data.api.GlobalApiService
 import ru.hse.gymvision.data.model.CameraInfoDTO
 import ru.hse.gymvision.data.model.LoginRequestDTO
 import ru.hse.gymvision.data.model.RegisterRequestDTO
+import ru.hse.gymvision.data.model.RotateInfoDTO
 import ru.hse.gymvision.data.model.UserCheckPasswordDTO
+import ru.hse.gymvision.data.model.ZoomInfoDTO
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
+import ru.hse.gymvision.domain.exception.CameraInUseException
 import ru.hse.gymvision.domain.exception.InvalidCredentialsException
 import ru.hse.gymvision.domain.exception.LoginAlreadyInUseException
 import ru.hse.gymvision.domain.model.ClickableCameraModel
@@ -152,7 +156,7 @@ class GlobalRepositoryImpl(
                 password = password
             )
         } catch (e: HttpException) {
-            Log.e("GlobalRepository", "Error updating user: ${e.code()} - ${e.message()}")
+            Log.e(TAG, "Error updating user: ${e.code()} - ${e.message()}")
             throw e
         }
     }
@@ -161,7 +165,7 @@ class GlobalRepositoryImpl(
         try {
             apiService.deleteUser(login)
         } catch (e: HttpException) {
-            Log.e("GlobalRepository", "Error deleting user: ${e.code()} - ${e.message()}")
+            Log.e(TAG, "Error deleting user: ${e.code()} - ${e.message()}")
             throw e
         }
     }
@@ -180,7 +184,7 @@ class GlobalRepositoryImpl(
         } catch (e: HttpException) {
             Log.e(TAG, "Error starting stream: ${e.code()} - ${e.message()}")
             if (e.code() == 409) {
-                throw Exception("Camera not found")
+                throw CameraInUseException()
             }
             throw e
         } catch (e: Exception) {
@@ -189,24 +193,119 @@ class GlobalRepositoryImpl(
         }
     }
 
+    @SuppressLint("ImplicitSamInstance")
     override suspend fun stopStream(cameraId: Int) {
-        TODO("Not yet implemented")
+        try {
+            apiService.stopStream(
+                CameraInfoDTO(
+                    cameraId = cameraId,
+                    aiEnabled = false
+                )
+            )
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error stopping stream: ${e.code()} - ${e.message()}")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during stopStream: $e")
+            throw e
+        }
     }
 
     override suspend fun moveCamera(cameraId: Int, rotateX: Float, rotateY: Float) {
-        TODO("Not yet implemented")
+        try {
+            apiService.moveCamera(
+                RotateInfoDTO(
+                    cameraId = cameraId,
+                    rotateX = rotateX,
+                    rotateY = rotateY
+                )
+            )
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error moving camera: ${e.code()} - ${e.message()}")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during moveCamera: $e")
+            throw e
+        }
     }
 
     override suspend fun stopMove(cameraId: Int) {
-        TODO("Not yet implemented")
+        try {
+            apiService.stopMove(
+                CameraInfoDTO(
+                    cameraId = cameraId,
+                    aiEnabled = false
+                )
+            )
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error stopping camera movement: ${e.code()} - ${e.message()}")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during stopMove: $e")
+            throw e
+        }
     }
 
     override suspend fun zoomCamera(cameraId: Int, zoomLevel: Float) {
-        TODO("Not yet implemented")
+        try {
+            apiService.zoomCamera(
+                ZoomInfoDTO(
+                    cameraId = cameraId,
+                    zoomLevel = zoomLevel
+                )
+            )
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error zooming camera: ${e.code()} - ${e.message()}")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during zoomCamera: $e")
+            throw e
+        }
     }
 
     override suspend fun stopZoom(cameraId: Int) {
-        TODO("Not yet implemented")
+        try {
+            apiService.stopZoom(
+                CameraInfoDTO(
+                    cameraId = cameraId,
+                    aiEnabled = false
+                )
+            )
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error stopping camera zoom: ${e.code()} - ${e.message()}")
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during stopZoom: $e")
+            throw e
+        }
+    }
+
+    @SuppressLint("ImplicitSamInstance")
+    override suspend fun checkCameraAccessibility(cameraId: Int): Boolean {
+        try {
+            apiService.startStream(
+                CameraInfoDTO(
+                    cameraId = cameraId,
+                    aiEnabled = false
+                )
+            )
+            apiService.stopStream(
+                CameraInfoDTO(
+                    cameraId = cameraId,
+                    aiEnabled = false
+                )
+            )
+            return true
+        } catch (e: HttpException) {
+            Log.e(TAG, "Error checking camera accessibility: ${e.code()} - ${e.message()}")
+            if (e.code() == 409) {
+                return false // Camera is in use
+            }
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during checkCameraAccessibility: $e")
+            throw e
+        }
     }
 
     override suspend fun checkPassword(login: String, password: String): Boolean {

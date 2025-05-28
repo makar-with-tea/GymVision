@@ -20,4 +20,5 @@ interface GlobalRepository {
     suspend fun zoomCamera(cameraId: Int, zoomLevel: Float)
     suspend fun stopZoom(cameraId: Int)
     suspend fun checkPassword(login: String, password: String): Boolean
+    suspend fun checkCameraAccessibility(cameraId: Int): Boolean
 }

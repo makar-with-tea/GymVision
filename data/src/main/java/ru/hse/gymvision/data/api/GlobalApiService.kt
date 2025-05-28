@@ -53,24 +53,21 @@ interface GlobalApiService {
     @POST("auth/refresh")
     suspend fun refreshToken(@Body request: RefreshRequestDTO): TokenResponseDTO
 
-    @GET("cameras")
-    suspend fun getCameras(): List<CameraInfoDTO>
-
-    @POST("start")
+    @POST("streams/start")
     suspend fun startStream(@Body cameraInfo: CameraInfoDTO): StreamInfoDTO
 
-    @POST("stop")
-    suspend fun stopStream(@Body cameraInfo: CameraInfoDTO): Map<String, String>
+    @POST("streams/stop")
+    suspend fun stopStream(@Body cameraInfo: CameraInfoDTO)
 
-    @POST("move")
-    suspend fun moveCamera(@Body rotateInfo: RotateInfoDTO): Map<String, String>
+    @POST("streams/move")
+    suspend fun moveCamera(@Body rotateInfo: RotateInfoDTO)
 
-    @POST("stop_move")
-    suspend fun stopMove(@Body cameraInfo: CameraInfoDTO): Map<String, String>
+    @POST("streams/stop_move")
+    suspend fun stopMove(@Body cameraInfo: CameraInfoDTO)
 
-    @POST("zoom")
-    suspend fun zoomCamera(@Body zoomInfo: ZoomInfoDTO): Map<String, String>
+    @POST("streams/zoom")
+    suspend fun zoomCamera(@Body zoomInfo: ZoomInfoDTO)
 
-    @POST("stop_zoom")
-    suspend fun stopZoom(@Body cameraInfo: CameraInfoDTO): Map<String, String>
+    @POST("streams/stop_zoom")
+    suspend fun stopZoom(@Body cameraInfo: CameraInfoDTO)
 }

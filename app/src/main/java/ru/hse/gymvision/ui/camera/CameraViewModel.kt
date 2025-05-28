@@ -13,7 +13,6 @@ import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
-import ru.hse.gymvision.domain.usecase.camera.ChangeAiStateUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraIdsUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraLinksUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetNewCameraLinkUseCase
@@ -30,7 +29,6 @@ class CameraViewModel(
     private val getCameraIdsUseCase: GetCameraIdsUseCase,
     private val getCameraLinksUseCase: GetCameraLinksUseCase,
     private val getNewCameraLinkUseCase: GetNewCameraLinkUseCase,
-    private val changeAIState: ChangeAiStateUseCase,
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
@@ -64,7 +62,6 @@ class CameraViewModel(
             is CameraEvent.DeleteCameraButtonClicked -> deleteCamera(event.cameraNum)
             is CameraEvent.InitCameras -> initCameras(event.newCameraId, event.gymId)
             is CameraEvent.MakeCameraMainButtonClicked -> makeCameraMain(event.cameraNum)
-            is CameraEvent.SavePlayers -> savePlayers(event.player1, event.player2, event.player3)
             is CameraEvent.ChangeAiState -> changeAIState(event.isAiEnabled)
         }
     }
@@ -72,21 +69,6 @@ class CameraViewModel(
     private fun clearState() {
         _state.value = CameraState.Idle
         _action.value = null
-        // Release media players to free resources
-//        mediaPlayer1?.release()
-//        mediaPlayer2?.release()
-//        mediaPlayer3?.release()
-    }
-
-    private fun savePlayers(player1: MediaPlayer?, player2: MediaPlayer?, player3: MediaPlayer?) {
-        // Release previous media players if they somehow weren't released earlier
-//        mediaPlayer1?.release()
-//        mediaPlayer2?.release()
-//        mediaPlayer3?.release()
-//
-//        mediaPlayer1 = player1
-//        mediaPlayer2 = player2
-//        mediaPlayer3 = player3
     }
 
     private fun initCameras(newCameraId: Int?, gymId: Int) {
@@ -100,7 +82,7 @@ class CameraViewModel(
             val cameraLinks = getCameraLinksUseCase.execute().toMutableList()
 
             if (newCameraId != null && !cameras.contains(newCameraId)) {
-                val newCameraLink = getNewCameraLinkUseCase.execute(gymId, newCameraId)
+                val newCameraLink = getNewCameraLinkUseCase.execute(newCameraId, false)
                 cameras.add(0, newCameraId)
                 cameraLinks.add(0, newCameraLink)
                 saveCamerasUseCase.execute(cameras, cameraLinks)
@@ -151,7 +133,7 @@ class CameraViewModel(
             else -> return
         }
         viewModelScope.launch(dispatcherIO) {
-            moveCameraUseCase.execute(gymId, cameraId, direction)
+            moveCameraUseCase.execute(cameraId, direction)
         }
     }
 
@@ -163,7 +145,7 @@ class CameraViewModel(
             else -> return
         }
         viewModelScope.launch(dispatcherIO) {
-            rotateCameraUseCase.execute(gymId, cameraId, direction)
+            rotateCameraUseCase.execute(cameraId, direction)
         }
     }
 
@@ -175,7 +157,7 @@ class CameraViewModel(
             else -> return
         }
         viewModelScope.launch(dispatcherIO) {
-            zoomCameraUseCase.execute(gymId, cameraId, direction)
+            zoomCameraUseCase.execute(cameraId, direction)
         }
     }
 
@@ -447,8 +429,49 @@ class CameraViewModel(
             is CameraState.ThreeCameras -> (_state.value as CameraState.ThreeCameras).camera1Id
             else -> return
         }
+
+        _state.value = CameraState.Loading
+
         viewModelScope.launch(dispatcherIO) {
-            changeAIState.execute(gymId, cameraId, isAiEnabled)
+            val cameras = getCameraIdsUseCase.execute().toMutableList()
+            val cameraLinks = getCameraLinksUseCase.execute().toMutableList()
+
+            val newCameraLink = getNewCameraLinkUseCase.execute(cameraId, isAiEnabled)
+            cameraLinks.removeAt(0)
+            cameraLinks.add(0, newCameraLink)
+            saveCamerasUseCase.execute(cameras, cameraLinks)
+
+            withContext(dispatcherMain) {
+                _state.value = when (cameras.size) {
+                    1 -> CameraState.OneCamera(
+                        camera1Id = cameras[0],
+                        camera1Link = cameraLinks[0],
+                        isAiEnabled = isAiEnabled,
+                    )
+
+                    2 -> CameraState.TwoCameras(
+                        camera1Id = cameras[0],
+                        camera1Link = cameraLinks[0],
+                        camera2Id = cameras[1],
+                        camera2Link = cameraLinks[1],
+                        isAiEnabled = isAiEnabled,
+                    )
+
+                    3 -> {
+                        CameraState.ThreeCameras(
+                            camera1Id = cameras[0],
+                            camera1Link = cameraLinks[0],
+                            camera2Id = cameras[1],
+                            camera2Link = cameraLinks[1],
+                            camera3Id = cameras[2],
+                            camera3Link = cameraLinks[2],
+                            isAiEnabled = isAiEnabled,
+                        )
+                    }
+
+                    else -> CameraState.Idle
+                }
+            }
         }
     }
 }

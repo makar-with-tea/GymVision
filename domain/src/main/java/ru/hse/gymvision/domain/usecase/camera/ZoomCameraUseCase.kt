@@ -6,7 +6,19 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 class ZoomCameraUseCase(
     private val globalRepository: GlobalRepository
 ) {
-    suspend fun execute(gymId: Int, cameraId: Int, direction: CameraZoom) {
-        globalRepository.zoomCamera(gymId, cameraId, direction)
+    suspend fun execute(cameraId: Int, direction: CameraZoom) {
+        if (direction == CameraZoom.STOP) {
+            globalRepository.stopZoom(cameraId)
+            return
+        }
+
+        globalRepository.zoomCamera(
+            cameraId,
+            when (direction) {
+                CameraZoom.IN -> 1f
+                CameraZoom.OUT -> -1f
+                else -> 0f
+            }
+        )
     }
 }
