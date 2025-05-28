@@ -43,23 +43,26 @@ import ru.hse.gymvision.domain.CameraZoom
 fun mainPlayerView(
     videoUrl: String,
     playWhenReady: Boolean,
+    isAiEnabled: Boolean,
     showControls: MutableState<Boolean>,
     onError: (Exception) -> Unit,
     onRotateCamera: (CameraRotation) -> Unit,
     onMoveCamera: (CameraMovement) -> Unit,
     onZoomCamera: (CameraZoom) -> Unit,
     onChangeAi: (Boolean) -> Unit,
-    onPlay: () -> Unit
+    onPlay: () -> Unit,
 ): MediaPlayer {
+    Log.d("camera", "Creating main player view for URL: $videoUrl")
     val context = LocalContext.current
     val libVLC = remember { LibVLC(context) }
-    val mediaPlayer = remember { MediaPlayer(libVLC) }
+    var mediaPlayer = remember { MediaPlayer(libVLC) }
     val videoUri = videoUrl.toUri()
     val vlcErrorText = stringResource(R.string.vlc_error)
-    val isAIEnabled = remember { mutableStateOf(false) }
+    val isAIEnabled = remember { mutableStateOf(isAiEnabled) }
 
     DisposableEffect(videoUrl) {
         val media = Media(libVLC, videoUri)
+        Log.d("camera", "Setting media for player: $videoUrl")
         mediaPlayer.media = media
         mediaPlayer.setEventListener { event ->
             if (event.type == MediaPlayer.Event.EncounteredError) {
@@ -70,7 +73,7 @@ fun mainPlayerView(
             mediaPlayer.play()
         }
         onDispose {
-            Log.d("camera", "Releasing media player and media")
+            Log.d("camera", "Releasing media player: $videoUrl")
             mediaPlayer.release()
             media.release()
         }

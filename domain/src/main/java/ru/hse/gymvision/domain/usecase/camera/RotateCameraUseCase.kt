@@ -6,7 +6,20 @@ import ru.hse.gymvision.domain.repos.GlobalRepository
 class RotateCameraUseCase(
     private val globalRepository: GlobalRepository
 ) {
-    suspend fun execute(gymId: Int, cameraId: Int, direction: CameraRotation) {
-        globalRepository.rotateCamera(gymId, cameraId, direction)
+    suspend fun execute(cameraId: Int, direction: CameraRotation) {
+        if (direction == CameraRotation.STOP) {
+            globalRepository.stopMove(cameraId)
+            return
+        }
+
+        globalRepository.moveCamera(
+            cameraId,
+            when (direction) {
+                CameraRotation.LEFT -> -1f
+                CameraRotation.RIGHT -> 1f
+                else -> 0f
+            },
+            0f
+        )
     }
 }

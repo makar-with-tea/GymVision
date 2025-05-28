@@ -80,11 +80,7 @@ fun CameraScreen(
                 },
                 onChangeAIState = { isAiEnabled ->
                     viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                },
-                onSavePlayer = { player ->
-                    viewModel.obtainEvent(CameraEvent.SavePlayers(player))
-                }
-            )
+                },)
         }
 
         is CameraState.TwoCameras -> {
@@ -118,9 +114,6 @@ fun CameraScreen(
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
                     },
-                    onSavePlayers = { player1, player2 ->
-                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2))
-                    }
                 )
             } else {
                 TwoCamerasStateLandscape(
@@ -152,9 +145,6 @@ fun CameraScreen(
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
                     },
-                    onSavePlayers = { player1, player2 ->
-                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2))
-                    }
                 )
             }
         }
@@ -196,9 +186,6 @@ fun CameraScreen(
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
                     },
-                    onSavePlayers = { player1, player2, player3 ->
-                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2, player3))
-                    }
                 )
             } else {
                 ThreeCamerasStateLandscape(
@@ -235,9 +222,6 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                    },
-                    onSavePlayers = { player1, player2, player3 ->
-                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2, player3))
                     }
                 )
             }
@@ -254,7 +238,6 @@ fun OneCameraState(
     onAddCamera: () -> Unit,
     onPlay: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
-    onSavePlayer: (MediaPlayer) -> Unit
 ) {
     val showControls = remember { mutableStateOf(false) }
 
@@ -268,6 +251,7 @@ fun OneCameraState(
             val player = mainPlayerView(
                 state.camera1Link,
                 state.isPlaying1,
+                state.isAiEnabled,
                 showControls,
                 onError = { error ->
                     Log.d("CameraScreen", "Error: $error")
@@ -278,7 +262,6 @@ fun OneCameraState(
                 onPlay = onPlay,
                 onChangeAi = onChangeAIState
             )
-            onSavePlayer(player)
         }
         FloatingActionButton(
             onClick = {
@@ -309,7 +292,6 @@ fun TwoCamerasStatePortrait(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
-    onSavePlayers: (MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -329,6 +311,7 @@ fun TwoCamerasStatePortrait(
                 player1 = mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
+                    state.isAiEnabled,
                     showControls1,
                     onError = { error ->
                         Log.d("CameraScreen", "Error: $error")
@@ -355,7 +338,6 @@ fun TwoCamerasStatePortrait(
                     onMakeMainCamera = onMakeMainCamera2,
                     onDeleteCamera = onDeleteCamera2
                 )
-                onSavePlayers(player1, player2)
             }
         }
         FloatingActionButton(
@@ -390,7 +372,6 @@ fun ThreeCamerasStatePortrait(
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
-    onSavePlayers: (MediaPlayer, MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -413,6 +394,7 @@ fun ThreeCamerasStatePortrait(
                 player1 = mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
+                    state.isAiEnabled,
                     showControls1,
                     onError = { error ->
                         Log.d("CameraScreen", "Error: $error")
@@ -458,7 +440,6 @@ fun ThreeCamerasStatePortrait(
                             onMakeMainCamera = onMakeMainCamera3,
                             onDeleteCamera = onDeleteCamera3
                         )
-                        onSavePlayers(player1, player2, player3)
                     }
                 }
             }
@@ -478,7 +459,6 @@ fun TwoCamerasStateLandscape(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
-    onSavePlayers: (MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -500,6 +480,7 @@ fun TwoCamerasStateLandscape(
                     player1 = mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
+                        state.isAiEnabled,
                         showControls1,
                         onError = { error ->
                             Log.d("CameraScreen", "Error: $error")
@@ -526,7 +507,6 @@ fun TwoCamerasStateLandscape(
                         onMakeMainCamera = onMakeMainCamera2,
                         onDeleteCamera = onDeleteCamera2
                     )
-                    onSavePlayers(player1, player2)
                 }
             }
         }
@@ -562,7 +542,6 @@ fun ThreeCamerasStateLandscape(
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
-    onSavePlayers: (MediaPlayer, MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -586,6 +565,7 @@ fun ThreeCamerasStateLandscape(
                     player1 = mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
+                        state.isAiEnabled,
                         showControls1,
                         onError = { error ->
                             Log.d("CameraScreen", "Error: $error")
@@ -631,7 +611,6 @@ fun ThreeCamerasStateLandscape(
                                 onMakeMainCamera = onMakeMainCamera3,
                                 onDeleteCamera = onDeleteCamera3
                             )
-                            onSavePlayers(player1, player2, player3)
                         }
                     }
                 }
