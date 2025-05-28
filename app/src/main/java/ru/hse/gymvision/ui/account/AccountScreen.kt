@@ -1,15 +1,22 @@
 package ru.hse.gymvision.ui.account
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,9 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
@@ -164,17 +176,36 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(
-            text = stringResource(
-                R.string.my_profile_title
-            )
+        Image(
+            painter = painterResource(id = R.drawable.ic_gymvision),
+            contentDescription = null, // todo: add content description
+            modifier = Modifier.size(100.dp)
+                .clip(CircleShape),
         )
-        Text("${stringResource(id = R.string.name)}: ${state.name}")
-        Text("${stringResource(id = R.string.surname)}: ${state.surname}")
-        Text("${stringResource(id = R.string.login)}: ${state.login}")
-        Button(onClick = { onEditName() }) {
-            Text(stringResource(id = R.string.edit))
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${state.name} ${state.surname}",
+                fontSize = 24.sp
+            )
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = { onEditName() },
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                    contentDescription = null, // todo
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
+        Text(
+            text = state.login,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            fontSize = 20.sp
+        )
         Button(onClick = { onChangePassword() }) {
             Text(stringResource(id = R.string.change_password))
         }

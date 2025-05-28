@@ -39,7 +39,6 @@ import ru.hse.gymvision.ui.BitmapHelper
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPopup
-import ru.hse.gymvision.ui.composables.MyTitle
 
 val CAMERA_SIZE = 24.dp
 
@@ -123,9 +122,7 @@ fun MainState(
         verticalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = stringResource(R.string.gym_scheme_title))
         val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
         val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.image)
         val painter: Painter = remember(imageBitmap) {

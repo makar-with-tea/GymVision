@@ -83,6 +83,7 @@ class GlobalRepositoryImpl(
                 UserModel(
                     name = user.name,
                     surname = user.surname,
+                    email = user.email,
                     login = user.login
                 )
             }
@@ -110,17 +111,21 @@ class GlobalRepositoryImpl(
                 throw InvalidCredentialsException()
             }
             throw e
+        } catch (e: Exception) {
+            Log.e("marathinks", "Error during login: $e")
+            throw e
         }
     }
 
     override suspend fun register(
         name: String,
         surname: String,
+        email: String,
         login: String,
         password: String
     ): TokenModel {
         try {
-            apiService.register(RegisterRequestDTO(name, surname, login, password))
+            apiService.register(RegisterRequestDTO(name, surname, email, login, password))
                 .let { response ->
                     return TokenModel(
                         accessToken = response.accessToken,

@@ -13,6 +13,7 @@
     <string name="name">Имя</string>
     <string name="surname">Фамилия</string>
     <string name="login">Логин</string>
+    <string name="email_label">Электронная почта</string>
     <string name="edit">Редактировать</string>
     <string name="change_password">Сменить пароль</string>
     <string name="logout">Выйти</string>
@@ -63,6 +64,7 @@
     <string name="password_mismatch_error">Пароли не совпадают</string>
     <string name="login_taken_error">Данный логин уже занят</string>
     <string name="registration_failed_error">Ошибка регистрации</string>
+    <string name="email_content_error">Неверный формат почты</string>
 
     <string name="empty_login_error">"Логин не может быть пустым</string>
     <string name="empty_password_error">Пароль не может быть пустым</string>
@@ -93,6 +95,8 @@
 
     <string name="vlc_error">Ошибка в VLC</string>
     <string name="confirmation">ОК</string>
+
+    <string name="arrow_back_description">Назад</string>
 
     <string name="repeat_new_password_label">Повторите новый пароль</string>
 </resources>

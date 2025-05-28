@@ -26,7 +26,6 @@ import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.ui.composables.LoadingBlock
-import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
 
@@ -251,7 +250,6 @@ fun OneCameraState(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_title))
             mainPlayerView(
                 state.camera1Link,
                 state.isPlaying1,
@@ -305,7 +303,6 @@ fun TwoCamerasStatePortrait(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Box(
                 modifier = Modifier.weight(1f)
             ) {
@@ -384,7 +381,6 @@ fun ThreeCamerasStatePortrait(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Box(
                 modifier = Modifier.weight(1f)
             ) {
@@ -465,7 +461,6 @@ fun TwoCamerasStateLandscape(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Row {
                 Box(
                     modifier = Modifier.weight(1f)
@@ -546,7 +541,6 @@ fun ThreeCamerasStateLandscape(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Row {
                 Box(
                     modifier = Modifier.weight(1f)
