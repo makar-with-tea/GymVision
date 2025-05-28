@@ -50,6 +50,10 @@ class AccountViewModel(
                 )
             }
 
+//            is AccountEvent.SaveEmailButtonClicked -> {
+//
+//            }
+
             is AccountEvent.ShowOldPasswordButtonClicked -> {
                 showOldPassword()
             }
@@ -100,6 +104,7 @@ class AccountViewModel(
                     _state.value = AccountState.Main(
                         name = userInfo.name,
                         surname = userInfo.surname,
+                        email = userInfo.email,
                         login = userInfo.login
                     )
                 }
@@ -116,8 +121,11 @@ class AccountViewModel(
     private fun saveName(name: String, surname: String) {
         if (_state.value !is AccountState.EditName) return
         _state.value = (_state.value as AccountState.EditName).copy(
-            isLoading = true
+            isLoading = false,
+            nameError = AccountState.AccountError.IDLE,
+            surnameError = AccountState.AccountError.IDLE
         )
+
         var isError = false
         if (name.length < 2 || name.length > 20) {
             _state.value = (_state.value as AccountState.EditName).copy(
@@ -132,11 +140,10 @@ class AccountViewModel(
             isError = true
         }
         if (isError) {
-            _state.value = (_state.value as AccountState.EditName).copy(
-                isLoading = false
-            )
             return
         }
+
+        _state.value = (_state.value as AccountState.EditName).copy(isLoading = true)
         viewModelScope.launch(dispatcherIO) {
             try {
                 updateUserUseCase.execute(
@@ -147,6 +154,7 @@ class AccountViewModel(
                 _state.value = AccountState.Main(
                     name = name,
                     surname = surname,
+                    email = (_state.value as AccountState.EditName).email,
                     login = (_state.value as AccountState.EditName).login
                 )
             } catch (e: Exception) {
@@ -154,6 +162,7 @@ class AccountViewModel(
                     _state.value = AccountState.EditName(
                         name = name,
                         surname = surname,
+                        email = (_state.value as AccountState.EditName).email,
                         login = (_state.value as AccountState.EditName).login,
                         surnameError = AccountState.AccountError.NETWORK,
                         nameError = AccountState.AccountError.NETWORK,
@@ -166,6 +175,11 @@ class AccountViewModel(
 
     private fun savePassword(newPassword: String, oldPassword: String, newPasswordRepeat: String) {
         if (_state.value !is AccountState.ChangePassword) return
+        _state.value = (_state.value as AccountState.ChangePassword).copy(
+            oldPasswordError = AccountState.AccountError.IDLE,
+            newPasswordError = AccountState.AccountError.IDLE,
+            newPasswordRepeatError = AccountState.AccountError.IDLE
+        )
 
         if (newPassword.length < 8 || newPassword.length > 20) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
@@ -212,6 +226,7 @@ class AccountViewModel(
                     _state.value = AccountState.Main(
                         name = (_state.value as AccountState.ChangePassword).name,
                         surname = (_state.value as AccountState.ChangePassword).surname,
+                        email = (_state.value as AccountState.ChangePassword).email,
                         login = (_state.value as AccountState.ChangePassword).login
                     )
                 }
@@ -259,6 +274,7 @@ class AccountViewModel(
         _state.value = AccountState.EditName(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
+            email = (_state.value as AccountState.Main).email,
             login = (_state.value as AccountState.Main).login,
         )
     }
@@ -268,6 +284,7 @@ class AccountViewModel(
         _state.value = AccountState.ChangePassword(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
+            email = (_state.value as AccountState.Main).email,
             login = (_state.value as AccountState.Main).login,
         )
     }

@@ -22,7 +22,11 @@ import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.R
 
 @Composable
-fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
+fun PauseButton(
+    modifier: Modifier = Modifier,
+    player: MediaPlayer,
+    onPlay: () -> Unit,
+) {
     var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
     LaunchedEffect(player.isPlaying) {
@@ -32,7 +36,7 @@ fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
     }
 
     IconButton(
-        modifier = Modifier.size(40.dp),
+        modifier = modifier.size(26.dp),
         onClick = {
             if (isPlaying) {
                 player.pause()
@@ -44,7 +48,7 @@ fun PauseButton(player: MediaPlayer, onPlay: () -> Unit) {
         }
     ) {
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(20.dp),
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = stringResource(R.string.pause_description),
             tint = MaterialTheme.colorScheme.primary

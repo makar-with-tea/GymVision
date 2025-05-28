@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.composables
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -21,7 +22,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -70,6 +70,7 @@ fun mainPlayerView(
             mediaPlayer.play()
         }
         onDispose {
+            Log.d("camera", "Releasing media player and media")
             mediaPlayer.release()
             media.release()
         }
@@ -101,14 +102,6 @@ fun mainPlayerView(
         )
 
         if (showControls.value) {
-            Box(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.Center),
-            ) {
-                PauseButton(mediaPlayer, onPlay)
-            }
-
             Column(
                 modifier = Modifier
                     .width(172.dp)
@@ -170,6 +163,12 @@ fun mainPlayerView(
                         colorFilter = ColorFilter.tint(
                             MaterialTheme.colorScheme.primaryContainer
                         )
+                    )
+
+                    PauseButton(
+                        modifier = Modifier.align(Alignment.Center),
+                        player = mediaPlayer,
+                        onPlay = onPlay
                     )
 
                     ControlButton(
@@ -256,6 +255,7 @@ fun secondaryPlayerView(
             mediaPlayer.play()
         }
         onDispose {
+            Log.d("camera secondary", "Releasing media player and media")
             mediaPlayer.release()
             media.release()
         }
@@ -292,7 +292,7 @@ fun secondaryPlayerView(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                PauseButton(mediaPlayer, onPlay)
+                PauseButton(Modifier, mediaPlayer, onPlay)
             }
             ControlButtonSimple(
                 iconId = R.drawable.ic_crop_free,

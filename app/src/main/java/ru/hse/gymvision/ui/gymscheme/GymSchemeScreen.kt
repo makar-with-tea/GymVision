@@ -3,11 +3,13 @@ package ru.hse.gymvision.ui.gymscheme
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,7 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +43,7 @@ import ru.hse.gymvision.ui.BitmapHelper
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPopup
+import ru.hse.gymvision.ui.composables.MyTitle
 
 val CAMERA_SIZE = 24.dp
 
@@ -116,6 +121,9 @@ fun MainState(
 
     var imWidth by remember { mutableStateOf(0.dp) }
     var imHeight by remember { mutableStateOf(0.dp) }
+    var imStartX by remember { mutableStateOf(0.dp) }
+    var imStartY by remember { mutableStateOf(0.dp) }
+
     val density = LocalDensity.current
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,8 +131,10 @@ fun MainState(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        MyTitle(state.gymScheme.name)
+
         val placeholderPainter = painterResource(id = R.drawable.im_placeholder)
-        val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.image)
+        val imageBitmap = BitmapHelper.byteArrayToBitmap(gymScheme.value?.scheme)
         val painter: Painter = remember(imageBitmap) {
             imageBitmap?.let {
                 BitmapPainter(imageBitmap.asImageBitmap())
@@ -140,12 +150,20 @@ fun MainState(
                 painter = painter,
                 contentDescription = stringResource(R.string.gym_scheme_image_description),
                 modifier = Modifier
+                    .padding(8.dp)
+//                    .fillMaxSize()
+//                    .border(1.dp, Color.Red)
                     .wrapContentSize(Alignment.Center)
                     .onGloballyPositioned {
                         val imageSize = it.size
                         imWidth = with(density) { imageSize.width.toDp() }
                         imHeight = with(density) { imageSize.height.toDp() }
-                    }
+
+                        val imagePosition = it.positionInWindow()
+                        imStartX = with(density) { imagePosition.x.toDp() }
+                        imStartY = with(density) { imagePosition.y.toDp() }
+                    },
+                contentScale = ContentScale.Fit
             )
 
             val clickableTrainers = gymScheme.value?.clickableTrainerModels ?: emptyList()
@@ -196,7 +214,7 @@ fun MainState(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_camera),
                             contentDescription = stringResource(R.string.camera_icon_description),
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint =  MaterialTheme.colorScheme.primary
                         )
                     }
                 }

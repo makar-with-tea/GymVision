@@ -8,19 +8,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
@@ -28,8 +29,6 @@ import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
-
-// todo: save players
 
 @Composable
 fun CameraScreen(
@@ -81,6 +80,9 @@ fun CameraScreen(
                 },
                 onChangeAIState = { isAiEnabled ->
                     viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
+                },
+                onSavePlayer = { player ->
+                    viewModel.obtainEvent(CameraEvent.SavePlayers(player))
                 }
             )
         }
@@ -115,6 +117,9 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
+                    },
+                    onSavePlayers = { player1, player2 ->
+                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2))
                     }
                 )
             } else {
@@ -146,6 +151,9 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
+                    },
+                    onSavePlayers = { player1, player2 ->
+                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2))
                     }
                 )
             }
@@ -187,6 +195,9 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
+                    },
+                    onSavePlayers = { player1, player2, player3 ->
+                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2, player3))
                     }
                 )
             } else {
@@ -224,6 +235,9 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
+                    },
+                    onSavePlayers = { player1, player2, player3 ->
+                        viewModel.obtainEvent(CameraEvent.SavePlayers(player1, player2, player3))
                     }
                 )
             }
@@ -240,6 +254,7 @@ fun OneCameraState(
     onAddCamera: () -> Unit,
     onPlay: () -> Unit,
     onChangeAIState: (Boolean) -> Unit,
+    onSavePlayer: (MediaPlayer) -> Unit
 ) {
     val showControls = remember { mutableStateOf(false) }
 
@@ -250,7 +265,7 @@ fun OneCameraState(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            mainPlayerView(
+            val player = mainPlayerView(
                 state.camera1Link,
                 state.isPlaying1,
                 showControls,
@@ -263,6 +278,7 @@ fun OneCameraState(
                 onPlay = onPlay,
                 onChangeAi = onChangeAIState
             )
+            onSavePlayer(player)
         }
         FloatingActionButton(
             onClick = {
@@ -275,7 +291,7 @@ fun OneCameraState(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -292,10 +308,14 @@ fun TwoCamerasStatePortrait(
     onMakeMainCamera2: () -> Unit,
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
+    onSavePlayers: (MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
+    lateinit var player1: MediaPlayer
+    lateinit var player2: MediaPlayer
+
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -306,7 +326,7 @@ fun TwoCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                mainPlayerView(
+                player1 = mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
                     showControls1,
@@ -324,7 +344,7 @@ fun TwoCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                secondaryPlayerView(
+                player2 = secondaryPlayerView(
                     state.camera2Link,
                     state.isPlaying2,
                     showControls2,
@@ -335,6 +355,7 @@ fun TwoCamerasStatePortrait(
                     onMakeMainCamera = onMakeMainCamera2,
                     onDeleteCamera = onDeleteCamera2
                 )
+                onSavePlayers(player1, player2)
             }
         }
         FloatingActionButton(
@@ -348,7 +369,7 @@ fun TwoCamerasStatePortrait(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
@@ -368,11 +389,16 @@ fun ThreeCamerasStatePortrait(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
+    onSavePlayers: (MediaPlayer, MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
     val showControls3 = remember { mutableStateOf(false) }
+
+    lateinit var player1: MediaPlayer
+    lateinit var player2: MediaPlayer
+    lateinit var player3: MediaPlayer
 
     Box(
         modifier = Modifier
@@ -384,7 +410,7 @@ fun ThreeCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                mainPlayerView(
+                player1 = mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
                     showControls1,
@@ -406,7 +432,7 @@ fun ThreeCamerasStatePortrait(
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
-                        secondaryPlayerView(
+                        player2 = secondaryPlayerView(
                             state.camera2Link,
                             state.isPlaying2,
                             showControls2,
@@ -421,7 +447,7 @@ fun ThreeCamerasStatePortrait(
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
-                        secondaryPlayerView(
+                        player3 = secondaryPlayerView(
                             state.camera3Link,
                             state.isPlaying3,
                             showControls3,
@@ -432,6 +458,7 @@ fun ThreeCamerasStatePortrait(
                             onMakeMainCamera = onMakeMainCamera3,
                             onDeleteCamera = onDeleteCamera3
                         )
+                        onSavePlayers(player1, player2, player3)
                     }
                 }
             }
@@ -450,10 +477,15 @@ fun TwoCamerasStateLandscape(
     onMakeMainCamera2: () -> Unit,
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
+    onSavePlayers: (MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
+
+    lateinit var player1: MediaPlayer
+    lateinit var player2: MediaPlayer
+
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -465,7 +497,7 @@ fun TwoCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    mainPlayerView(
+                    player1 = mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
                         showControls1,
@@ -483,7 +515,7 @@ fun TwoCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    secondaryPlayerView(
+                    player2 = secondaryPlayerView(
                         state.camera2Link,
                         state.isPlaying2,
                         showControls2,
@@ -494,6 +526,7 @@ fun TwoCamerasStateLandscape(
                         onMakeMainCamera = onMakeMainCamera2,
                         onDeleteCamera = onDeleteCamera2
                     )
+                    onSavePlayers(player1, player2)
                 }
             }
         }
@@ -508,7 +541,7 @@ fun TwoCamerasStateLandscape(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
@@ -528,11 +561,16 @@ fun ThreeCamerasStateLandscape(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
+    onSavePlayers: (MediaPlayer, MediaPlayer, MediaPlayer) -> Unit
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
     val showControls3 = remember { mutableStateOf(false) }
+
+    lateinit var player1: MediaPlayer
+    lateinit var player2: MediaPlayer
+    lateinit var player3: MediaPlayer
 
     Box(
         modifier = Modifier
@@ -545,7 +583,7 @@ fun ThreeCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    mainPlayerView(
+                    player1 = mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
                         showControls1,
@@ -567,7 +605,7 @@ fun ThreeCamerasStateLandscape(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            secondaryPlayerView(
+                            player2 = secondaryPlayerView(
                                 state.camera2Link,
                                 state.isPlaying2,
                                 showControls2,
@@ -582,7 +620,7 @@ fun ThreeCamerasStateLandscape(
                         Box(
                             modifier = Modifier.weight(1f)
                         ) {
-                            secondaryPlayerView(
+                            player3 = secondaryPlayerView(
                                 state.camera3Link,
                                 state.isPlaying3,
                                 showControls3,
@@ -593,6 +631,7 @@ fun ThreeCamerasStateLandscape(
                                 onMakeMainCamera = onMakeMainCamera3,
                                 onDeleteCamera = onDeleteCamera3
                             )
+                            onSavePlayers(player1, player2, player3)
                         }
                     }
                 }

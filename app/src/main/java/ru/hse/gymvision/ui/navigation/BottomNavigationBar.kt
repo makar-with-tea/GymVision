@@ -1,8 +1,10 @@
 package ru.hse.gymvision.ui.navigation
 
 import android.util.Log
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
@@ -27,12 +29,16 @@ fun BottomNavigationBar(
 ) {
 
 
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier.height(100.dp),
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
         NavigationBarItem(
             selected = currentRoute == Route.GymList.route,
             icon = {
                 Icon(
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_home),
                     contentDescription = stringResource(R.string.home_icon_description)
                 )
@@ -47,7 +53,7 @@ fun BottomNavigationBar(
             selected = currentRoute == Route.GymScheme.route,
             icon = {
                 Icon(
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_fitness_center),
                     contentDescription = stringResource(R.string.gym_icon_description)
                 )
@@ -62,7 +68,7 @@ fun BottomNavigationBar(
             selected = currentRoute == Route.Account.route,
             icon = {
                 Icon(
-                    modifier = Modifier.size(32.dp),
+                    modifier = Modifier.size(24.dp),
                     imageVector = ImageVector.vectorResource(R.drawable.ic_account_box),
                     contentDescription = stringResource(R.string.account_icon_description)
                 )

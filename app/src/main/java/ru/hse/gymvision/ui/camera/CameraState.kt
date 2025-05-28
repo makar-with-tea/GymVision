@@ -1,6 +1,6 @@
 package ru.hse.gymvision.ui.camera
 
-import org.videolan.libvlc.media.MediaPlayer
+import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
@@ -47,8 +47,8 @@ sealed class CameraEvent {
     data object Clear : CameraEvent()
     data class SavePlayers(
         val player1: MediaPlayer,
-        val player2: MediaPlayer,
-        val player3: MediaPlayer
+        val player2: MediaPlayer? = null,
+        val player3: MediaPlayer? = null
     ) : CameraEvent()
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -31,10 +32,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
+import ru.hse.gymvision.ui.composables.AccountButton
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPasswordField
@@ -51,8 +54,8 @@ fun AccountScreen(
 
     when (action.value) {
         is AccountAction.NavigateToAuthorization -> {
-            navigateToAuthorization()
             viewModel.obtainEvent(AccountEvent.Clear)
+            navigateToAuthorization()
         }
 
         null -> {}
@@ -171,7 +174,7 @@ fun MainState(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -179,8 +182,14 @@ fun MainState(
         Image(
             painter = painterResource(id = R.drawable.ic_gymvision),
             contentDescription = null, // todo: add content description
-            modifier = Modifier.size(100.dp)
+            modifier = Modifier
+                .size(100.dp)
                 .clip(CircleShape),
+        )
+        Text(
+            text = state.login,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 20.sp
         )
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -202,19 +211,30 @@ fun MainState(
             }
         }
         Text(
-            text = state.login,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+//            modifier = Modifier.fillMaxWidth(),
+            text = state.email,
+            color = MaterialTheme.colorScheme.secondary,
             fontSize = 20.sp
         )
-        Button(onClick = { onChangePassword() }) {
-            Text(stringResource(id = R.string.change_password))
-        }
-        Button(onClick = { onLogout() }) {
-            Text(stringResource(id = R.string.logout))
-        }
-        Button(onClick = { showDeleteDialog.value = true }) {
-            Text(stringResource(id = R.string.delete_account))
-        }
+
+        AccountButton(
+            textId = R.string.change_password,
+            iconId = R.drawable.ic_lock,
+            onClick = { onChangePassword() }
+        )
+
+        AccountButton(
+            textId = R.string.logout,
+            iconId = R.drawable.ic_logout,
+            onClick = { onLogout() }
+        )
+
+        AccountButton(
+            textId = R.string.delete_account,
+            iconId = R.drawable.ic_delete,
+            onClick = { showDeleteDialog.value = true },
+            isDangerous = true
+        )
     }
 
     if (showDeleteDialog.value) {
@@ -382,4 +402,21 @@ fun AccountState.AccountError.toText() = when (this) {
 
     AccountState.AccountError.ACCOUNT_NOT_FOUND ->
         stringResource(id = R.string.account_not_found_error)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainStatePreview() {
+    MainState(
+        state = AccountState.Main(
+            name = "John",
+            surname = "Doe",
+            email = "johndoe@example.com",
+            login = "johndoe"
+        ),
+        onChangePassword = {},
+        onEditName = {},
+        onDeleteAccount = {},
+        onLogout = {}
+    )
 }
