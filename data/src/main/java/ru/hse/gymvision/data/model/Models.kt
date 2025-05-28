@@ -35,6 +35,7 @@ data class GymSchemeDTO(
 data class UserDTO(
     val name: String,
     val surname: String,
+    val email: String,
     val login: String,
     val password: String
 )
@@ -51,6 +52,7 @@ data class StreamInfoDTO(
 data class RegisterRequestDTO(
     val name: String,
     val surname: String,
+    val email: String,
     val login: String,
     val password: String
 )

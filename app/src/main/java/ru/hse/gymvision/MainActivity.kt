@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         // todo: убрать, когда появится бэкенд
-        gymSchemeExample.image = BitmapHelper.bitmapToByteArray(
+        gymSchemeExample.scheme = BitmapHelper.bitmapToByteArray(
             BitmapFactory.decodeResource(resources, R.drawable.im_gym_scheme)
         )!!
 

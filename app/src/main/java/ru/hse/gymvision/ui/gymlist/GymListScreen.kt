@@ -126,7 +126,6 @@ fun MainState(
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(text = stringResource(R.string.available_gyms_title))
         LazyColumn {
             itemsIndexed(state.gyms) { _, gym ->
 

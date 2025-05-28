@@ -57,11 +57,12 @@ fun RegistrationScreen(
         RegistrationState.Loading -> LoadingState()
         is RegistrationState.Main -> MainState(
             state.value as RegistrationState.Main,
-            onRegistrationClick = { name, surname, login, password, passwordRepeat ->
+            onRegistrationClick = { name, surname, email, login, password, passwordRepeat ->
                 viewModel.obtainEvent(
                     RegistrationEvent.RegistrationButtonClicked(
                         name,
                         surname,
+                        email,
                         login,
                         password,
                         passwordRepeat
@@ -91,13 +92,14 @@ fun RegistrationScreen(
 @Composable
 fun MainState(
     state: RegistrationState.Main,
-    onRegistrationClick: (String, String, String, String, String) -> Unit,
+    onRegistrationClick: (String, String, String, String, String, String) -> Unit,
     onLoginClick: (String, String) -> Unit,
     onShowPasswordClick: () -> Unit,
     onShowPasswordRepeatClick: () -> Unit
 ) {
     val name: MutableState<String> = remember { mutableStateOf(state.name) }
     val surname: MutableState<String> = remember { mutableStateOf(state.surname) }
+    val email: MutableState<String> = remember { mutableStateOf(state.email) }
     val login: MutableState<String> = remember { mutableStateOf(state.login) }
     val password: MutableState<String> = remember { mutableStateOf(state.password) }
     val passwordRepeat: MutableState<String> = remember { mutableStateOf(state.passwordRepeat) }
@@ -127,6 +129,15 @@ fun MainState(
                 state.surnameError.getText() else null
         ) {
             surname.value = it
+        }
+        MyTextField(
+            value = email.value,
+            label = stringResource(R.string.email_label),
+            isError = state.emailError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.emailError != RegistrationState.RegistrationError.NETWORK)
+                state.emailError.getText() else null
+        ) {
+            email.value = it
         }
         MyTextField(
             value = login.value,
@@ -160,6 +171,7 @@ fun MainState(
             onRegistrationClick(
                 name.value,
                 surname.value,
+                email.value,
                 login.value,
                 password.value,
                 passwordRepeat.value
@@ -213,6 +225,8 @@ private fun RegistrationState.RegistrationError.getText(): String {
             stringResource(R.string.registration_failed_error)
         RegistrationState.RegistrationError.NETWORK ->
             stringResource(R.string.network_error_short)
+        RegistrationState.RegistrationError.EMAIL_CONTENT ->
+            stringResource(R.string.email_content_error)
         RegistrationState.RegistrationError.IDLE -> ""
     }
 }

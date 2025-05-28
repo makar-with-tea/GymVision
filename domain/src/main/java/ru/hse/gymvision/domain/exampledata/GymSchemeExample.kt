@@ -5,7 +5,7 @@ import ru.hse.gymvision.domain.model.ClickableTrainerModel
 import ru.hse.gymvision.domain.model.GymSchemeModel
 
 val gymSchemeExample = GymSchemeModel(
-    image = ByteArray(0),
+    scheme = ByteArray(0),
     clickableTrainerModels = listOf(
         ClickableTrainerModel(0, "Беговая дорожка", "Тут можно бегать", 0.135f, 0.16f, 0.2f, 0.35f),
         ClickableTrainerModel(1, "Эллиптический тренажер", "Тут можно делать... Что-то...", 0.53f, 0.16f, 0.3f, 0.2f),

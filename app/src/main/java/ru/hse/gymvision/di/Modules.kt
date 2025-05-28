@@ -68,7 +68,7 @@ val dataModule = module {
         val gson = GsonBuilder().create()
 
         Retrofit.Builder()
-            .baseUrl("http://192.168.0.107:8000/")
+            .baseUrl("http://192.168.0.106:8000/")
             .client(get<OkHttpClient>())
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()

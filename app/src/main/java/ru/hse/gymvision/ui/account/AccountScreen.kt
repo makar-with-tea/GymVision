@@ -1,15 +1,23 @@
 package ru.hse.gymvision.ui.account
 
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,11 +26,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
+import ru.hse.gymvision.ui.composables.AccountButton
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPasswordField
@@ -39,8 +54,8 @@ fun AccountScreen(
 
     when (action.value) {
         is AccountAction.NavigateToAuthorization -> {
-            navigateToAuthorization()
             viewModel.obtainEvent(AccountEvent.Clear)
+            navigateToAuthorization()
         }
 
         null -> {}
@@ -159,31 +174,67 @@ fun MainState(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(
-            text = stringResource(
-                R.string.my_profile_title
-            )
+        Image(
+            painter = painterResource(id = R.drawable.ic_gymvision),
+            contentDescription = null, // todo: add content description
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape),
         )
-        Text("${stringResource(id = R.string.name)}: ${state.name}")
-        Text("${stringResource(id = R.string.surname)}: ${state.surname}")
-        Text("${stringResource(id = R.string.login)}: ${state.login}")
-        Button(onClick = { onEditName() }) {
-            Text(stringResource(id = R.string.edit))
+        Text(
+            text = state.login,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 20.sp
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${state.name} ${state.surname}",
+                fontSize = 24.sp
+            )
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = { onEditName() },
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                    contentDescription = null, // todo
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
-        Button(onClick = { onChangePassword() }) {
-            Text(stringResource(id = R.string.change_password))
-        }
-        Button(onClick = { onLogout() }) {
-            Text(stringResource(id = R.string.logout))
-        }
-        Button(onClick = { showDeleteDialog.value = true }) {
-            Text(stringResource(id = R.string.delete_account))
-        }
+        Text(
+//            modifier = Modifier.fillMaxWidth(),
+            text = state.email,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 20.sp
+        )
+
+        AccountButton(
+            textId = R.string.change_password,
+            iconId = R.drawable.ic_lock,
+            onClick = { onChangePassword() }
+        )
+
+        AccountButton(
+            textId = R.string.logout,
+            iconId = R.drawable.ic_logout,
+            onClick = { onLogout() }
+        )
+
+        AccountButton(
+            textId = R.string.delete_account,
+            iconId = R.drawable.ic_delete,
+            onClick = { showDeleteDialog.value = true },
+            isDangerous = true
+        )
     }
 
     if (showDeleteDialog.value) {
@@ -351,4 +402,21 @@ fun AccountState.AccountError.toText() = when (this) {
 
     AccountState.AccountError.ACCOUNT_NOT_FOUND ->
         stringResource(id = R.string.account_not_found_error)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainStatePreview() {
+    MainState(
+        state = AccountState.Main(
+            name = "John",
+            surname = "Doe",
+            email = "johndoe@example.com",
+            login = "johndoe"
+        ),
+        onChangePassword = {},
+        onEditName = {},
+        onDeleteAccount = {},
+        onLogout = {}
+    )
 }

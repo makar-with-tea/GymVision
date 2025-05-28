@@ -276,7 +276,7 @@ class GymSchemeViewModelTest {
         private val gymSchemeExample = GymSchemeModel(
             id = 1,
             name = "Gym 1",
-            image = null,
+            scheme = null,
             clickableTrainers = emptyList(),
             clickableCameras = emptyList()
         )
