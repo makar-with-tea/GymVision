@@ -1,6 +1,5 @@
 package ru.hse.gymvision.ui.camera
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -9,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
@@ -43,7 +41,6 @@ class CameraViewModel(
         get() = _action
 
     override fun onCleared() {
-        Log.d("CameraViewModel", "onCleared")
         clearState()
         super.onCleared()
     }
@@ -301,7 +298,6 @@ class CameraViewModel(
     }
 
     private fun makeCameraMain(cameraNum: Int) {
-        Log.d("CameraViewModel", "makeCameraMain: $cameraNum, state: ${_state.value}")
         val prevState = _state.value
         _state.value = CameraState.Loading
 
@@ -345,7 +341,6 @@ class CameraViewModel(
                         return
                     }
                 }
-                Log.d("CameraViewModel", "newCameraIds: $newCameraIds")
                 viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
                     withContext(dispatcherMain) {

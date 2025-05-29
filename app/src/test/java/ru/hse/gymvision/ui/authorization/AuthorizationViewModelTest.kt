@@ -21,6 +21,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import ru.hse.gymvision.domain.exception.InvalidCredentialsException
 import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.usecase.user.GetPastLoginUseCase
 import ru.hse.gymvision.domain.usecase.user.LoginUseCase
@@ -54,16 +55,15 @@ class AuthorizationViewModelTest {
     fun `successful login`() = runTest {
         // Arrange
         val login = userExample.login
-        val password = userExample.password
-        `when`(loginUseCase.execute(login, password)).thenReturn(true)
+        val password = PASSWORD_EXAMPLE
 
         // Act
         viewModel.obtainEvent(AuthorizationEvent.LoginButtonClicked(login, password))
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first()
         verify(loginUseCase).execute(login, password)
+        val state = viewModel.state.first()
         assertTrue(state is AuthorizationState.Main)
         assertEquals((state as AuthorizationState.Main).login, login)
         assertEquals(password, state.password)
@@ -77,16 +77,15 @@ class AuthorizationViewModelTest {
     fun `login with empty login`() = runTest {
         // Arrange
         val login = ""
-        val password = userExample.password
-        `when`(loginUseCase.execute(login, password)).thenReturn(false)
+        val password = PASSWORD_EXAMPLE
 
         // Act
         viewModel.obtainEvent(AuthorizationEvent.LoginButtonClicked(login, password))
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first() as AuthorizationState.Main
         verify(loginUseCase, never()).execute(login, password)
+        val state = viewModel.state.first() as AuthorizationState.Main
         assertEquals(login, state.login)
         assertEquals(password, state.password)
         assertFalse(state.isLoading)
@@ -97,15 +96,14 @@ class AuthorizationViewModelTest {
         // Arrange
         val login = userExample.login
         val password = ""
-        `when`(loginUseCase.execute(login, password)).thenReturn(false)
 
         // Act
         viewModel.obtainEvent(AuthorizationEvent.LoginButtonClicked(login, password))
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first() as AuthorizationState.Main
         verify(loginUseCase, never()).execute(login, password)
+        val state = viewModel.state.first() as AuthorizationState.Main
         assertEquals(login, state.login)
         assertEquals(password, state.password)
         assertFalse(state.isLoading)
@@ -116,16 +114,18 @@ class AuthorizationViewModelTest {
     fun `login with invalid credentials`() = runTest {
         // Arrange
         val login = userExample.login
-        val password = userExample.password
-        `when`(loginUseCase.execute(login, password)).thenReturn(false)
+        val password = "wrongPassword"
+        `when`(loginUseCase.execute(login, password)).thenThrow(
+            InvalidCredentialsException()
+        )
 
         // Act
         viewModel.obtainEvent(AuthorizationEvent.LoginButtonClicked(login, password))
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first() as AuthorizationState.Main
         verify(loginUseCase).execute(login, password)
+        val state = viewModel.state.first() as AuthorizationState.Main
         assertEquals(login, state.login)
         assertEquals(password, state.password)
         assertFalse(state.isLoading)
@@ -137,7 +137,7 @@ class AuthorizationViewModelTest {
     fun `login with exception`() = runTest {
         // Arrange
         val login = userExample.login
-        val password = userExample.password
+        val password = PASSWORD_EXAMPLE
         `when`(loginUseCase.execute(login, password)).thenThrow(RuntimeException())
 
         // Act
@@ -145,8 +145,8 @@ class AuthorizationViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first() as AuthorizationState.Main
         verify(loginUseCase).execute(login, password)
+        val state = viewModel.state.first() as AuthorizationState.Main
         assertEquals(login, state.login)
         assertEquals(password, state.password)
         assertEquals(AuthorizationState.AuthorizationError.NETWORK, state.passwordError)
@@ -164,9 +164,9 @@ class AuthorizationViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(getPastLoginUseCase).execute()
         val action = viewModel.action.first()
         assertEquals(AuthorizationAction.NavigateToGymList, action)
-        verify(getPastLoginUseCase).execute()
     }
 
     @Test
@@ -179,8 +179,8 @@ class AuthorizationViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first()
         verify(getPastLoginUseCase).execute()
+        val state = viewModel.state.first()
         assertTrue(state is AuthorizationState.Main)
     }
 
@@ -188,7 +188,7 @@ class AuthorizationViewModelTest {
     fun `navigate to registration`() = runTest {
         // Arrange
         val login = userExample.login
-        val password = userExample.password
+        val password = PASSWORD_EXAMPLE
 
         // Act
         viewModel.obtainEvent(AuthorizationEvent.RegistrationButtonClicked(login, password))
@@ -244,7 +244,9 @@ class AuthorizationViewModelTest {
             name = "John",
             surname = "Doe",
             login = "johndoe",
-            password = "password1"
+            email = "johndoe@example.com"
         )
+
+        const val PASSWORD_EXAMPLE = "password1"
     }
 }
