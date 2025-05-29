@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -208,45 +210,59 @@ fun MainState(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_gymvision),
-            contentDescription = null, // decorative image doesn't need a description
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape),
-        )
-        Text(
-            text = state.login,
-            color = MaterialTheme.colorScheme.secondary,
-            fontSize = 20.sp
-        )
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(36.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp)
         ) {
-            Text(
-                text = "${state.name} ${state.surname}",
-                fontSize = 24.sp
+            Image(
+                painter = painterResource(id = R.drawable.ic_gymvision),
+                contentDescription = null, // decorative image doesn't need a description
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape),
             )
-            IconButton(
-                modifier = Modifier.size(24.dp),
-                onClick = { onEditName() },
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
-                    contentDescription = stringResource(id = R.string.edit_name),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
+
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${state.name} ${state.surname}",
+                        fontSize = 24.sp
+                    )
+                    IconButton(
+                        modifier = Modifier.size(24.dp),
+                        onClick = { onEditName() },
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                            contentDescription = stringResource(id = R.string.edit_name),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
+                Text(
+                    text = state.login,
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 20.sp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        
+        Divider(
+            modifier = Modifier.padding(vertical = 8.dp),
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+            thickness = 1.dp
+        )
+
         AccountButton(
             textId = R.string.change_password,
             iconId = R.drawable.ic_lock,
