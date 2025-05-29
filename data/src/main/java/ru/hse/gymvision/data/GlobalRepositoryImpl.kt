@@ -147,12 +147,13 @@ class GlobalRepositoryImpl(
         }
     }
 
-    override suspend fun updateUser(name: String?, surname: String?, login: String, password: String?) {
+    override suspend fun updateUser(name: String?, surname: String?, email: String?, login: String, password: String?) {
         try {
             apiService.updateUser(
                 login = login,
                 name = name,
                 surname = surname,
+                email = email,
                 password = password
             )
         } catch (e: HttpException) {

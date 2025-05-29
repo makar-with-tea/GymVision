@@ -3,6 +3,7 @@ package ru.hse.gymvision.ui.composables
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +58,7 @@ fun mainPlayerView(
     Log.d("camera", "Creating main player view for URL: $videoUrl")
     val context = LocalContext.current
     val libVLC = remember { LibVLC(context) }
-    var mediaPlayer = remember { MediaPlayer(libVLC) }
+    val mediaPlayer = remember { MediaPlayer(libVLC) }
     val videoUri = videoUrl.toUri()
     val vlcErrorText = stringResource(R.string.vlc_error)
     val isAIEnabled = remember { mutableStateOf(isAiEnabled) }
@@ -217,10 +220,17 @@ fun mainPlayerView(
                 }
             }
             ControlButtonSimple(
+                modifier = Modifier
+                    .padding(vertical = 86.dp, horizontal = 18.dp)
+                    .size(50.dp)
+                    .align(Alignment.BottomEnd)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(0.5f))
+                    .border(2.dp, MaterialTheme.colorScheme.primaryContainer.copy(0.7f), CircleShape)
+                ,
                 iconId = if (isAIEnabled.value)
                     R.drawable.ic_sparkles_crossed else R.drawable.ic_sparkles,
                 contentDescription = stringResource(R.string.ai_analysis_description),
-                alignment = Alignment.TopStart,
             ) {
                 isAIEnabled.value = !isAIEnabled.value
                 onChangeAi(isAIEnabled.value)
@@ -289,28 +299,25 @@ fun secondaryPlayerView(
         )
 
         if (showControls.value) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                PauseButton(Modifier, mediaPlayer, onPlay)
-            }
+            PauseButton(
+                Modifier.align(Alignment.Center),
+                mediaPlayer,
+                onPlay,
+                size = 40.dp,
+                iconSize = 32.dp
+            )
             ControlButtonSimple(
+                modifier = Modifier.align(Alignment.CenterStart),
                 iconId = R.drawable.ic_crop_free,
                 contentDescription = stringResource(R.string.make_main_camera_description),
-                alignment = Alignment.CenterStart
-            ) {
-                onMakeMainCamera()
-            }
+                onClick = onMakeMainCamera
+            )
             ControlButtonSimple(
+                modifier = Modifier.align(Alignment.CenterEnd),
                 iconId = R.drawable.ic_delete,
                 contentDescription = stringResource(R.string.delete_camera_description),
-                alignment = Alignment.CenterEnd
-            ) {
-                onDeleteCamera()
-            }
+                onClick = onDeleteCamera
+            )
         }
     }
     return mediaPlayer

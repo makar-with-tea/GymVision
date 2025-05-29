@@ -11,6 +11,9 @@ sealed class AccountState {
         ACCOUNT_NOT_FOUND,
         NETWORK_FATAL,
         NETWORK,
+        EMAIL_CONTENT,
+        NAME_CONTENT,
+        SURNAME_CONTENT,
         IDLE
     }
     data object Idle : AccountState()
@@ -61,15 +64,15 @@ sealed class AccountState {
         val login: String,
     ): AccountState()
 
-//    data class ChangeEmail(
-//        val name: String = "",
-//        val surname: String = "",
-//        val email: String = "",
-//        val login: String = "",
-//        val isLoading: Boolean = false,
-//        val emailError: AccountError = AccountError.IDLE,
-//        val loading: Boolean = false
-//    ) : AccountState()
+    data class ChangeEmail(
+        val name: String = "",
+        val surname: String = "",
+        val email: String = "",
+        val login: String = "",
+        val isLoading: Boolean = false,
+        val emailError: AccountError = AccountError.IDLE,
+        val loading: Boolean = false
+    ) : AccountState()
 }
 
 sealed class AccountEvent {
@@ -83,19 +86,20 @@ sealed class AccountEvent {
         val oldPassword: String,
         val newPasswordRepeat: String
     ): AccountEvent()
-//    data class SaveEmailButtonClicked(
-//        val email: String
-//    ): AccountEvent()
+    data class SaveEmailButtonClicked(
+        val email: String
+    ): AccountEvent()
 
     data object ShowOldPasswordButtonClicked : AccountEvent()
     data object ShowNewPasswordButtonClicked : AccountEvent()
     data object ShowNewPasswordRepeatButtonClicked : AccountEvent()
     data object EditNameButtonClicked : AccountEvent()
     data object EditPasswordButtonClicked: AccountEvent()
-//    data object EditEmailButtonClicked: AccountEvent()
+    data object EditEmailButtonClicked: AccountEvent()
     data class DeleteAccountButtonClicked(val login: String): AccountEvent()
     data object LogoutButtonClicked: AccountEvent()
     data object Clear: AccountEvent()
+    data object ReturnToMain: AccountEvent()
 }
 
 sealed class AccountAction {

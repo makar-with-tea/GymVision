@@ -25,6 +25,7 @@ fun AccountButton(
     textId: Int,
     iconId: Int,
     onClick: () -> Unit,
+    contentDescription: String? = null,
     isDangerous: Boolean = false
 ) {
     Row(
@@ -38,8 +39,8 @@ fun AccountButton(
     ) {
         Icon(
             painter = painterResource(id = iconId),
-            contentDescription = null,
-            modifier = Modifier.padding(start = 8.dp).size(32.dp),
+            contentDescription = contentDescription,
+            modifier = Modifier.padding(start = 8.dp).size(28.dp),
             tint = if (isDangerous) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
         )
 

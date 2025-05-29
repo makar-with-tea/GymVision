@@ -21,23 +21,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ControlButtonSimple(iconId: Int,
-                  contentDescription: String,
-                  alignment: Alignment,
-                  onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp), contentAlignment = alignment
-    ) {
-        IconButton(modifier = Modifier.size(40.dp), onClick = onClick) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = iconId),
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp),
-            )
-        }
+fun ControlButtonSimple(
+    modifier: Modifier,
+    iconId: Int,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    IconButton(modifier = modifier.size(40.dp), onClick = onClick) {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = iconId),
+            contentDescription = contentDescription,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(32.dp),
+        )
     }
 }
 
