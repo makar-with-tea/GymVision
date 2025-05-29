@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +27,8 @@ fun PauseButton(
     modifier: Modifier = Modifier,
     player: MediaPlayer,
     onPlay: () -> Unit,
+    size: Dp = 26.dp,
+    iconSize: Dp = 20.dp,
 ) {
     var isPlaying by remember { mutableStateOf(player.isPlaying) }
 
@@ -36,7 +39,7 @@ fun PauseButton(
     }
 
     IconButton(
-        modifier = modifier.size(26.dp),
+        modifier = modifier.size(size),
         onClick = {
             if (isPlaying) {
                 player.pause()
@@ -48,7 +51,7 @@ fun PauseButton(
         }
     ) {
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(iconSize),
             imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
             contentDescription = stringResource(R.string.pause_description),
             tint = MaterialTheme.colorScheme.primary

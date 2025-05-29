@@ -227,6 +227,10 @@ private fun RegistrationState.RegistrationError.getText(): String {
             stringResource(R.string.network_error_short)
         RegistrationState.RegistrationError.EMAIL_CONTENT ->
             stringResource(R.string.email_content_error)
+        RegistrationState.RegistrationError.NAME_CONTENT ->
+            stringResource(R.string.name_content_error)
+        RegistrationState.RegistrationError.SURNAME_CONTENT ->
+            stringResource(R.string.surname_content_error)
         RegistrationState.RegistrationError.IDLE -> ""
     }
 }

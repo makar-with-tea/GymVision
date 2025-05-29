@@ -1,6 +1,9 @@
 package ru.hse.gymvision.ui.gymscheme
 
 import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,13 +13,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -32,6 +39,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,6 +52,7 @@ import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPopup
 import ru.hse.gymvision.ui.composables.MyTitle
+import ru.hse.gymvision.ui.composables.SkeletonView
 
 val CAMERA_SIZE = 24.dp
 
@@ -57,8 +66,11 @@ fun GymSchemeScreen(
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
+    val isActive = remember { mutableStateOf(true) }
+
     when (action.value) {
         is GymSchemeAction.NavigateToCamera -> {
+            isActive.value = false
             navigateToCamera(
                 (action.value as GymSchemeAction.NavigateToCamera).gymId,
                 (action.value as GymSchemeAction.NavigateToCamera).cameraId
@@ -91,7 +103,9 @@ fun GymSchemeScreen(
         }
         is GymSchemeState.Idle -> {
             IdleState()
-            viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
+            if (isActive.value) {
+                viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(id))
+            }
         }
         is GymSchemeState.Error -> {
             ErrorState(
@@ -128,8 +142,7 @@ fun MainState(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.padding(top = 16.dp, bottom = 0.dp, start = 12.dp, end = 12.dp)
     ) {
         MyTitle(state.gymScheme.name)
 
@@ -150,9 +163,6 @@ fun MainState(
                 painter = painter,
                 contentDescription = stringResource(R.string.gym_scheme_image_description),
                 modifier = Modifier
-                    .padding(8.dp)
-//                    .fillMaxSize()
-//                    .border(1.dp, Color.Red)
                     .wrapContentSize(Alignment.Center)
                     .onGloballyPositioned {
                         val imageSize = it.size
@@ -163,7 +173,6 @@ fun MainState(
                         imStartX = with(density) { imagePosition.x.toDp() }
                         imStartY = with(density) { imagePosition.y.toDp() }
                     },
-                contentScale = ContentScale.Fit
             )
 
             val clickableTrainers = gymScheme.value?.clickableTrainerModels ?: emptyList()
@@ -252,12 +261,59 @@ private fun GymSchemeState.GymSchemeError.toText() = when (this) {
 
 @Composable
 fun LoadingState() {
-    LoadingBlock()
+    Column(
+        modifier = Modifier.padding(top = 16.dp, bottom = 0.dp, start = 12.dp, end = 12.dp)
+    ) {
+        val animatable = remember { Animatable(0f) }
+
+        LaunchedEffect(Unit) {
+            while (true) {
+                animatable.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(1200, 0, LinearEasing)
+                )
+                animatable.snapTo(0f)
+            }
+        }
+
+        val tan = remember { 0.26795f } // tan(15 degrees)
+        val screenHeight = with (LocalDensity.current) {
+            LocalConfiguration.current.screenHeightDp.dp.toPx()
+        }
+        val globalY = screenHeight * animatable.value
+        val globalX = tan * globalY
+
+        val endY = screenHeight + globalY
+        val endX = tan * endY
+
+        SkeletonView(
+            modifier = Modifier
+                .padding(horizontal = 40.dp, vertical = 30.dp)
+                .fillMaxWidth()
+                .height(40.dp)
+                .clip(RoundedCornerShape(14.dp))
+            ,
+            globalX = globalX,
+            globalY = globalY,
+            endX = endX,
+            endY = endY,
+        )
+
+        SkeletonView(
+            modifier = Modifier
+                .padding(vertical = 16.dp)
+                .fillMaxSize()
+                .clip(RoundedCornerShape(14.dp)),
+            globalX = globalX,
+            globalY = globalY,
+            endX = endX,
+            endY = endY,
+        )
+    }
 }
 
 @Composable
 fun IdleState() {
-    LoadingBlock()
 }
 
 @Composable

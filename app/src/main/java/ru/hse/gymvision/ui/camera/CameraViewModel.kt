@@ -32,9 +32,6 @@ class CameraViewModel(
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
-    private var mediaPlayer1: MediaPlayer? = null
-    private var mediaPlayer2: MediaPlayer? = null
-    private var mediaPlayer3: MediaPlayer? = null
     private var gymId: Int = -1
 
     private val _state: MutableStateFlow<CameraState> =
@@ -230,10 +227,6 @@ class CameraViewModel(
                         }
                     }
                 }
-
-                mediaPlayer2?.release()
-                mediaPlayer2 = mediaPlayer3
-                mediaPlayer3 = null
             }
 
             3 -> {
@@ -261,9 +254,6 @@ class CameraViewModel(
                         )
                     }
                 }
-
-                mediaPlayer3?.release()
-                mediaPlayer3 = null
             }
         }
     }
@@ -311,65 +301,77 @@ class CameraViewModel(
     }
 
     private fun makeCameraMain(cameraNum: Int) {
+        Log.d("CameraViewModel", "makeCameraMain: $cameraNum, state: ${_state.value}")
+        val prevState = _state.value
+        _state.value = CameraState.Loading
+
         when (cameraNum) {
             2 -> {
-                if (_state.value !is CameraState.ThreeCameras && _state.value !is CameraState.TwoCameras) {
+                if (prevState !is CameraState.ThreeCameras && prevState !is CameraState.TwoCameras) {
+                    _state.value = prevState
                     return
                 }
-                val newCameraIds: List<Int> = when (_state.value) {
+                val newCameraIds: List<Int> = when (prevState) {
                     is CameraState.TwoCameras -> listOf(
-                        (_state.value as CameraState.TwoCameras).camera2Id,
-                        (_state.value as CameraState.TwoCameras).camera1Id
+                        prevState.camera2Id,
+                        prevState.camera1Id
                     )
 
                     is CameraState.ThreeCameras -> listOf(
-                        (_state.value as CameraState.ThreeCameras).camera2Id,
-                        (_state.value as CameraState.ThreeCameras).camera1Id,
-                        (_state.value as CameraState.ThreeCameras).camera3Id
+                        prevState.camera2Id,
+                        prevState.camera1Id,
+                        prevState.camera3Id
                     )
 
-                    else -> return
+                    else -> {
+                        _state.value = prevState
+                        return
+                    }
                 }
-                val newCameraLinks: List<String> = when (_state.value) {
+                val newCameraLinks: List<String> = when (prevState) {
                     is CameraState.TwoCameras -> listOf(
-                        (_state.value as CameraState.TwoCameras).camera2Link,
-                        (_state.value as CameraState.TwoCameras).camera1Link
+                        prevState.camera2Link,
+                        prevState.camera1Link
                     )
 
                     is CameraState.ThreeCameras -> listOf(
-                        (_state.value as CameraState.ThreeCameras).camera2Link,
-                        (_state.value as CameraState.ThreeCameras).camera1Link,
-                        (_state.value as CameraState.ThreeCameras).camera3Link
+                        prevState.camera2Link,
+                        prevState.camera1Link,
+                        prevState.camera3Link
                     )
 
-                    else -> return
+                    else -> {
+                        _state.value = prevState
+                        return
+                    }
                 }
+                Log.d("CameraViewModel", "newCameraIds: $newCameraIds")
                 viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
                     withContext(dispatcherMain) {
-                        _state.value = when (_state.value) {
+                        _state.value = when (prevState) {
                             is CameraState.ThreeCameras -> {
                                 CameraState.ThreeCameras(
                                     camera1Id = newCameraIds[0],
-                                    camera1Link = (_state.value as CameraState.ThreeCameras).camera2Link,
-                                    isPlaying1 = (_state.value as CameraState.ThreeCameras).isPlaying2,
+                                    camera1Link = prevState.camera2Link,
+                                    isPlaying1 = prevState.isPlaying2,
                                     camera2Id = newCameraIds[1],
-                                    camera2Link = (_state.value as CameraState.ThreeCameras).camera1Link,
-                                    isPlaying2 = (_state.value as CameraState.ThreeCameras).isPlaying1,
+                                    camera2Link = prevState.camera1Link,
+                                    isPlaying2 = prevState.isPlaying1,
                                     camera3Id = newCameraIds[2],
-                                    camera3Link = (_state.value as CameraState.ThreeCameras).camera3Link,
-                                    isPlaying3 = (_state.value as CameraState.ThreeCameras).isPlaying3
+                                    camera3Link = prevState.camera3Link,
+                                    isPlaying3 = prevState.isPlaying3
                                 )
                             }
 
                             is CameraState.TwoCameras -> {
                                 CameraState.TwoCameras(
                                     camera1Id = newCameraIds[0],
-                                    camera1Link = (_state.value as CameraState.TwoCameras).camera2Link,
-                                    isPlaying1 = (_state.value as CameraState.TwoCameras).isPlaying2,
+                                    camera1Link = prevState.camera2Link,
+                                    isPlaying1 = prevState.isPlaying2,
                                     camera2Id = newCameraIds[1],
-                                    camera2Link = (_state.value as CameraState.TwoCameras).camera1Link,
-                                    isPlaying2 = (_state.value as CameraState.TwoCameras).isPlaying1
+                                    camera2Link = prevState.camera1Link,
+                                    isPlaying2 = prevState.isPlaying1
                                 )
                             }
 
@@ -377,47 +379,39 @@ class CameraViewModel(
                         }
                     }
                 }
-
-                val temp = mediaPlayer1
-                mediaPlayer1 = mediaPlayer2
-                mediaPlayer2 = temp
             }
 
             3 -> {
-                if (_state.value !is CameraState.ThreeCameras) {
+                if (prevState !is CameraState.ThreeCameras) {
+                    _state.value = prevState
                     return
                 }
                 val newCameraIds: List<Int> = listOf(
-                    (_state.value as CameraState.ThreeCameras).camera3Id,
-                    (_state.value as CameraState.ThreeCameras).camera1Id,
-                    (_state.value as CameraState.ThreeCameras).camera2Id
+                    prevState.camera3Id,
+                    prevState.camera1Id,
+                    prevState.camera2Id
                 )
                 val newCameraLinks: List<String> = listOf(
-                    (_state.value as CameraState.ThreeCameras).camera3Link,
-                    (_state.value as CameraState.ThreeCameras).camera1Link,
-                    (_state.value as CameraState.ThreeCameras).camera2Link
+                    prevState.camera3Link,
+                    prevState.camera1Link,
+                    prevState.camera2Link
                 )
                 viewModelScope.launch(dispatcherIO) {
                     saveCamerasUseCase.execute(newCameraIds, newCameraLinks)
                     withContext(dispatcherMain) {
                         _state.value = CameraState.ThreeCameras(
                             camera1Id = newCameraIds[0],
-                            camera1Link = (_state.value as CameraState.ThreeCameras).camera3Link,
-                            isPlaying1 = (_state.value as CameraState.ThreeCameras).isPlaying3,
+                            camera1Link = prevState.camera3Link,
+                            isPlaying1 = prevState.isPlaying3,
                             camera2Id = newCameraIds[1],
-                            camera2Link = (_state.value as CameraState.ThreeCameras).camera1Link,
-                            isPlaying2 = (_state.value as CameraState.ThreeCameras).isPlaying1,
+                            camera2Link = prevState.camera1Link,
+                            isPlaying2 = prevState.isPlaying1,
                             camera3Id = newCameraIds[2],
-                            camera3Link = (_state.value as CameraState.ThreeCameras).camera2Link,
-                            isPlaying3 = (_state.value as CameraState.ThreeCameras).isPlaying2
+                            camera3Link = prevState.camera2Link,
+                            isPlaying3 = prevState.isPlaying2
                         )
                     }
                 }
-
-                val temp = mediaPlayer1
-                mediaPlayer1 = mediaPlayer3
-                mediaPlayer3 = mediaPlayer2
-                mediaPlayer2 = temp
             }
         }
     }

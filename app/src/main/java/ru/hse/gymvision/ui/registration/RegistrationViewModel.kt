@@ -86,21 +86,29 @@ class RegistrationViewModel(
         )
 
         var isError = false
-        if (name.length < 2 || name.length > 20) {
+
+        if (name.length < 2 || name.length > 20 || !name.all { it.isLetter() }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                nameError = RegistrationState.RegistrationError.NAME_LENGTH,
+                nameError = if (!name.all { it.isLetter() }) {
+                    RegistrationState.RegistrationError.NAME_CONTENT
+                } else {
+                    RegistrationState.RegistrationError.NAME_LENGTH
+                }
             )
             isError = true
         }
-        if (surname.length < 2 || surname.length > 20) {
+        if (surname.length < 2 || surname.length > 20 || !surname.all { it.isLetter() }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                surnameError = RegistrationState.RegistrationError.SURNAME_LENGTH,
+                surnameError = if (!surname.all { it.isLetter() }) {
+                    RegistrationState.RegistrationError.SURNAME_CONTENT
+                } else {
+                    RegistrationState.RegistrationError.SURNAME_LENGTH
+                }
             )
             isError = true
         }
 
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        if (!email.matches(emailRegex)) {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             _state.value = (_state.value as RegistrationState.Main).copy(
                 emailError = RegistrationState.RegistrationError.EMAIL_CONTENT,
             )

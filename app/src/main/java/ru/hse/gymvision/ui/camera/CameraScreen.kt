@@ -80,7 +80,8 @@ fun CameraScreen(
                 },
                 onChangeAIState = { isAiEnabled ->
                     viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                },)
+                },
+            )
         }
 
         is CameraState.TwoCameras -> {
@@ -248,7 +249,7 @@ fun OneCameraState(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val player = mainPlayerView(
+            mainPlayerView(
                 state.camera1Link,
                 state.isPlaying1,
                 state.isAiEnabled,
@@ -295,8 +296,6 @@ fun TwoCamerasStatePortrait(
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
-    lateinit var player1: MediaPlayer
-    lateinit var player2: MediaPlayer
 
     Box(
         modifier = Modifier
@@ -308,7 +307,7 @@ fun TwoCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                player1 = mainPlayerView(
+                mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
                     state.isAiEnabled,
@@ -327,7 +326,7 @@ fun TwoCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                player2 = secondaryPlayerView(
+                secondaryPlayerView(
                     state.camera2Link,
                     state.isPlaying2,
                     showControls2,
@@ -377,10 +376,6 @@ fun ThreeCamerasStatePortrait(
     val showControls2 = remember { mutableStateOf(false) }
     val showControls3 = remember { mutableStateOf(false) }
 
-    lateinit var player1: MediaPlayer
-    lateinit var player2: MediaPlayer
-    lateinit var player3: MediaPlayer
-
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -391,7 +386,7 @@ fun ThreeCamerasStatePortrait(
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                player1 = mainPlayerView(
+                mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
                     state.isAiEnabled,
@@ -414,7 +409,7 @@ fun ThreeCamerasStatePortrait(
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
-                        player2 = secondaryPlayerView(
+                        secondaryPlayerView(
                             state.camera2Link,
                             state.isPlaying2,
                             showControls2,
@@ -429,7 +424,7 @@ fun ThreeCamerasStatePortrait(
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
-                        player3 = secondaryPlayerView(
+                        secondaryPlayerView(
                             state.camera3Link,
                             state.isPlaying3,
                             showControls3,
@@ -463,8 +458,6 @@ fun TwoCamerasStateLandscape(
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
 
-    lateinit var player1: MediaPlayer
-    lateinit var player2: MediaPlayer
 
     Box(
         modifier = Modifier
@@ -477,7 +470,7 @@ fun TwoCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    player1 = mainPlayerView(
+                    mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
                         state.isAiEnabled,
@@ -496,7 +489,7 @@ fun TwoCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    player2 = secondaryPlayerView(
+                    secondaryPlayerView(
                         state.camera2Link,
                         state.isPlaying2,
                         showControls2,
@@ -547,10 +540,6 @@ fun ThreeCamerasStateLandscape(
     val showControls2 = remember { mutableStateOf(false) }
     val showControls3 = remember { mutableStateOf(false) }
 
-    lateinit var player1: MediaPlayer
-    lateinit var player2: MediaPlayer
-    lateinit var player3: MediaPlayer
-
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -562,7 +551,7 @@ fun ThreeCamerasStateLandscape(
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
-                    player1 = mainPlayerView(
+                    mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
                         state.isAiEnabled,
@@ -585,7 +574,7 @@ fun ThreeCamerasStateLandscape(
                         Column(
                             modifier = Modifier.weight(1f)
                         ) {
-                            player2 = secondaryPlayerView(
+                            secondaryPlayerView(
                                 state.camera2Link,
                                 state.isPlaying2,
                                 showControls2,
@@ -600,7 +589,7 @@ fun ThreeCamerasStateLandscape(
                         Box(
                             modifier = Modifier.weight(1f)
                         ) {
-                            player3 = secondaryPlayerView(
+                            secondaryPlayerView(
                                 state.camera3Link,
                                 state.isPlaying3,
                                 showControls3,

@@ -11,7 +11,7 @@ interface GlobalRepository {
     suspend fun getUserInfo(login: String): UserModel?
     suspend fun login(login: String, password: String): TokenModel
     suspend fun register(name: String, surname: String, email: String, login: String, password: String): TokenModel
-    suspend fun updateUser(name: String? = null, surname: String? = null, login: String, password: String? = null)
+    suspend fun updateUser(name: String? = null, surname: String? = null, email: String? = null, login: String, password: String? = null)
     suspend fun deleteUser(login: String)
     suspend fun startStream(cameraId: Int, aiEnabled: Boolean): String
     suspend fun stopStream(cameraId: Int)

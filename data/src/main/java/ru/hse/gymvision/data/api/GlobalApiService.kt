@@ -38,6 +38,7 @@ interface GlobalApiService {
         @Path("login") login: String,
         @Query("name") name: String?,
         @Query("surname") surname: String?,
+        @Query("email") email: String?,
         @Query("password") password: String?
     ): Map<String, Boolean>
 

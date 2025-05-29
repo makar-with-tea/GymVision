@@ -27,6 +27,9 @@
     <string name="old_password">Старый пароль</string>
     <string name="new_password">Новый пароль</string>
     <string name="change_password_title">Смена пароля</string>
+    <string name="change_email_title">Смена почты</string>
+    <string name="change_email">Сменить почту</string>
+    <string name="email">Электронная почта</string>
 
     <string name="authorization_title">Авторизация</string>
     <string name="login_label">Логин</string>
@@ -54,6 +57,8 @@
     <string name="surname_label">Фамилия</string>
     <string name="repeat_password_label">Повторите пароль</string>
     <string name="already_have_account">Уже есть аккаунт?</string>
+    <string name="name_content_error">Имя должно содержать только буквы</string>
+    <string name="surname_content_error">Фамилия должна содержать только буквы</string>
 
     <string name="name_length_error">Имя должно быть длиной от 2 до 20 символов</string>
     <string name="surname_length_error">Фамилия должна быть длиной от 2 до 20 символов</string>
