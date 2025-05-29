@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
@@ -78,7 +79,6 @@ fun AuthorizationScreen(
     }
 }
 
-
 @Composable
 fun MainState(
     state: AuthorizationState.Main,
@@ -130,17 +130,22 @@ fun MainState(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(id = R.string.no_account))
+                Text(
+                    text = stringResource(R.string.no_account),
+                    fontSize = 14.sp
+                )
                 TextButton(
                     onClick = {
                         onRegistrationClick(login.value, password.value)
                     },
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp, vertical = 0.dp)
-                        .wrapContentSize(),
+                    modifier = Modifier.width(145.dp),
                     contentPadding = PaddingValues(0.dp)
                 ) {
-                    Text(stringResource(id = R.string.register_button), modifier = Modifier.padding(0.dp))
+                    Text(
+                        text = stringResource(R.string.register_button),
+                        modifier = Modifier.padding(0.dp),
+                        fontSize = 14.sp
+                    )
                 }
             }
         }

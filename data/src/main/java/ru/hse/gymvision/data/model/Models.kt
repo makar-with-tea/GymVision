@@ -1,5 +1,7 @@
 package ru.hse.gymvision.data.model
 
+import com.google.gson.annotations.SerializedName
+
 data class ClickableCameraDTO(
     val id: Int,
     val xPercent: Float,
@@ -20,49 +22,67 @@ data class GymInfoDTO(
     val id: Int,
     val name: String,
     val address: String,
-    val image: ByteArray? = null
+    val image: String? = null
 )
 
 data class GymSchemeDTO(
-    val image: ByteArray,
+    val image: String,
     val name: String,
-    val clickableTrainerDTOS: List<ClickableTrainerDTO>,
-    val clickableCameraDTOS: List<ClickableCameraDTO>
+    val clickableTrainers: List<ClickableTrainerDTO>,
+    val clickableCameras: List<ClickableCameraDTO>
 )
 
 data class UserDTO(
     val name: String,
     val surname: String,
+    val email: String,
     val login: String,
     val password: String
 )
 
 data class CameraInfoDTO(
-    val cameraId: Int
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("ai_enabled") val aiEnabled: Boolean
+)
+
+data class RotateInfoDTO(
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("rotate_x") val rotateX: Float,
+    @SerializedName("rotate_y") val rotateY: Float
+)
+
+data class ZoomInfoDTO(
+    @SerializedName("camera_id") val cameraId: Int,
+    @SerializedName("zoom_level") val zoomLevel: Float
 )
 
 data class StreamInfoDTO(
-    val streamUrl: String,
-    val startedAt: Long
+    @SerializedName("stream_url") val streamUrl: String,
 )
 
 data class RegisterRequestDTO(
-    val username: String,
+    val name: String,
+    val surname: String,
     val email: String,
+    val login: String,
     val password: String
 )
 
 data class LoginRequestDTO(
-    val username: String,
-    val password: String
+    val login: String,
+    val password: String,
 )
 
 data class TokenResponseDTO(
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresAt: Long
+    @SerializedName("access_token") val accessToken: String,
+    @SerializedName("refresh_token") val refreshToken: String
 )
 
 data class RefreshRequestDTO(
     val refreshToken: String
+)
+
+data class UserCheckPasswordDTO(
+    val login: String,
+    val password: String
 )

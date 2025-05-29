@@ -1,5 +1,6 @@
 package ru.hse.gymvision.ui.account
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -8,10 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.hse.gymvision.domain.usecase.user.ChangePasswordUseCase
+import ru.hse.gymvision.domain.usecase.user.CheckPasswordUseCase
 import ru.hse.gymvision.domain.usecase.user.DeleteUserUseCase
 import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
 import ru.hse.gymvision.domain.usecase.user.LogoutUseCase
 import ru.hse.gymvision.domain.usecase.user.UpdateUserUseCase
+
+private const val TAG = "marathinks" // todo: AccountViewModel
 
 class AccountViewModel(
     private val getUserInfoUseCase: GetUserInfoUseCase,
@@ -19,6 +23,7 @@ class AccountViewModel(
     private val updateUserUseCase: UpdateUserUseCase,
     private val deleteUserUseCase: DeleteUserUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val checkPasswordUseCase: CheckPasswordUseCase,
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
@@ -43,7 +48,13 @@ class AccountViewModel(
 
             is AccountEvent.SavePasswordButtonClicked -> {
                 savePassword(
-                    event.newPassword, event.oldPassword, event.realPassword
+                    event.newPassword, event.oldPassword, event.newPasswordRepeat
+                )
+            }
+
+            is AccountEvent.SaveEmailButtonClicked -> {
+                saveEmail(
+                    event.email
                 )
             }
 
@@ -63,6 +74,10 @@ class AccountViewModel(
                 editName()
             }
 
+            is AccountEvent.EditEmailButtonClicked -> {
+                editEmail()
+            }
+
             is AccountEvent.EditPasswordButtonClicked -> {
                 editPassword()
             }
@@ -78,10 +93,15 @@ class AccountViewModel(
             is AccountEvent.Clear -> {
                 clear()
             }
+
+            is AccountEvent.ReturnToMain -> {
+                returnToMain()
+            }
         }
     }
 
     private fun getUserInfo() {
+        Log.d(TAG, "getUserInfo")
         _state.value = AccountState.Loading
         viewModelScope.launch(dispatcherIO) {
             try {
@@ -97,8 +117,8 @@ class AccountViewModel(
                     _state.value = AccountState.Main(
                         name = userInfo.name,
                         surname = userInfo.surname,
-                        login = userInfo.login,
-                        password = userInfo.password
+                        email = userInfo.email,
+                        login = userInfo.login
                     )
                 }
             } catch (e: Exception) {
@@ -112,20 +132,32 @@ class AccountViewModel(
     }
 
     private fun saveName(name: String, surname: String) {
+        Log.d(TAG, "saveName: $name $surname")
         if (_state.value !is AccountState.EditName) return
         _state.value = (_state.value as AccountState.EditName).copy(
-            isLoading = true
+            isLoading = false,
+            nameError = AccountState.AccountError.IDLE,
+            surnameError = AccountState.AccountError.IDLE
         )
+
         var isError = false
-        if (name.length < 2 || name.length > 20) {
+        if (name.length < 2 || name.length > 20 || !name.all { it.isLetter() }) {
             _state.value = (_state.value as AccountState.EditName).copy(
-                nameError = AccountState.AccountError.NAME_LENGTH
+                nameError = if (!name.all { it.isLetter() }) {
+                    AccountState.AccountError.NAME_CONTENT
+                } else {
+                    AccountState.AccountError.NAME_LENGTH
+                }
             )
             isError = true
         }
-        if (surname.length < 2 || surname.length > 20) {
+        if (surname.length < 2 || surname.length > 20 || !surname.all { it.isLetter() }) {
             _state.value = (_state.value as AccountState.EditName).copy(
-                surnameError = AccountState.AccountError.SURNAME_LENGTH
+                surnameError = if (!surname.all { it.isLetter() }) {
+                    AccountState.AccountError.SURNAME_CONTENT
+                } else {
+                    AccountState.AccountError.SURNAME_LENGTH
+                }
             )
             isError = true
         }
@@ -135,6 +167,8 @@ class AccountViewModel(
             )
             return
         }
+
+        _state.value = (_state.value as AccountState.EditName).copy(isLoading = true)
         viewModelScope.launch(dispatcherIO) {
             try {
                 updateUserUseCase.execute(
@@ -145,16 +179,16 @@ class AccountViewModel(
                 _state.value = AccountState.Main(
                     name = name,
                     surname = surname,
-                    login = (_state.value as AccountState.EditName).login,
-                    password = (_state.value as AccountState.EditName).password
+                    email = (_state.value as AccountState.EditName).email,
+                    login = (_state.value as AccountState.EditName).login
                 )
             } catch (e: Exception) {
                 withContext(dispatcherMain) {
                     _state.value = AccountState.EditName(
                         name = name,
                         surname = surname,
+                        email = (_state.value as AccountState.EditName).email,
                         login = (_state.value as AccountState.EditName).login,
-                        password = (_state.value as AccountState.EditName).password,
                         surnameError = AccountState.AccountError.NETWORK,
                         nameError = AccountState.AccountError.NETWORK,
                         isLoading = false
@@ -164,8 +198,14 @@ class AccountViewModel(
         }
     }
 
-    private fun savePassword(newPassword: String, oldPassword: String, realPassword: String) {
+    private fun savePassword(newPassword: String, oldPassword: String, newPasswordRepeat: String) {
+        Log.d(TAG, "savePassword: $newPassword $oldPassword $newPasswordRepeat")
         if (_state.value !is AccountState.ChangePassword) return
+        _state.value = (_state.value as AccountState.ChangePassword).copy(
+            oldPasswordError = AccountState.AccountError.IDLE,
+            newPasswordError = AccountState.AccountError.IDLE,
+            newPasswordRepeatError = AccountState.AccountError.IDLE
+        )
 
         if (newPassword.length < 8 || newPassword.length > 20) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
@@ -181,26 +221,38 @@ class AccountViewModel(
             return
         }
 
-        if (oldPassword != realPassword) {
+        if (newPassword != newPasswordRepeat) {
             _state.value = (_state.value as AccountState.ChangePassword).copy(
-                oldPasswordError = AccountState.AccountError.PASSWORD_INCORRECT
+                newPasswordRepeatError = AccountState.AccountError.PASSWORD_MISMATCH
             )
             return
         }
+
         _state.value = (_state.value as AccountState.ChangePassword).copy(
             isLoading = true
         )
         viewModelScope.launch(dispatcherIO) {
             try {
+                val isOldPasswordCorrect = checkPasswordUseCase.execute(
+                    (_state.value as AccountState.ChangePassword).login,
+                    oldPassword
+                )
+                if (!isOldPasswordCorrect) {
+                    _state.value = (_state.value as AccountState.ChangePassword).copy(
+                        oldPasswordError = AccountState.AccountError.PASSWORD_INCORRECT,
+                        isLoading = false
+                    )
+                    return@launch
+                }
                 changePasswordUseCase.execute(
                     (_state.value as AccountState.ChangePassword).login,
                     newPassword
                 )
                 withContext(dispatcherMain) {
                     _state.value = AccountState.Main(
-                        password = newPassword,
                         name = (_state.value as AccountState.ChangePassword).name,
                         surname = (_state.value as AccountState.ChangePassword).surname,
+                        email = (_state.value as AccountState.ChangePassword).email,
                         login = (_state.value as AccountState.ChangePassword).login
                     )
                 }
@@ -211,6 +263,49 @@ class AccountViewModel(
                         oldPasswordError = AccountState.AccountError.NETWORK,
                         newPasswordError = AccountState.AccountError.NETWORK,
                         newPasswordRepeatError = AccountState.AccountError.NETWORK
+                    )
+                }
+            }
+        }
+    }
+
+    private fun saveEmail(email: String) {
+        Log.d(TAG, "saveEmail: $email")
+        if (_state.value !is AccountState.ChangeEmail) return
+        _state.value = (_state.value as AccountState.ChangeEmail).copy(
+            emailError = AccountState.AccountError.IDLE,
+            isLoading = false
+        )
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _state.value = (_state.value as AccountState.ChangeEmail).copy(
+                emailError = AccountState.AccountError.EMAIL_CONTENT
+            )
+            return
+        }
+
+        _state.value = (_state.value as AccountState.ChangeEmail).copy(isLoading = true)
+        viewModelScope.launch(dispatcherIO) {
+            try {
+                updateUserUseCase.execute(
+                    name = (_state.value as AccountState.ChangeEmail).name,
+                    surname = (_state.value as AccountState.ChangeEmail).surname,
+                    email = email,
+                    login = (_state.value as AccountState.ChangeEmail).login,
+                )
+                withContext(dispatcherMain) {
+                    _state.value = AccountState.Main(
+                        name = (_state.value as AccountState.ChangeEmail).name,
+                        surname = (_state.value as AccountState.ChangeEmail).surname,
+                        email = email,
+                        login = (_state.value as AccountState.ChangeEmail).login
+                    )
+                }
+            } catch (e: Exception) {
+                withContext(dispatcherMain) {
+                    _state.value = (_state.value as AccountState.ChangeEmail).copy(
+                        emailError = AccountState.AccountError.NETWORK,
+                        isLoading = false
                     )
                 }
             }
@@ -242,28 +337,42 @@ class AccountViewModel(
     }
 
     private fun editName() {
+        Log.d(TAG, "editName")
         if (_state.value !is AccountState.Main) {
             return
         }
         _state.value = AccountState.EditName(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
+            email = (_state.value as AccountState.Main).email,
             login = (_state.value as AccountState.Main).login,
-            password = (_state.value as AccountState.Main).password
         )
     }
 
     private fun editPassword() {
+        Log.d(TAG, "editPassword")
         if (_state.value !is AccountState.Main) return
         _state.value = AccountState.ChangePassword(
             name = (_state.value as AccountState.Main).name,
             surname = (_state.value as AccountState.Main).surname,
+            email = (_state.value as AccountState.Main).email,
             login = (_state.value as AccountState.Main).login,
-            password = (_state.value as AccountState.Main).password
+        )
+    }
+
+    private fun editEmail() {
+        Log.d(TAG, "editEmail")
+        if (_state.value !is AccountState.Main) return
+        _state.value = AccountState.ChangeEmail(
+            name = (_state.value as AccountState.Main).name,
+            surname = (_state.value as AccountState.Main).surname,
+            email = (_state.value as AccountState.Main).email,
+            login = (_state.value as AccountState.Main).login,
         )
     }
 
     private fun deleteAccount(login: String) {
+        Log.d(TAG, "deleteAccount: $login")
         if (_state.value !is AccountState.Main) return
         _state.value = (_state.value as AccountState.Main).copy(
             isLoading = true
@@ -284,7 +393,35 @@ class AccountViewModel(
         }
     }
 
+    private fun returnToMain() {
+        Log.d(TAG, "returnToMain")
+        _state.value = when (
+            val currentState = _state.value
+        ) {
+            is AccountState.EditName -> AccountState.Main(
+                name = currentState.name,
+                surname = currentState.surname,
+                email = currentState.email,
+                login = currentState.login
+            )
+            is AccountState.ChangeEmail -> AccountState.Main(
+                name = currentState.name,
+                surname = currentState.surname,
+                email = currentState.email,
+                login = currentState.login
+            )
+            is AccountState.ChangePassword -> AccountState.Main(
+                name = currentState.name,
+                surname = currentState.surname,
+                email = currentState.email,
+                login = currentState.login
+            )
+            else -> AccountState.Idle
+        }
+    }
+
     private fun logout() {
+        Log.d(TAG, "logout")
         _state.value = AccountState.Loading
         viewModelScope.launch(dispatcherIO) {
             try {
@@ -298,6 +435,7 @@ class AccountViewModel(
     }
 
     private fun clear() {
+        Log.d(TAG, "clear")
         _state.value = AccountState.Idle
         _action.value = null
     }

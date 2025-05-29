@@ -5,6 +5,6 @@ import ru.hse.gymvision.domain.model.UserModel
 var userExample = UserModel(
     name = "John",
     surname = "Doe",
-    login = "johndoe",
-    password = "password1",
+    email = "johndoe@example.com",
+    login = "johndoe"
 )

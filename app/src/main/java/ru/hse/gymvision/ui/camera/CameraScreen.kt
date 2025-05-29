@@ -8,29 +8,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import org.videolan.libvlc.MediaPlayer
 import ru.hse.gymvision.R
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
 import ru.hse.gymvision.ui.composables.LoadingBlock
-import ru.hse.gymvision.ui.composables.MyTitle
 import ru.hse.gymvision.ui.composables.mainPlayerView
 import ru.hse.gymvision.ui.composables.secondaryPlayerView
-
-// todo: save players
 
 @Composable
 fun CameraScreen(
@@ -82,7 +80,7 @@ fun CameraScreen(
                 },
                 onChangeAIState = { isAiEnabled ->
                     viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                }
+                },
             )
         }
 
@@ -116,7 +114,7 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                    }
+                    },
                 )
             } else {
                 TwoCamerasStateLandscape(
@@ -147,7 +145,7 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                    }
+                    },
                 )
             }
         }
@@ -188,7 +186,7 @@ fun CameraScreen(
                     },
                     onChangeAIState = { isAiEnabled ->
                         viewModel.obtainEvent(CameraEvent.ChangeAiState(isAiEnabled))
-                    }
+                    },
                 )
             } else {
                 ThreeCamerasStateLandscape(
@@ -251,10 +249,10 @@ fun OneCameraState(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_title))
             mainPlayerView(
                 state.camera1Link,
                 state.isPlaying1,
+                state.isAiEnabled,
                 showControls,
                 onError = { error ->
                     Log.d("CameraScreen", "Error: $error")
@@ -277,7 +275,7 @@ fun OneCameraState(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     }
@@ -294,10 +292,11 @@ fun TwoCamerasStatePortrait(
     onMakeMainCamera2: () -> Unit,
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -305,13 +304,13 @@ fun TwoCamerasStatePortrait(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Box(
                 modifier = Modifier.weight(1f)
             ) {
                 mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
+                    state.isAiEnabled,
                     showControls1,
                     onError = { error ->
                         Log.d("CameraScreen", "Error: $error")
@@ -351,7 +350,7 @@ fun TwoCamerasStatePortrait(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
@@ -371,7 +370,7 @@ fun ThreeCamerasStatePortrait(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -384,13 +383,13 @@ fun ThreeCamerasStatePortrait(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Box(
                 modifier = Modifier.weight(1f)
             ) {
                 mainPlayerView(
                     state.camera1Link,
                     state.isPlaying1,
+                    state.isAiEnabled,
                     showControls1,
                     onError = { error ->
                         Log.d("CameraScreen", "Error: $error")
@@ -454,10 +453,12 @@ fun TwoCamerasStateLandscape(
     onMakeMainCamera2: () -> Unit,
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
+
+
     Box(
         modifier = Modifier
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
@@ -465,7 +466,6 @@ fun TwoCamerasStateLandscape(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Row {
                 Box(
                     modifier = Modifier.weight(1f)
@@ -473,6 +473,7 @@ fun TwoCamerasStateLandscape(
                     mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
+                        state.isAiEnabled,
                         showControls1,
                         onError = { error ->
                             Log.d("CameraScreen", "Error: $error")
@@ -513,7 +514,7 @@ fun TwoCamerasStateLandscape(
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_camera),
                 contentDescription = stringResource(R.string.add_camera_button_description),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
@@ -533,7 +534,7 @@ fun ThreeCamerasStateLandscape(
     onPlay1: () -> Unit,
     onPlay2: () -> Unit,
     onPlay3: () -> Unit,
-    onChangeAIState: (Boolean) -> Unit
+    onChangeAIState: (Boolean) -> Unit,
 ) {
     val showControls1 = remember { mutableStateOf(false) }
     val showControls2 = remember { mutableStateOf(false) }
@@ -546,7 +547,6 @@ fun ThreeCamerasStateLandscape(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MyTitle(text = stringResource(R.string.camera_plural_title))
             Row {
                 Box(
                     modifier = Modifier.weight(1f)
@@ -554,6 +554,7 @@ fun ThreeCamerasStateLandscape(
                     mainPlayerView(
                         state.camera1Link,
                         state.isPlaying1,
+                        state.isAiEnabled,
                         showControls1,
                         onError = { error ->
                             Log.d("CameraScreen", "Error: $error")

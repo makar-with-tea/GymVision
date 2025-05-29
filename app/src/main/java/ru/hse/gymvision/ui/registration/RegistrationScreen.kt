@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
 import ru.hse.gymvision.ui.composables.LoadingBlock
@@ -56,11 +57,12 @@ fun RegistrationScreen(
         RegistrationState.Loading -> LoadingState()
         is RegistrationState.Main -> MainState(
             state.value as RegistrationState.Main,
-            onRegistrationClick = { name, surname, login, password, passwordRepeat ->
+            onRegistrationClick = { name, surname, email, login, password, passwordRepeat ->
                 viewModel.obtainEvent(
                     RegistrationEvent.RegistrationButtonClicked(
                         name,
                         surname,
+                        email,
                         login,
                         password,
                         passwordRepeat
@@ -90,13 +92,14 @@ fun RegistrationScreen(
 @Composable
 fun MainState(
     state: RegistrationState.Main,
-    onRegistrationClick: (String, String, String, String, String) -> Unit,
+    onRegistrationClick: (String, String, String, String, String, String) -> Unit,
     onLoginClick: (String, String) -> Unit,
     onShowPasswordClick: () -> Unit,
     onShowPasswordRepeatClick: () -> Unit
 ) {
     val name: MutableState<String> = remember { mutableStateOf(state.name) }
     val surname: MutableState<String> = remember { mutableStateOf(state.surname) }
+    val email: MutableState<String> = remember { mutableStateOf(state.email) }
     val login: MutableState<String> = remember { mutableStateOf(state.login) }
     val password: MutableState<String> = remember { mutableStateOf(state.password) }
     val passwordRepeat: MutableState<String> = remember { mutableStateOf(state.passwordRepeat) }
@@ -126,6 +129,15 @@ fun MainState(
                 state.surnameError.getText() else null
         ) {
             surname.value = it
+        }
+        MyTextField(
+            value = email.value,
+            label = stringResource(R.string.email_label),
+            isError = state.emailError != RegistrationState.RegistrationError.IDLE,
+            errorText = if (state.emailError != RegistrationState.RegistrationError.NETWORK)
+                state.emailError.getText() else null
+        ) {
+            email.value = it
         }
         MyTextField(
             value = login.value,
@@ -159,6 +171,7 @@ fun MainState(
             onRegistrationClick(
                 name.value,
                 surname.value,
+                email.value,
                 login.value,
                 password.value,
                 passwordRepeat.value
@@ -170,13 +183,20 @@ fun MainState(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(stringResource(R.string.already_have_account))
+            Text(
+                text = stringResource(R.string.already_have_account),
+                fontSize = 14.sp
+            )
             TextButton(
                 onClick = { onLoginClick(login.value, password.value) },
-                modifier = Modifier.wrapContentWidth(),
+                modifier = Modifier.width(50.dp),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Text(stringResource(R.string.login_button), modifier = Modifier.padding(0.dp))
+                Text(
+                    text = stringResource(R.string.login_button),
+                    modifier = Modifier.padding(0.dp),
+                    fontSize = 14.sp
+                )
             }
         }
     }
@@ -205,6 +225,12 @@ private fun RegistrationState.RegistrationError.getText(): String {
             stringResource(R.string.registration_failed_error)
         RegistrationState.RegistrationError.NETWORK ->
             stringResource(R.string.network_error_short)
+        RegistrationState.RegistrationError.EMAIL_CONTENT ->
+            stringResource(R.string.email_content_error)
+        RegistrationState.RegistrationError.NAME_CONTENT ->
+            stringResource(R.string.name_content_error)
+        RegistrationState.RegistrationError.SURNAME_CONTENT ->
+            stringResource(R.string.surname_content_error)
         RegistrationState.RegistrationError.IDLE -> ""
     }
 }

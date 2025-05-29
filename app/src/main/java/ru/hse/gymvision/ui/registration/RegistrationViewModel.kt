@@ -8,26 +8,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.hse.gymvision.domain.usecase.user.CheckLoginAvailableUseCase
+import ru.hse.gymvision.domain.exception.LoginAlreadyInUseException
 import ru.hse.gymvision.domain.usecase.user.RegisterUseCase
 
 const val LATIN = "abcdefghijklmnopqrstuvwxyz"
 
 class RegistrationViewModel(
     private val registerUseCase: RegisterUseCase,
-    private val checkLoginAvailableUseCase: CheckLoginAvailableUseCase,
     private val dispatcherIO: CoroutineDispatcher = Dispatchers.IO,
     private val dispatcherMain: CoroutineDispatcher = Dispatchers.Main,
 ): ViewModel() {
     private val _state: MutableStateFlow<RegistrationState> = MutableStateFlow(
-        RegistrationState.Main(
-            login = "",
-            password = "",
-            passwordRepeat = "",
-            passwordVisibility = false,
-            passwordRepeatVisibility = false,
-            isLoading = false
-        )
+        RegistrationState.Main()
     )
     val state: StateFlow<RegistrationState>
         get() = _state
@@ -41,6 +33,7 @@ class RegistrationViewModel(
                 register(
                     event.name,
                     event.surname,
+                    event.email,
                     event.login,
                     event.password,
                     event.passwordRepeat
@@ -70,6 +63,7 @@ class RegistrationViewModel(
     private fun register(
         name: String,
         surname: String,
+        email: String,
         login: String,
         password: String,
         passwordRepeat: String
@@ -92,18 +86,35 @@ class RegistrationViewModel(
         )
 
         var isError = false
-        if (name.length < 2 || name.length > 20) {
+
+        if (name.length < 2 || name.length > 20 || !name.all { it.isLetter() }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                nameError = RegistrationState.RegistrationError.NAME_LENGTH,
+                nameError = if (!name.all { it.isLetter() }) {
+                    RegistrationState.RegistrationError.NAME_CONTENT
+                } else {
+                    RegistrationState.RegistrationError.NAME_LENGTH
+                }
             )
             isError = true
         }
-        if (surname.length < 2 || surname.length > 20) {
+        if (surname.length < 2 || surname.length > 20 || !surname.all { it.isLetter() }) {
             _state.value = (_state.value as RegistrationState.Main).copy(
-                surnameError = RegistrationState.RegistrationError.SURNAME_LENGTH,
+                surnameError = if (!surname.all { it.isLetter() }) {
+                    RegistrationState.RegistrationError.SURNAME_CONTENT
+                } else {
+                    RegistrationState.RegistrationError.SURNAME_LENGTH
+                }
             )
             isError = true
         }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            _state.value = (_state.value as RegistrationState.Main).copy(
+                emailError = RegistrationState.RegistrationError.EMAIL_CONTENT,
+            )
+            isError = true
+        }
+
         if (login.length < 5 || login.length > 15) {
             _state.value = (_state.value as RegistrationState.Main).copy(
                 loginError = RegistrationState.RegistrationError.LOGIN_LENGTH,
@@ -143,30 +154,19 @@ class RegistrationViewModel(
 
         viewModelScope.launch(dispatcherIO) {
             try {
-                val isAvailable = checkLoginAvailableUseCase.execute(login)
-                if (!isAvailable) {
-                    withContext(dispatcherMain) {
+                registerUseCase.execute(name, surname, email, login, password)
+                withContext(dispatcherMain) {
+                    _action.value = RegistrationAction.NavigateToGymList
+                }
+            } catch (e: Exception) {
+                withContext(dispatcherMain) {
+                    if (e is LoginAlreadyInUseException) {
                         _state.value = (_state.value as RegistrationState.Main).copy(
                             loginError = RegistrationState.RegistrationError.LOGIN_TAKEN,
                             isLoading = false
                         )
+                        return@withContext
                     }
-                    return@launch
-                }
-                val success = registerUseCase.execute(name, surname, login, password)
-                withContext(dispatcherMain) {
-                    if (!success) {
-                        _state.value = RegistrationState.Main(
-                            name = name,
-                            surname = surname,
-                            login = login,
-                            password = password,
-                            loginError = RegistrationState.RegistrationError.REGISTRATION_FAILED,
-                        )
-                    } else _action.value = RegistrationAction.NavigateToGymList
-                }
-            } catch (e: Exception) {
-                withContext(dispatcherMain) {
                     _state.value = RegistrationState.Main(
                         name = name,
                         surname = surname,
@@ -174,14 +174,10 @@ class RegistrationViewModel(
                         password = password,
                         loginError = RegistrationState.RegistrationError.NETWORK,
                         surnameError = RegistrationState.RegistrationError.NETWORK,
+                        emailError = RegistrationState.RegistrationError.NETWORK,
                         nameError = RegistrationState.RegistrationError.NETWORK,
                         passwordError = RegistrationState.RegistrationError.NETWORK,
                         passwordRepeatError = RegistrationState.RegistrationError.NETWORK,
-                    )
-                }
-            } finally {
-                withContext(dispatcherMain) {
-                    _state.value = (_state.value as RegistrationState.Main).copy(
                         isLoading = false
                     )
                 }

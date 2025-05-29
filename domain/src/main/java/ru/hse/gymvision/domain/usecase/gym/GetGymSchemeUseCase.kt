@@ -8,7 +8,6 @@ class GetGymSchemeUseCase(
     private val globalRepository: GlobalRepository
 ) {
     suspend fun execute(id: Int): GymSchemeModel? {
-            sleep(1000)
-            return globalRepository.getGymScheme(id)
+        return globalRepository.getGymScheme(id)
     }
 }

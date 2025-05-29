@@ -1,14 +1,13 @@
 package ru.hse.gymvision.domain
 
 enum class CameraMovement { // tilt
-    UP, DOWN
+    UP, DOWN, STOP
 }
 
 enum class CameraRotation { // pan
-    LEFT, RIGHT
+    LEFT, RIGHT, STOP
 }
 
 enum class CameraZoom { // zoom
-    IN, OUT
+    IN, OUT, STOP
 }
-

@@ -1,15 +1,25 @@
 package ru.hse.gymvision.ui.account
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -18,11 +28,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
 import ru.hse.gymvision.R
+import ru.hse.gymvision.ui.composables.AccountButton
 import ru.hse.gymvision.ui.composables.LoadingBlock
 import ru.hse.gymvision.ui.composables.MyAlertDialog
 import ru.hse.gymvision.ui.composables.MyPasswordField
@@ -34,13 +51,20 @@ fun AccountScreen(
     navigateToAuthorization: () -> Unit,
     viewModel: AccountViewModel = koinViewModel()
 ) {
+    Log.d("marathinks", "AccountScreen")
+    val isScreenActive = remember { mutableStateOf(true) }
+
     val state = viewModel.state.collectAsState()
     val action = viewModel.action.collectAsState()
 
     when (action.value) {
         is AccountAction.NavigateToAuthorization -> {
+            isScreenActive.value = false
             navigateToAuthorization()
+            Log.d("marathinks", "navigated to authorization")
             viewModel.obtainEvent(AccountEvent.Clear)
+            Log.d("marathinks", "cleared")
+            return
         }
 
         null -> {}
@@ -53,6 +77,9 @@ fun AccountScreen(
                 onEditName = { viewModel.obtainEvent(AccountEvent.EditNameButtonClicked) },
                 onChangePassword = {
                     viewModel.obtainEvent(AccountEvent.EditPasswordButtonClicked)
+                },
+                onChangeEmail = {
+                    viewModel.obtainEvent(AccountEvent.EditEmailButtonClicked)
                 },
                 onDeleteAccount = {
                     viewModel.obtainEvent(
@@ -74,6 +101,9 @@ fun AccountScreen(
                 state.value as AccountState.EditName,
                 onSaveName = { name, surname ->
                     viewModel.obtainEvent(AccountEvent.SaveNameButtonClicked(name, surname))
+                },
+                onBackPressed = {
+                    viewModel.obtainEvent(AccountEvent.ReturnToMain)
                 }
             )
         }
@@ -81,11 +111,12 @@ fun AccountScreen(
         is AccountState.ChangePassword -> {
             ChangePasswordState(
                 state.value as AccountState.ChangePassword,
-                onSavePassword = { newPassword, oldPassword, realPassword ->
+                onSavePassword = { newPassword, oldPassword, newPasswordRepeat ->
                     viewModel.obtainEvent(
                         AccountEvent.SavePasswordButtonClicked(
                             newPassword,
-                            oldPassword, realPassword
+                            oldPassword,
+                            newPasswordRepeat
                         )
                     )
                 },
@@ -97,12 +128,30 @@ fun AccountScreen(
                 },
                 onShowNewPasswordRepeat = {
                     viewModel.obtainEvent(AccountEvent.ShowNewPasswordRepeatButtonClicked)
+                },
+                onBackPressed = {
+                    viewModel.obtainEvent(AccountEvent.ReturnToMain)
+                }
+            )
+        }
+
+        is AccountState.ChangeEmail -> {
+            ChangeEmailState(
+                state.value as AccountState.ChangeEmail,
+                onSaveEmail = { email ->
+                    viewModel.obtainEvent(AccountEvent.SaveEmailButtonClicked(email))
+                },
+                onBackPressed = {
+                    viewModel.obtainEvent(AccountEvent.ReturnToMain)
                 }
             )
         }
 
         is AccountState.Idle -> {
             IdleState()
+            if (!isScreenActive.value) {
+                return
+            }
             viewModel.obtainEvent(AccountEvent.GetUserInfo)
         }
 
@@ -150,6 +199,7 @@ fun LoadingState() {
 fun MainState(
     state: AccountState.Main,
     onChangePassword: () -> Unit,
+    onChangeEmail: () -> Unit,
     onEditName: () -> Unit,
     onDeleteAccount: () -> Unit,
     onLogout: () -> Unit
@@ -158,31 +208,73 @@ fun MainState(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
     ) {
-        MyTitle(
-            text = stringResource(
-                R.string.my_profile_title
-            )
+        Image(
+            painter = painterResource(id = R.drawable.ic_gymvision),
+            contentDescription = null, // decorative image doesn't need a description
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape),
         )
-        Text("${stringResource(id = R.string.name)}: ${state.name}")
-        Text("${stringResource(id = R.string.surname)}: ${state.surname}")
-        Text("${stringResource(id = R.string.login)}: ${state.login}")
-        Button(onClick = { onEditName() }) {
-            Text(stringResource(id = R.string.edit))
+        Text(
+            text = state.login,
+            color = MaterialTheme.colorScheme.secondary,
+            fontSize = 20.sp
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "${state.name} ${state.surname}",
+                fontSize = 24.sp
+            )
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = { onEditName() },
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_edit),
+                    contentDescription = stringResource(id = R.string.edit_name),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         }
-        Button(onClick = { onChangePassword() }) {
-            Text(stringResource(id = R.string.change_password))
-        }
-        Button(onClick = { onLogout() }) {
-            Text(stringResource(id = R.string.logout))
-        }
-        Button(onClick = { showDeleteDialog.value = true }) {
-            Text(stringResource(id = R.string.delete_account))
-        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        AccountButton(
+            textId = R.string.change_password,
+            iconId = R.drawable.ic_lock,
+            contentDescription = stringResource(R.string.change_password),
+            onClick = onChangePassword
+        )
+
+        AccountButton(
+            textId = R.string.change_email,
+            iconId = R.drawable.ic_mail,
+            contentDescription = stringResource(R.string.change_email),
+            onClick = { onChangeEmail() }
+        )
+
+        AccountButton(
+            textId = R.string.logout,
+            iconId = R.drawable.ic_logout,
+            contentDescription = stringResource(R.string.logout),
+            onClick = onLogout
+        )
+
+        AccountButton(
+            textId = R.string.delete_account,
+            iconId = R.drawable.ic_delete,
+            contentDescription = stringResource(R.string.delete_account),
+            onClick = { showDeleteDialog.value = true },
+            isDangerous = true
+        )
     }
 
     if (showDeleteDialog.value) {
@@ -205,9 +297,16 @@ fun MainState(
 }
 
 @Composable
-fun EditNameState(state: AccountState.EditName,
-                  onSaveName: (String, String) -> Unit) {
+fun EditNameState(
+    state: AccountState.EditName,
+    onSaveName: (String, String) -> Unit,
+    onBackPressed: () -> Unit
+) {
     Log.d("EditNameState", "EditNameState")
+
+    BackHandler {
+        onBackPressed()
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -245,12 +344,16 @@ fun ChangePasswordState(
     onSavePassword: (String, String, String) -> Unit,
     onShowOldPassword: () -> Unit,
     onShowNewPassword: () -> Unit,
-    onShowNewPasswordRepeat: () -> Unit
+    onShowNewPasswordRepeat: () -> Unit,
+    onBackPressed: () -> Unit
 ) {
     val oldPassword: MutableState<String> = remember { mutableStateOf(state.oldPassword) }
     val newPassword: MutableState<String> = remember { mutableStateOf(state.newPassword) }
     val newPasswordRepeat: MutableState<String> = remember { mutableStateOf(state.newPassword) }
 
+    BackHandler {
+        onBackPressed()
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -292,7 +395,8 @@ fun ChangePasswordState(
         Button(onClick = {
             onSavePassword(
                 newPassword.value,
-                oldPassword.value, state.password
+                oldPassword.value,
+                newPasswordRepeat.value
             )
         }) {
             Text(stringResource(id = R.string.save))
@@ -300,6 +404,37 @@ fun ChangePasswordState(
     }
     if (state.isLoading) {
         LoadingBlock()
+    }
+}
+
+@Composable
+fun ChangeEmailState(
+    state: AccountState.ChangeEmail,
+    onSaveEmail: (String) -> Unit,
+    onBackPressed: () -> Unit
+) {
+    BackHandler {
+        onBackPressed()
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 0.dp, start = 16.dp, end = 16.dp)
+    ) {
+        val email = remember { mutableStateOf(state.email) }
+        MyTitle(text = stringResource(id = R.string.change_email_title))
+        MyTextField(
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = stringResource(id = R.string.email),
+            isError = state.emailError != AccountState.AccountError.IDLE,
+            errorText = state.emailError.toText()
+        )
+        Button(onClick = { onSaveEmail(email.value) }) {
+            Text(stringResource(id = R.string.save))
+        }
     }
 }
 
@@ -349,4 +484,31 @@ fun AccountState.AccountError.toText() = when (this) {
 
     AccountState.AccountError.ACCOUNT_NOT_FOUND ->
         stringResource(id = R.string.account_not_found_error)
+
+    AccountState.AccountError.EMAIL_CONTENT ->
+        stringResource(id = R.string.email_content_error)
+
+    AccountState.AccountError.NAME_CONTENT ->
+        stringResource(id = R.string.name_content_error)
+
+    AccountState.AccountError.SURNAME_CONTENT ->
+        stringResource(id = R.string.surname_content_error)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainStatePreview() {
+    MainState(
+        state = AccountState.Main(
+            name = "John",
+            surname = "Doe",
+            email = "johndoe@example.com",
+            login = "johndoe"
+        ),
+        onChangePassword = {},
+        onEditName = {},
+        onDeleteAccount = {},
+        onLogout = {},
+        onChangeEmail = {}
+    )
 }

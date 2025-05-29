@@ -11,6 +11,9 @@ sealed class AccountState {
         ACCOUNT_NOT_FOUND,
         NETWORK_FATAL,
         NETWORK,
+        EMAIL_CONTENT,
+        NAME_CONTENT,
+        SURNAME_CONTENT,
         IDLE
     }
     data object Idle : AccountState()
@@ -18,32 +21,33 @@ sealed class AccountState {
     data class Main(
         val name: String = "",
         val surname: String = "",
+        val email: String = "",
         val login: String = "",
-        val password: String = "",
         val isLoading: Boolean = false,
     ) : AccountState()
 
     data class EditName(
         val name: String = "",
         val surname: String = "",
+        val email: String = "",
         val login: String = "",
-        val password: String = "",
         val isLoading: Boolean = false,
         val nameError: AccountError = AccountError.IDLE,
         val surnameError: AccountError = AccountError.IDLE,
         val loading: Boolean = false
-        ) : AccountState()
+    ) : AccountState()
 
     data class ChangePassword(
         val oldPassword: String = "",
         val newPassword: String = "",
+        val newPasswordRepeat: String = "",
         val oldPasswordVisibility: Boolean = false,
         val newPasswordVisibility: Boolean = false,
         val newPasswordRepeatVisibility: Boolean = false,
         val name: String = "",
         val surname: String = "",
+        val email: String = "",
         val login: String = "",
-        val password: String = "",
         val oldPasswordError: AccountError = AccountError.IDLE,
         val newPasswordError: AccountError = AccountError.IDLE,
         val newPasswordRepeatError: AccountError = AccountError.IDLE,
@@ -59,6 +63,16 @@ sealed class AccountState {
     data class DeletionError(
         val login: String,
     ): AccountState()
+
+    data class ChangeEmail(
+        val name: String = "",
+        val surname: String = "",
+        val email: String = "",
+        val login: String = "",
+        val isLoading: Boolean = false,
+        val emailError: AccountError = AccountError.IDLE,
+        val loading: Boolean = false
+    ) : AccountState()
 }
 
 sealed class AccountEvent {
@@ -70,7 +84,10 @@ sealed class AccountEvent {
     data class SavePasswordButtonClicked(
         val newPassword: String,
         val oldPassword: String,
-        val realPassword: String
+        val newPasswordRepeat: String
+    ): AccountEvent()
+    data class SaveEmailButtonClicked(
+        val email: String
     ): AccountEvent()
 
     data object ShowOldPasswordButtonClicked : AccountEvent()
@@ -78,9 +95,11 @@ sealed class AccountEvent {
     data object ShowNewPasswordRepeatButtonClicked : AccountEvent()
     data object EditNameButtonClicked : AccountEvent()
     data object EditPasswordButtonClicked: AccountEvent()
+    data object EditEmailButtonClicked: AccountEvent()
     data class DeleteAccountButtonClicked(val login: String): AccountEvent()
     data object LogoutButtonClicked: AccountEvent()
     data object Clear: AccountEvent()
+    data object ReturnToMain: AccountEvent()
 }
 
 sealed class AccountAction {
