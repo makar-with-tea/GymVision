@@ -221,8 +221,6 @@ private fun RegistrationState.RegistrationError.getText(): String {
             stringResource(R.string.password_mismatch_error)
         RegistrationState.RegistrationError.LOGIN_TAKEN ->
             stringResource(R.string.login_taken_error)
-        RegistrationState.RegistrationError.REGISTRATION_FAILED ->
-            stringResource(R.string.registration_failed_error)
         RegistrationState.RegistrationError.NETWORK ->
             stringResource(R.string.network_error_short)
         RegistrationState.RegistrationError.EMAIL_CONTENT ->

@@ -12,16 +12,12 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.times
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.videolan.libvlc.media.MediaPlayer
 import ru.hse.gymvision.domain.CameraMovement
 import ru.hse.gymvision.domain.CameraRotation
 import ru.hse.gymvision.domain.CameraZoom
-import ru.hse.gymvision.domain.usecase.camera.ChangeAiStateUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraIdsUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetCameraLinksUseCase
 import ru.hse.gymvision.domain.usecase.camera.GetNewCameraLinkUseCase
@@ -41,7 +37,6 @@ class CameraViewModelTest {
     private lateinit var getCameraIdsUseCase: GetCameraIdsUseCase
     private lateinit var getCameraLinksUseCase: GetCameraLinksUseCase
     private lateinit var getNewCameraLinkUseCase: GetNewCameraLinkUseCase
-    private lateinit var changeAiStateUseCase: ChangeAiStateUseCase
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -55,7 +50,6 @@ class CameraViewModelTest {
         getCameraIdsUseCase = mock(GetCameraIdsUseCase::class.java)
         getCameraLinksUseCase = mock(GetCameraLinksUseCase::class.java)
         getNewCameraLinkUseCase = mock(GetNewCameraLinkUseCase::class.java)
-        changeAiStateUseCase = mock(ChangeAiStateUseCase::class.java)
         viewModel = CameraViewModel(
             moveCameraUseCase,
             rotateCameraUseCase,
@@ -64,7 +58,6 @@ class CameraViewModelTest {
             getCameraIdsUseCase,
             getCameraLinksUseCase,
             getNewCameraLinkUseCase,
-            changeAiStateUseCase,
             dispatcherIO = testDispatcher,
             dispatcherMain = testDispatcher
         )
@@ -97,7 +90,7 @@ class CameraViewModelTest {
         val newCameraLink = "link3"
         `when`(getCameraIdsUseCase.execute()).thenReturn(cameraIds)
         `when`(getCameraLinksUseCase.execute()).thenReturn(cameraLinks)
-        `when`(getNewCameraLinkUseCase.execute(gymId, newCameraId)).thenReturn(newCameraLink)
+        `when`(getNewCameraLinkUseCase.execute(newCameraId, false)).thenReturn(newCameraLink)
 
         // Act
         viewModel.obtainEvent(CameraEvent.InitCameras(newCameraId, gymId))
@@ -153,7 +146,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        verify(moveCameraUseCase).execute(gymId, cameraId, direction)
+        verify(moveCameraUseCase).execute(cameraId, direction)
     }
 
     @Test
@@ -174,7 +167,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        verify(rotateCameraUseCase).execute(gymId, cameraId, direction)
+        verify(rotateCameraUseCase).execute(cameraId, direction)
     }
 
     @Test
@@ -194,7 +187,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        verify(zoomCameraUseCase).execute(gymId, cameraId, direction)
+        verify(zoomCameraUseCase).execute(cameraId, direction)
     }
 
     @Test
@@ -225,6 +218,7 @@ class CameraViewModelTest {
         val isAiEnabled = true
         `when`(getCameraIdsUseCase.execute()).thenReturn(listOf(cameraId))
         `when`(getCameraLinksUseCase.execute()).thenReturn(listOf("link1"))
+        `when`(getNewCameraLinkUseCase.execute(cameraId, isAiEnabled)).thenReturn("newLink")
 
         viewModel.obtainEvent(CameraEvent.InitCameras(null, gymId))
         advanceUntilIdle()
@@ -234,7 +228,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         // Assert
-        verify(changeAiStateUseCase).execute(gymId, cameraId, isAiEnabled)
+        verify(getNewCameraLinkUseCase).execute(cameraId, isAiEnabled)
     }
 
     @Test
@@ -275,21 +269,6 @@ class CameraViewModelTest {
         val state = viewModel.state.first() as CameraState.TwoCameras
         assertEquals(2, state.camera1Id)
         assertEquals("link2", state.camera1Link)
-    }
-
-    @Test
-    fun `savePlayers releases old players and saves new ones`() = runTest {
-        // Arrange
-        val oldPlayer = mock(MediaPlayer::class.java)
-        doNothing().`when`(oldPlayer).release()
-        val player = mock(MediaPlayer::class.java)
-        viewModel.obtainEvent(CameraEvent.SavePlayers(oldPlayer, oldPlayer, oldPlayer))
-
-        // Act
-        viewModel.obtainEvent(CameraEvent.SavePlayers(player, player, player))
-
-        // Assert
-        verify(oldPlayer, times(3)).release()
     }
 
     @Test

@@ -14,12 +14,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import ru.hse.gymvision.domain.model.UserModel
 import ru.hse.gymvision.domain.usecase.user.ChangePasswordUseCase
+import ru.hse.gymvision.domain.usecase.user.CheckPasswordUseCase
 import ru.hse.gymvision.domain.usecase.user.DeleteUserUseCase
 import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
 import ru.hse.gymvision.domain.usecase.user.LogoutUseCase
@@ -37,6 +38,7 @@ class AccountViewModelTest {
     private lateinit var updateUserUseCase: UpdateUserUseCase
     private lateinit var deleteUserUseCase: DeleteUserUseCase
     private lateinit var logoutUseCase: LogoutUseCase
+    private lateinit var checkPasswordUseCase: CheckPasswordUseCase
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -48,12 +50,14 @@ class AccountViewModelTest {
         updateUserUseCase = mock(UpdateUserUseCase::class.java)
         deleteUserUseCase = mock(DeleteUserUseCase::class.java)
         logoutUseCase = mock(LogoutUseCase::class.java)
+        checkPasswordUseCase = mock(CheckPasswordUseCase::class.java)
         viewModel = AccountViewModel(
             getUserInfoUseCase,
             changePasswordUseCase,
             updateUserUseCase,
             deleteUserUseCase,
             logoutUseCase,
+            checkPasswordUseCase,
             dispatcherIO = testDispatcher,
             dispatcherMain = testDispatcher
         )
@@ -74,7 +78,6 @@ class AccountViewModelTest {
         assertEquals(userExample.login, state.login)
         assertEquals(userExample.name, state.name)
         assertEquals(userExample.surname, state.surname)
-        assertEquals(userExample.password, state.password)
     }
 
     @Test
@@ -111,9 +114,8 @@ class AccountViewModelTest {
         val name = userExample.name
         val surname = userExample.surname
         val login = userExample.login
-        val password = userExample.password
+        val email = userExample.email
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(updateUserUseCase.execute(name, surname, login))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -126,7 +128,7 @@ class AccountViewModelTest {
 
         // Assert
         val state = viewModel.state.first()
-        assertEquals(AccountState.Main(name, surname, login, password), state)
+        assertEquals(AccountState.Main(name, surname, email, login), state)
     }
 
     @Test
@@ -136,7 +138,6 @@ class AccountViewModelTest {
         val surname = userExample.surname
         val login = userExample.login
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(updateUserUseCase.execute(name, surname, login))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -148,6 +149,7 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(updateUserUseCase, never()).execute(name, surname, login)
         val state = viewModel.state.first() as AccountState.EditName
         assertEquals(AccountState.AccountError.NAME_LENGTH, state.nameError)
     }
@@ -157,9 +159,7 @@ class AccountViewModelTest {
         // Arrange
         val name = userExample.name
         val surname = "A"
-        val login = userExample.login
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(updateUserUseCase.execute(name, surname, login))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -194,20 +194,66 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(updateUserUseCase).execute(name, surname, login)
         val state = viewModel.state.first() as AccountState.EditName
         assertEquals(AccountState.AccountError.NETWORK, state.nameError)
         assertEquals(AccountState.AccountError.NETWORK, state.surnameError)
     }
 
     @Test
+    fun `save name with invalid characters in name`() = runTest {
+        // Arrange
+        val name = "John1"
+        val surname = userExample.surname
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditNameButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SaveNameButtonClicked(name, surname))
+        advanceUntilIdle()
+
+        // Assert
+        verify(updateUserUseCase, never()).execute(name, surname, userExample.login)
+        val state = viewModel.state.first() as AccountState.EditName
+        assertEquals(AccountState.AccountError.NAME_CONTENT, state.nameError)
+    }
+
+    @Test
+    fun `save name with invalid characters in surname`() = runTest {
+        // Arrange
+        val name = userExample.name
+        val surname = "Doe@"
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditNameButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SaveNameButtonClicked(name, surname))
+        advanceUntilIdle()
+
+        // Assert
+        verify(updateUserUseCase, never()).execute(name, surname, userExample.login)
+        val state = viewModel.state.first() as AccountState.EditName
+        assertEquals(AccountState.AccountError.SURNAME_CONTENT, state.surnameError)
+    }
+
+    @Test
     fun `save password successfully`() = runTest {
         // Arrange
         val newPassword = "newPassword1"
-        val oldPassword = userExample.password
-        val realPassword = userExample.password
+        val oldPassword = PASSWORD_EXAMPLE
+        val newPasswordRepeat = "newPassword1"
 
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(changePasswordUseCase.execute(userExample.login, newPassword))
+        `when`(checkPasswordUseCase.execute(userExample.login, oldPassword))
+            .thenReturn(true)
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -215,12 +261,13 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Act
-        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword, oldPassword, realPassword))
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
         advanceUntilIdle()
 
         // Assert
-        val state = viewModel.state.first() as AccountState.Main
-        assertEquals(newPassword, state.password)
+        verify(changePasswordUseCase).execute(userExample.login, newPassword)
     }
 
     @Test
@@ -228,9 +275,10 @@ class AccountViewModelTest {
         // Arrange
         val newPassword = "newPassword1"
         val oldPassword = "wrongPassword"
-        val realPassword = userExample.password
+        val newPasswordRepeat = "newPassword1"
+        `when`(checkPasswordUseCase.execute(userExample.login, oldPassword))
+            .thenReturn(false)
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(changePasswordUseCase.execute(userExample.login, newPassword))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -238,10 +286,13 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Act
-        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword, oldPassword, realPassword))
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
         advanceUntilIdle()
 
         // Assert
+        verify(checkPasswordUseCase).execute(userExample.login, oldPassword)
         val state = viewModel.state.first() as AccountState.ChangePassword
         assertEquals(AccountState.AccountError.PASSWORD_INCORRECT, state.oldPasswordError)
     }
@@ -250,10 +301,11 @@ class AccountViewModelTest {
     fun `save password with weak new password`() = runTest {
         // Arrange
         val newPassword = "newPassword"
-        val oldPassword = userExample.password
-        val realPassword = userExample.password
+        val oldPassword = PASSWORD_EXAMPLE
+        val newPasswordRepeat = "newPassword"
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(changePasswordUseCase.execute(userExample.login, newPassword))
+        `when`(checkPasswordUseCase.execute(userExample.login, oldPassword))
+            .thenReturn(true)
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -261,10 +313,13 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Act
-        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword, oldPassword, realPassword))
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
         advanceUntilIdle()
 
         // Assert
+        verify(checkPasswordUseCase, never()).execute(userExample.login, newPassword)
         val state = viewModel.state.first() as AccountState.ChangePassword
         assertEquals(AccountState.AccountError.PASSWORD_CONTENT, state.newPasswordError)
     }
@@ -273,10 +328,9 @@ class AccountViewModelTest {
     fun `save password with short new password`() = runTest {
         // Arrange
         val newPassword = "A"
-        val oldPassword = userExample.password
-        val realPassword = userExample.password
+        val oldPassword = PASSWORD_EXAMPLE
+        val newPasswordRepeat = "A"
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        doNothing().`when`(changePasswordUseCase.execute(userExample.login, newPassword))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -284,10 +338,13 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Act
-        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword, oldPassword, realPassword))
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
         advanceUntilIdle()
 
         // Assert
+        verify(checkPasswordUseCase, never()).execute(userExample.login, newPassword)
         val state = viewModel.state.first() as AccountState.ChangePassword
         assertEquals(AccountState.AccountError.PASSWORD_LENGTH, state.newPasswordError)
     }
@@ -296,11 +353,14 @@ class AccountViewModelTest {
     fun `save password with error`() = runTest {
         // Arrange
         val newPassword = "newPassword1"
-        val oldPassword = userExample.password
-        val realPassword = userExample.password
+        val oldPassword = PASSWORD_EXAMPLE
+        val newPasswordRepeat = "newPassword1"
 
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
-        `when`(changePasswordUseCase.execute(userExample.login, newPassword)).thenThrow(RuntimeException("Error"))
+        `when`(checkPasswordUseCase.execute(userExample.login, oldPassword))
+            .thenReturn(true)
+        `when`(changePasswordUseCase.execute(userExample.login, newPassword))
+            .thenThrow(RuntimeException("Error"))
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
         advanceUntilIdle()
@@ -308,10 +368,13 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Act
-        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(newPassword, oldPassword, realPassword))
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
         advanceUntilIdle()
 
         // Assert
+        verify(changePasswordUseCase).execute(userExample.login, newPassword)
         val state = viewModel.state.first() as AccountState.ChangePassword
         assertEquals(AccountState.AccountError.NETWORK, state.oldPasswordError)
         assertEquals(AccountState.AccountError.NETWORK, state.newPasswordError)
@@ -322,7 +385,6 @@ class AccountViewModelTest {
     fun `delete account successfully`() = runTest {
         // Arrange
         val login = userExample.login
-        doNothing().`when`(deleteUserUseCase.execute(login))
         `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
 
         viewModel.obtainEvent(AccountEvent.GetUserInfo)
@@ -333,6 +395,7 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(deleteUserUseCase).execute(login)
         val action = viewModel.action.first()
         assertEquals(AccountAction.NavigateToAuthorization, action)
     }
@@ -352,6 +415,7 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(deleteUserUseCase).execute(login)
         val state = viewModel.state.first() as AccountState.DeletionError
         assertEquals(login, state.login)
     }
@@ -363,6 +427,7 @@ class AccountViewModelTest {
         advanceUntilIdle()
 
         // Assert
+        verify(logoutUseCase).execute()
         val action = viewModel.action.first()
         assertEquals(AccountAction.NavigateToAuthorization, action)
     }
@@ -442,6 +507,116 @@ class AccountViewModelTest {
         assertEquals(!initialState.newPasswordRepeatVisibility, newState.newPasswordRepeatVisibility)
     }
 
+    @Test
+    fun `save password with mismatched new password repeat`() = runTest {
+        // Arrange
+        val newPassword = "newPassword1"
+        val oldPassword = PASSWORD_EXAMPLE
+        val newPasswordRepeat = "differentPassword"
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditPasswordButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SavePasswordButtonClicked(
+            newPassword, oldPassword, newPasswordRepeat
+        ))
+        advanceUntilIdle()
+
+        // Assert
+        verify(changePasswordUseCase, never()).execute(userExample.login, newPassword)
+        val state = viewModel.state.first() as AccountState.ChangePassword
+        assertEquals(AccountState.AccountError.PASSWORD_MISMATCH, state.newPasswordRepeatError)
+    }
+
+    @Test
+    fun `save email successfully`() = runTest {
+        // Arrange
+        val email = "newemail@example.com"
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditEmailButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SaveEmailButtonClicked(email))
+        advanceUntilIdle()
+
+        // Assert
+        verify(updateUserUseCase).execute(
+            name = userExample.name,
+            surname = userExample.surname,
+            email = email,
+            login = userExample.login
+        )
+        val state = viewModel.state.first()
+        assertEquals(AccountState.Main(
+            userExample.name, userExample.surname, email, userExample.login), state)
+    }
+
+    @Test
+    fun `save email with invalid email`() = runTest {
+        // Arrange
+        val email = "invalid-email"
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditEmailButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SaveEmailButtonClicked(email))
+        advanceUntilIdle()
+
+        // Assert
+        verify(updateUserUseCase, never()).execute(
+            name = userExample.name,
+            surname = userExample.surname,
+            email = email,
+            login = userExample.login
+        )
+        val state = viewModel.state.first() as AccountState.ChangeEmail
+        assertEquals(AccountState.AccountError.EMAIL_CONTENT, state.emailError)
+    }
+
+    @Test
+    fun `save email with network error`() = runTest {
+        // Arrange
+        val email = "newemail@example.com"
+        `when`(getUserInfoUseCase.execute()).thenReturn(userExample)
+        `when`(updateUserUseCase.execute(
+            name = userExample.name,
+            surname = userExample.surname,
+            email = email,
+            login = userExample.login
+        )).thenThrow(RuntimeException())
+
+        viewModel.obtainEvent(AccountEvent.GetUserInfo)
+        advanceUntilIdle()
+        viewModel.obtainEvent(AccountEvent.EditEmailButtonClicked)
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(AccountEvent.SaveEmailButtonClicked(email))
+        advanceUntilIdle()
+
+        // Assert
+        verify(updateUserUseCase).execute(
+            name = userExample.name,
+            surname = userExample.surname,
+            email = email,
+            login = userExample.login
+        )
+        val state = viewModel.state.first() as AccountState.ChangeEmail
+        assertEquals(AccountState.AccountError.NETWORK, state.emailError)
+    }
+
 
     @After
     fun tearDown() {
@@ -453,7 +628,8 @@ class AccountViewModelTest {
             name = "John",
             surname = "Doe",
             login = "johndoe",
-            password = "password1"
+            email = "johndoe@example.com"
         )
+        const val PASSWORD_EXAMPLE = "password1"
     }
 }

@@ -108,7 +108,8 @@ class RegistrationViewModel(
             isError = true
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!emailRegex.matches(email)) {
             _state.value = (_state.value as RegistrationState.Main).copy(
                 emailError = RegistrationState.RegistrationError.EMAIL_CONTENT,
             )

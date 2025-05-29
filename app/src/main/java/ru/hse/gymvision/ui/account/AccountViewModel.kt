@@ -15,8 +15,6 @@ import ru.hse.gymvision.domain.usecase.user.GetUserInfoUseCase
 import ru.hse.gymvision.domain.usecase.user.LogoutUseCase
 import ru.hse.gymvision.domain.usecase.user.UpdateUserUseCase
 
-private const val TAG = "marathinks" // todo: AccountViewModel
-
 class AccountViewModel(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val changePasswordUseCase: ChangePasswordUseCase,
@@ -101,7 +99,6 @@ class AccountViewModel(
     }
 
     private fun getUserInfo() {
-        Log.d(TAG, "getUserInfo")
         _state.value = AccountState.Loading
         viewModelScope.launch(dispatcherIO) {
             try {
@@ -132,7 +129,6 @@ class AccountViewModel(
     }
 
     private fun saveName(name: String, surname: String) {
-        Log.d(TAG, "saveName: $name $surname")
         if (_state.value !is AccountState.EditName) return
         _state.value = (_state.value as AccountState.EditName).copy(
             isLoading = false,
@@ -199,7 +195,6 @@ class AccountViewModel(
     }
 
     private fun savePassword(newPassword: String, oldPassword: String, newPasswordRepeat: String) {
-        Log.d(TAG, "savePassword: $newPassword $oldPassword $newPasswordRepeat")
         if (_state.value !is AccountState.ChangePassword) return
         _state.value = (_state.value as AccountState.ChangePassword).copy(
             oldPasswordError = AccountState.AccountError.IDLE,
@@ -270,14 +265,14 @@ class AccountViewModel(
     }
 
     private fun saveEmail(email: String) {
-        Log.d(TAG, "saveEmail: $email")
         if (_state.value !is AccountState.ChangeEmail) return
         _state.value = (_state.value as AccountState.ChangeEmail).copy(
             emailError = AccountState.AccountError.IDLE,
             isLoading = false
         )
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!emailRegex.matches(email)) {
             _state.value = (_state.value as AccountState.ChangeEmail).copy(
                 emailError = AccountState.AccountError.EMAIL_CONTENT
             )
@@ -337,7 +332,6 @@ class AccountViewModel(
     }
 
     private fun editName() {
-        Log.d(TAG, "editName")
         if (_state.value !is AccountState.Main) {
             return
         }
@@ -350,7 +344,6 @@ class AccountViewModel(
     }
 
     private fun editPassword() {
-        Log.d(TAG, "editPassword")
         if (_state.value !is AccountState.Main) return
         _state.value = AccountState.ChangePassword(
             name = (_state.value as AccountState.Main).name,
@@ -361,7 +354,6 @@ class AccountViewModel(
     }
 
     private fun editEmail() {
-        Log.d(TAG, "editEmail")
         if (_state.value !is AccountState.Main) return
         _state.value = AccountState.ChangeEmail(
             name = (_state.value as AccountState.Main).name,
@@ -372,7 +364,6 @@ class AccountViewModel(
     }
 
     private fun deleteAccount(login: String) {
-        Log.d(TAG, "deleteAccount: $login")
         if (_state.value !is AccountState.Main) return
         _state.value = (_state.value as AccountState.Main).copy(
             isLoading = true
@@ -394,7 +385,6 @@ class AccountViewModel(
     }
 
     private fun returnToMain() {
-        Log.d(TAG, "returnToMain")
         _state.value = when (
             val currentState = _state.value
         ) {
@@ -421,7 +411,6 @@ class AccountViewModel(
     }
 
     private fun logout() {
-        Log.d(TAG, "logout")
         _state.value = AccountState.Loading
         viewModelScope.launch(dispatcherIO) {
             try {
@@ -435,7 +424,6 @@ class AccountViewModel(
     }
 
     private fun clear() {
-        Log.d(TAG, "clear")
         _state.value = AccountState.Idle
         _action.value = null
     }

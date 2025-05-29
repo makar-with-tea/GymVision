@@ -13,7 +13,6 @@ sealed class RegistrationState {
         PASSWORD_MISMATCH,
         EMAIL_CONTENT,
         LOGIN_TAKEN,
-        REGISTRATION_FAILED,
         NETWORK,
         IDLE
     }

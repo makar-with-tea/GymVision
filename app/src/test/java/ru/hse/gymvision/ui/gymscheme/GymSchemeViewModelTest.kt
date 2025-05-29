@@ -17,6 +17,7 @@ import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import ru.hse.gymvision.domain.model.GymSchemeModel
+import ru.hse.gymvision.domain.usecase.camera.CheckCameraAccessibilityUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymIdUseCase
 import ru.hse.gymvision.domain.usecase.gym.GetGymSchemeUseCase
 import ru.hse.gymvision.domain.usecase.gym.SaveGymIdUseCase
@@ -134,7 +135,7 @@ class GymSchemeViewModelTest {
         // Arrange
         val gymId = 1
         val cameraId = 2
-        `when`(checkCameraAccessibilityUseCase.execute(gymId, cameraId)).thenReturn(true)
+        `when`(checkCameraAccessibilityUseCase.execute(cameraId)).thenReturn(true)
         `when`(getGymSchemeUseCase.execute(gymId)).thenReturn(gymSchemeExample)
         viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
         advanceUntilIdle()
@@ -153,7 +154,7 @@ class GymSchemeViewModelTest {
         // Arrange
         val gymId = 1
         val cameraId = 2
-        `when`(checkCameraAccessibilityUseCase.execute(gymId, cameraId)).thenReturn(false)
+        `when`(checkCameraAccessibilityUseCase.execute(cameraId)).thenReturn(false)
         `when`(getGymSchemeUseCase.execute(gymId)).thenReturn(gymSchemeExample)
         viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
         advanceUntilIdle()
@@ -165,6 +166,25 @@ class GymSchemeViewModelTest {
         // Assert
         val state = viewModel.state.first() as GymSchemeState.Main
         assertEquals(true, state.showDialog)
+    }
+
+    @Test
+    fun `camera clicked and error occurred`() = runTest {
+        // Arrange
+        val gymId = 1
+        val cameraId = 2
+        `when`(checkCameraAccessibilityUseCase.execute(cameraId)).thenThrow(RuntimeException())
+        `when`(getGymSchemeUseCase.execute(gymId)).thenReturn(gymSchemeExample)
+        viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
+        advanceUntilIdle()
+
+        // Act
+        viewModel.obtainEvent(GymSchemeEvent.CameraClicked(gymId, cameraId))
+        advanceUntilIdle()
+
+        // Assert
+        val state = viewModel.state.first() as GymSchemeState.Error
+        assertEquals(true, state.error == GymSchemeState.GymSchemeError.NETWORK_ERROR)
     }
 
     @Test
@@ -191,7 +211,7 @@ class GymSchemeViewModelTest {
         // Arrange
         val gymId = 1
         val cameraId = 2
-        `when`(checkCameraAccessibilityUseCase.execute(gymId, cameraId)).thenReturn(false)
+        `when`(checkCameraAccessibilityUseCase.execute(cameraId)).thenReturn(false)
         `when`(getGymSchemeUseCase.execute(gymId)).thenReturn(gymSchemeExample)
         viewModel.obtainEvent(GymSchemeEvent.LoadGymScheme(gymId))
         advanceUntilIdle()
@@ -276,8 +296,8 @@ class GymSchemeViewModelTest {
             id = 1,
             name = "Gym 1",
             scheme = null,
-            clickableTrainers = emptyList(),
-            clickableCameras = emptyList()
+            clickableTrainerModels = emptyList(),
+            clickableCameraModels = emptyList()
         )
     }
 }
